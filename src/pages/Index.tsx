@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, FileText, BarChart3, Shield, Users, Bell, LogOut } from "lucide-react";
@@ -41,7 +42,7 @@ const Index = () => {
           ) : (
             <>
               <Link to="/auth">
-                <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
+                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
                   Sign In
                 </Button>
               </Link>
