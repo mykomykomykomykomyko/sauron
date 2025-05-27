@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, ArrowLeft, TrendingUp, Download, CheckCircle, Clock, Users } from "lucide-react";
+import { Eye, ArrowLeft, TrendingUp, Download, CheckCircle, Clock, Users, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { getReportsWithAnalysis, exportReportsAsCSV } from "@/services/supabaseService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -153,6 +153,7 @@ const Dashboard = () => {
             variant="outline"
             className="border-neutral-700 text-white hover:bg-neutral-900"
           >
+            <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </Button>
         </div>

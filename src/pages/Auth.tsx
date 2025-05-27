@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, ArrowLeft, LogIn, UserPlus, Loader2 } from "lucide-react";
+import { Eye, ArrowLeft, LogIn, Loader2, KeyRound } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,8 +16,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    password: "",
-    fullName: ""
+    password: ""
   });
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -43,19 +42,14 @@ const Auth = () => {
         toast.success("Logged in successfully!");
         navigate('/dashboard');
       } else {
-        const { error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              full_name: formData.fullName,
-            }
-          }
+        // Forgot password functionality
+        const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+          redirectTo: `${window.location.origin}/auth`,
         });
 
         if (error) throw error;
-        toast.success("Account created successfully!");
-        navigate('/dashboard');
+        toast.success("Password reset email sent! Check your inbox.");
+        setIsLogin(true);
       }
     } catch (error: any) {
       console.error('Auth error:', error);
@@ -89,35 +83,21 @@ const Auth = () => {
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-white mb-4 tracking-tight font-mono">
-              {isLogin ? 'Sign In' : 'Create Account'}
+              {isLogin ? 'Sign In' : 'Reset Password'}
             </h1>
             <p className="text-neutral-400">
-              {isLogin ? 'Welcome back to SAURON' : 'Join the SAURON system'}
+              {isLogin ? 'Access the SAURON system' : 'Enter your email to reset your password'}
             </p>
           </div>
 
           <Card className="bg-neutral-900 border-neutral-800">
             <CardHeader>
               <CardTitle className="text-white font-mono">
-                {isLogin ? 'Login' : 'Sign Up'}
+                {isLogin ? 'Login' : 'Forgot Password'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {!isLogin && (
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName" className="text-neutral-300 font-mono">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={formData.fullName}
-                      onChange={(e) => handleInputChange("fullName", e.target.value)}
-                      placeholder="Your full name"
-                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500"
-                      required={!isLogin}
-                    />
-                  </div>
-                )}
-
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-neutral-300 font-mono">Email</Label>
                   <Input
@@ -131,19 +111,21 @@ const Auth = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-neutral-300 font-mono">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
-                    placeholder="Enter your password"
-                    className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500"
-                    required
-                    minLength={6}
-                  />
-                </div>
+                {isLogin && (
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-neutral-300 font-mono">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange("password", e.target.value)}
+                      placeholder="Enter your password"
+                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                )}
 
                 <Button
                   type="submit"
@@ -153,12 +135,12 @@ const Auth = () => {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {isLogin ? 'Signing In...' : 'Creating Account...'}
+                      {isLogin ? 'Signing In...' : 'Sending Reset Email...'}
                     </>
                   ) : (
                     <>
-                      {isLogin ? <LogIn className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-                      {isLogin ? 'Sign In' : 'Create Account'}
+                      {isLogin ? <LogIn className="w-4 h-4 mr-2" /> : <KeyRound className="w-4 h-4 mr-2" />}
+                      {isLogin ? 'Sign In' : 'Send Reset Email'}
                     </>
                   )}
                 </Button>
@@ -169,7 +151,7 @@ const Auth = () => {
                     onClick={() => setIsLogin(!isLogin)}
                     className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
                   >
-                    {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                    {isLogin ? "Forgot your password?" : "Back to sign in"}
                   </button>
                 </div>
               </form>

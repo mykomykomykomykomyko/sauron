@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, ArrowLeft, Send, Loader2, CheckCircle } from "lucide-react";
+import { Eye, ArrowLeft, Send, Loader2, CheckCircle, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { submitReport } from "@/services/supabaseService";
@@ -21,7 +20,7 @@ const Submit = () => {
     week: "",
     report: ""
   });
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,7 +72,6 @@ const Submit = () => {
   };
 
   const handleSignOut = async () => {
-    const { signOut } = useAuth();
     await signOut();
     navigate('/');
   };
@@ -105,7 +103,7 @@ const Submit = () => {
         <div className="flex items-center space-x-4">
           {userRole === 'admin' && (
             <Link to="/dashboard">
-              <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
+              <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
                 Dashboard
               </Button>
             </Link>
@@ -115,6 +113,7 @@ const Submit = () => {
             variant="outline"
             className="border-neutral-700 text-white hover:bg-neutral-900"
           >
+            <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </Button>
         </div>
@@ -246,11 +245,13 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
                     >
                       Submit Another Report
                     </Button>
-                    <Link to="/dashboard">
-                      <Button className="bg-red-900 hover:bg-red-800 text-white">
-                        View Dashboard
-                      </Button>
-                    </Link>
+                    {userRole === 'admin' && (
+                      <Link to="/dashboard">
+                        <Button className="bg-red-900 hover:bg-red-800 text-white">
+                          View Dashboard
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </CardContent>
               </Card>

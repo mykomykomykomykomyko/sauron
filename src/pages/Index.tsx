@@ -1,10 +1,20 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileText, BarChart3, Shield, Users, Bell } from "lucide-react";
+import { Eye, FileText, BarChart3, Shield, Users, Bell, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -16,16 +26,41 @@ const Index = () => {
           <span className="text-2xl font-bold text-white tracking-tight font-mono">SAURON</span>
         </div>
         <div className="flex space-x-4">
-          <Link to="/auth">
-            <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
-              Sign In
-            </Button>
-          </Link>
-          <Link to="/submit">
-            <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
-              Submit Report
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <Link to="/submit">
+                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+                  Submit Report
+                </Button>
+              </Link>
+              <Link to="/dashboard">
+                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+                  Dashboard
+                </Button>
+              </Link>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="border-neutral-700 text-white hover:bg-neutral-900"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/submit">
+                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+                  Submit Report
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -47,7 +82,7 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="lg" variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900 px-8 py-4 text-lg transition-all duration-200 hover:scale-[1.02] font-mono">
+              <Button size="lg" className="bg-red-900 hover:bg-red-800 text-white px-8 py-4 text-lg border border-red-800/30 transition-all duration-200 hover:scale-[1.02] font-mono">
                 <Shield className="w-5 h-5 mr-2" />
                 Access Dashboard
               </Button>
