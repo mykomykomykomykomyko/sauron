@@ -45,6 +45,18 @@ export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id'
   return data as AnalysisResult;
 };
 
+export const updateAnalysisStatus = async (reportId: string, status: 'validated' | 'review' | 'flagged' | 'pending') => {
+  const { data, error } = await supabase
+    .from('analysis_results')
+    .update({ status })
+    .eq('report_id', reportId)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data as AnalysisResult;
+};
+
 export const getReportsWithAnalysis = async () => {
   const { data, error } = await supabase
     .from('reports')

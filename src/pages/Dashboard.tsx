@@ -1,7 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, ArrowLeft, TrendingUp, Download, CheckCircle, Clock, Users, LogOut } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Eye, ArrowLeft, TrendingUp, Download, CheckCircle, Clock, Users, LogOut, Edit } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { getReportsWithAnalysis, exportReportsAsCSV } from "@/services/supabaseService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +19,7 @@ interface ReportWithAnalysis {
   report: string;
   created_at?: string;
   analysis_results: Array<{
+    id?: string;
     score: number;
     status: string;
     flags: number;
@@ -26,6 +30,7 @@ interface ReportWithAnalysis {
 const Dashboard = () => {
   const [reports, setReports] = useState<ReportWithAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<ReportWithAnalysis | null>(null);
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -77,6 +82,29 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleStatusChange = async (reportId: string, newStatus: string) => {
+    try {
+      // Update the local state immediately for better UX
+      setReports(prev => prev.map(report => {
+        if (report.id === reportId) {
+          return {
+            ...report,
+            analysis_results: report.analysis_results.map(analysis => ({
+              ...analysis,
+              status: newStatus
+            }))
+          };
+        }
+        return report;
+      }));
+      
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast.error("Failed to update status");
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -275,10 +303,79 @@ const Dashboard = () => {
                             </p>
                             <p className="text-xs text-neutral-500 font-mono">Submitted</p>
                           </div>
-                          <div className={`px-3 py-1 rounded-full border text-sm font-medium flex items-center space-x-1 font-mono ${getStatusColor(status)}`}>
-                            {getStatusIcon(status)}
-                            <span className="capitalize">{status}</span>
-                          </div>
+                          
+                          {/* Status Selector */}
+                          <Select value={status} onValueChange={(value) => handleStatusChange(report.id!, value)}>
+                            <SelectTrigger className={`w-32 h-8 text-xs border ${getStatusColor(status)} bg-transparent`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-neutral-900 border-neutral-700">
+                              <SelectItem value="pending" className="text-blue-400">Pending</SelectItem>
+                              <SelectItem value="review" className="text-yellow-400">Review</SelectItem>
+                              <SelectItem value="validated" className="text-green-400">Validated</SelectItem>
+                              <SelectItem value="flagged" className="text-red-400">Flagged</SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          {/* View Full Report Dialog */}
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedReport(report)}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-neutral-900 border-neutral-700">
+                              <DialogHeader>
+                                <DialogTitle className="text-white font-mono">
+                                  Full Report - {report.name}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <span className="text-neutral-400 font-mono">Project:</span>
+                                    <span className="text-white ml-2">{report.project}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-neutral-400 font-mono">Week:</span>
+                                    <span className="text-white ml-2">{report.week}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-neutral-400 font-mono">Email:</span>
+                                    <span className="text-white ml-2">{report.email}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-neutral-400 font-mono">Status:</span>
+                                    <span className={`ml-2 px-2 py-1 rounded text-xs ${getStatusColor(status)}`}>
+                                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h4 className="text-neutral-400 font-mono mb-2">Report Content:</h4>
+                                  <div className="bg-neutral-800 p-4 rounded-lg">
+                                    <p className="text-white whitespace-pre-wrap">{report.report}</p>
+                                  </div>
+                                </div>
+                                {analysis && (
+                                  <div>
+                                    <h4 className="text-neutral-400 font-mono mb-2">Analysis Summary:</h4>
+                                    <div className="bg-neutral-800 p-4 rounded-lg">
+                                      <p className="text-white">{analysis.summary}</p>
+                                      <div className="mt-2 flex items-center space-x-4 text-sm">
+                                        <span className="text-neutral-400">Score: <span className="text-white">{analysis.score}</span></span>
+                                        <span className="text-neutral-400">Flags: <span className="text-white">{analysis.flags}</span></span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                     );
