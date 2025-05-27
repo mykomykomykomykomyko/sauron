@@ -44,17 +44,17 @@ serve(async (req) => {
       });
     }
 
-    const claudeApiKey = Deno.env.get('CLAUDE_API_KEY');
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
     
-    if (!claudeApiKey) {
-      console.error('Claude API key not found');
-      return new Response(JSON.stringify({ error: 'Claude API key not configured' }), {
+    if (!geminiApiKey) {
+      console.error('Gemini API key not found');
+      return new Response(JSON.stringify({ error: 'Gemini API key not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Analyze the report with Claude
+    // Analyze the report with Gemini
     const analysisPrompt = `Please analyze this weekly progress report and provide:
 1. A score from 1-10 based on completeness, clarity, and professionalism
 2. A brief summary of the report
@@ -80,39 +80,56 @@ Please respond in JSON format with the following structure:
   "detailed_feedback": "comprehensive feedback"
 }`;
 
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': claudeApiKey,
-        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: analysisPrompt
-        }]
+        contents: [{
+          parts: [{
+            text: analysisPrompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
       })
     });
 
-    if (!claudeResponse.ok) {
-      console.error('Claude API error:', await claudeResponse.text());
-      return new Response(JSON.stringify({ error: 'Failed to analyze report with Claude' }), {
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error:', errorText);
+      return new Response(JSON.stringify({ error: 'Failed to analyze report with Gemini' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const claudeData = await claudeResponse.json();
-    const analysisText = claudeData.content[0].text;
+    const geminiData = await geminiResponse.json();
+    
+    if (!geminiData.candidates || geminiData.candidates.length === 0) {
+      console.error('No candidates in Gemini response:', geminiData);
+      return new Response(JSON.stringify({ error: 'No analysis generated' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const analysisText = geminiData.candidates[0].content.parts[0].text;
     
     let analysis;
     try {
-      analysis = JSON.parse(analysisText);
+      // Clean the response text to extract JSON
+      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+      const jsonText = jsonMatch ? jsonMatch[0] : analysisText;
+      analysis = JSON.parse(jsonText);
     } catch (parseError) {
-      console.error('Failed to parse Claude response:', parseError);
+      console.error('Failed to parse Gemini response:', parseError);
+      console.error('Raw response:', analysisText);
       // Fallback analysis
       analysis = {
         score: 7,
