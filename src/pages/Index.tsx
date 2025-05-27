@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target, TrendingUp, Globe, Clock, CheckCircle } from "lucide-react";
@@ -83,8 +84,8 @@ const Index = () => {
         />
       ))}
 
-      {/* Header */}
-      <nav className={`flex items-center justify-between p-6 md:p-8 border-b border-red-800/30 backdrop-blur-sm bg-black/50 relative z-10 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
+      {/* Header - Only logo, no buttons */}
+      <nav className={`flex items-center justify-center p-6 md:p-8 border-b border-red-800/30 backdrop-blur-sm bg-black/50 relative z-10 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="flex items-center space-x-3 group">
           <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center border border-red-500/50 group-hover:scale-110 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-red-500/30 group-hover:rotate-12">
             <Eye className="w-6 h-6 text-white group-hover:animate-pulse" />
@@ -94,57 +95,6 @@ const Index = () => {
             <Sparkles className="w-4 h-4 text-red-400 animate-pulse" />
             <span className="text-xs text-red-400 font-mono">AI-POWERED</span>
           </div>
-        </div>
-        <div className="flex space-x-3">
-          {user ? (
-            <>
-              <Link to="/auth">
-                <Button className="bg-red-600 hover:bg-red-700 text-white border border-red-500/50 hover:border-red-400 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
-                  <Shield className="w-4 h-4 mr-2 relative z-10" />
-                  <span className="relative z-10">Access Dashboard</span>
-                </Button>
-              </Link>
-              <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 hover:scale-105 transition-all duration-300">
-                    Sign Out
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-gray-900 border-red-700/50">
-                  <DialogHeader>
-                    <DialogTitle className="text-red-400">Sign Out</DialogTitle>
-                    <DialogDescription className="text-gray-300">
-                      Are you sure you want to sign out of The Eye of Sauron?
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex gap-3 mt-4">
-                    <Button 
-                      onClick={handleSignOut}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      Yes, Sign Out
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowSignOutDialog(false)}
-                      className="border-red-600/50 text-red-400 hover:bg-red-900/30"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            <Link to="/auth">
-              <Button className="bg-red-600 hover:bg-red-700 text-white border border-red-500/50 hover:border-red-400 hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-700 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
-                <Shield className="w-4 h-4 mr-2 relative z-10" />
-                <span className="relative z-10">Sign In</span>
-              </Button>
-            </Link>
-          )}
         </div>
       </nav>
 
