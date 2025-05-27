@@ -1,53 +1,45 @@
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, ArrowLeft, TrendingUp, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getReportsWithAnalysis } from "@/services/supabaseService";
+import { toast } from "sonner";
+
+interface ReportWithAnalysis {
+  id: string;
+  name: string;
+  project: string;
+  week: string;
+  created_at: string;
+  analysis_results: Array<{
+    score: number;
+    status: string;
+    flags: number;
+    summary: string;
+  }>;
+}
 
 const Dashboard = () => {
-  // Updated mock data with more realistic AI analysis results
-  const reports = [
-    {
-      id: 1,
-      name: "Alex Chen",
-      project: "Project Alpha",
-      week: "2024-01-15",
-      score: 8.5,
-      status: "validated",
-      flags: 0,
-      summary: "Completed user authentication system with OAuth integration and comprehensive testing"
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      project: "Project Beta",
-      week: "2024-01-15",
-      score: 6.2,
-      status: "review",
-      flags: 2,
-      summary: "General infrastructure improvements mentioned without specific technical details"
-    },
-    {
-      id: 3,
-      name: "Mike Rodriguez",
-      project: "Project Gamma",
-      week: "2024-01-15",
-      score: 9.1,
-      status: "validated",
-      flags: 0,
-      summary: "API development with comprehensive testing suite and detailed challenge resolution"
-    },
-    {
-      id: 4,
-      name: "Emma Thompson",
-      project: "Project Delta",
-      week: "2024-01-15",
-      score: 4.8,
-      status: "flagged",
-      flags: 4,
-      summary: "Vague development work mentioned without specifics or measurable outcomes"
-    }
-  ];
+  const [reports, setReports] = useState<ReportWithAnalysis[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const data = await getReportsWithAnalysis();
+        setReports(data || []);
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+        toast.error("Failed to load reports");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -75,8 +67,34 @@ const Dashboard = () => {
     }
   };
 
-  const avgScore = reports.reduce((sum, report) => sum + report.score, 0) / reports.length;
-  const totalFlags = reports.reduce((sum, report) => sum + report.flags, 0);
+  // Calculate statistics
+  const avgScore = reports.length > 0 
+    ? reports.reduce((sum, report) => {
+        const analysis = report.analysis_results[0];
+        return sum + (analysis?.score || 0);
+      }, 0) / reports.length 
+    : 0;
+
+  const totalFlags = reports.reduce((sum, report) => {
+    const analysis = report.analysis_results[0];
+    return sum + (analysis?.flags || 0);
+  }, 0);
+
+  const validatedCount = reports.filter(report => {
+    const analysis = report.analysis_results[0];
+    return analysis?.status === "validated";
+  }).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <p className="text-neutral-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -153,9 +171,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-neutral-400 text-sm font-mono">Validated</p>
-                    <p className="text-3xl font-bold text-white font-mono">
-                      {reports.filter(r => r.status === "validated").length}
-                    </p>
+                    <p className="text-3xl font-bold text-white font-mono">{validatedCount}</p>
                   </div>
                   <Eye className="w-8 h-8 text-red-500" />
                 </div>
@@ -169,43 +185,63 @@ const Dashboard = () => {
               <CardTitle className="text-2xl text-white font-mono">Recent Reports</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="space-y-0">
-                {reports.map((report, index) => (
-                  <div
-                    key={report.id}
-                    className={`flex items-center justify-between p-6 hover:bg-neutral-800/50 transition-colors ${
-                      index !== reports.length - 1 ? 'border-b border-neutral-800' : ''
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-4 mb-3">
-                        <h3 className="font-semibold text-white font-mono">{report.name}</h3>
-                        <span className="text-neutral-600">•</span>
-                        <span className="text-neutral-400 font-mono text-sm">{report.project}</span>
-                        <span className="text-neutral-600">•</span>
-                        <span className="text-neutral-400 font-mono text-sm">{report.week}</span>
-                      </div>
-                      <p className="text-neutral-300 text-sm">{report.summary}</p>
-                    </div>
-                    <div className="flex items-center space-x-6">
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-white font-mono">{report.score}</p>
-                        <p className="text-xs text-neutral-400 font-mono">SAURON Score</p>
-                      </div>
-                      {report.flags > 0 && (
-                        <div className="text-right">
-                          <p className="text-red-400 font-semibold font-mono">{report.flags}</p>
-                          <p className="text-xs text-neutral-400 font-mono">Flags</p>
+              {reports.length === 0 ? (
+                <div className="p-12 text-center">
+                  <p className="text-neutral-400 text-lg mb-4">No reports submitted yet</p>
+                  <Link to="/submit">
+                    <Button className="bg-red-900 hover:bg-red-800 text-white">
+                      Submit First Report
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-0">
+                  {reports.map((report, index) => {
+                    const analysis = report.analysis_results[0];
+                    return (
+                      <div
+                        key={report.id}
+                        className={`flex items-center justify-between p-6 hover:bg-neutral-800/50 transition-colors ${
+                          index !== reports.length - 1 ? 'border-b border-neutral-800' : ''
+                        }`}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4 mb-3">
+                            <h3 className="font-semibold text-white font-mono">{report.name}</h3>
+                            <span className="text-neutral-600">•</span>
+                            <span className="text-neutral-400 font-mono text-sm">{report.project}</span>
+                            <span className="text-neutral-600">•</span>
+                            <span className="text-neutral-400 font-mono text-sm">{report.week}</span>
+                          </div>
+                          <p className="text-neutral-300 text-sm">
+                            {analysis?.summary || "Analysis pending..."}
+                          </p>
                         </div>
-                      )}
-                      <div className={`px-3 py-1 rounded-full border text-sm font-medium flex items-center space-x-1 font-mono ${getStatusColor(report.status)}`}>
-                        {getStatusIcon(report.status)}
-                        <span className="capitalize">{report.status}</span>
+                        <div className="flex items-center space-x-6">
+                          {analysis && (
+                            <>
+                              <div className="text-right">
+                                <p className="text-2xl font-bold text-white font-mono">{analysis.score}</p>
+                                <p className="text-xs text-neutral-400 font-mono">SAURON Score</p>
+                              </div>
+                              {analysis.flags > 0 && (
+                                <div className="text-right">
+                                  <p className="text-red-400 font-semibold font-mono">{analysis.flags}</p>
+                                  <p className="text-xs text-neutral-400 font-mono">Flags</p>
+                                </div>
+                              )}
+                              <div className={`px-3 py-1 rounded-full border text-sm font-medium flex items-center space-x-1 font-mono ${getStatusColor(analysis.status)}`}>
+                                {getStatusIcon(analysis.status)}
+                                <span className="capitalize">{analysis.status}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

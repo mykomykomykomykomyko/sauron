@@ -1,4 +1,6 @@
 
+import { submitReport, saveAnalysisResult } from './supabaseService';
+
 interface AnalysisResult {
   score: number;
   feedback: string;
@@ -10,12 +12,16 @@ interface AnalysisResult {
 
 interface ReportData {
   name: string;
+  email: string;
   project: string;
   week: string;
   report: string;
 }
 
 export const analyzeReport = async (reportData: ReportData): Promise<AnalysisResult> => {
+  // First, save the report to the database
+  const savedReport = await submitReport(reportData);
+  
   // Simulate AI analysis for now - this will be replaced with actual Claude API integration
   const reportLength = reportData.report.length;
   const hasSpecificDetails = reportData.report.includes('completed') || reportData.report.includes('implemented');
@@ -76,7 +82,7 @@ export const analyzeReport = async (reportData: ReportData): Promise<AnalysisRes
   
   const feedback = generateFeedback(score, strengths, improvements);
   
-  return {
+  const analysisResult = {
     score: Math.round(score * 10) / 10,
     feedback,
     strengths,
@@ -84,6 +90,22 @@ export const analyzeReport = async (reportData: ReportData): Promise<AnalysisRes
     flags,
     status
   };
+  
+  // Save analysis result to database
+  await saveAnalysisResult({
+    report_id: savedReport.id,
+    score: analysisResult.score,
+    status: analysisResult.status,
+    flags: analysisResult.flags,
+    summary: generateSummary(reportData.report, analysisResult.score),
+    detailed_feedback: {
+      strengths: analysisResult.strengths,
+      improvements: analysisResult.improvements,
+      feedback: analysisResult.feedback
+    }
+  });
+  
+  return analysisResult;
 };
 
 const generateFeedback = (score: number, strengths: string[], improvements: string[]): string => {
@@ -114,6 +136,19 @@ const generateFeedback = (score: number, strengths: string[], improvements: stri
   }
   
   return feedback;
+};
+
+const generateSummary = (reportText: string, score: number): string => {
+  const words = reportText.split(' ');
+  const firstSentence = reportText.split('.')[0];
+  
+  if (score >= 8) {
+    return `${firstSentence.substring(0, 100)}... - Comprehensive report with detailed technical implementation`;
+  } else if (score >= 6) {
+    return `${firstSentence.substring(0, 100)}... - Good progress report with room for improvement`;
+  } else {
+    return `${firstSentence.substring(0, 100)}... - Report lacks sufficient detail and specificity`;
+  }
 };
 
 // Future: Replace with actual Claude API integration

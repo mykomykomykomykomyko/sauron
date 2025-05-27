@@ -28,15 +28,15 @@ const Submit = () => {
     setAnalysisResult(null);
     
     try {
-      // Simulate AI processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Submitting report:', formData);
       
-      // Analyze the report
+      // Analyze the report (this also saves it to the database)
       const result = await analyzeReport(formData);
       setAnalysisResult(result);
       
-      toast.success("Report analyzed successfully!");
+      toast.success("Report analyzed and saved successfully!");
     } catch (error) {
+      console.error('Analysis error:', error);
       toast.error("Analysis failed. Please try again.");
     } finally {
       setIsSubmitting(false);
