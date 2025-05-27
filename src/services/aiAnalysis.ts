@@ -1,5 +1,5 @@
 
-import { submitReport, saveAnalysisResult } from './supabaseService';
+import { submitReport, saveAnalysisResult, Report } from './supabaseService';
 
 interface AnalysisResult {
   score: number;
@@ -21,10 +21,10 @@ interface ReportData {
 export const analyzeReport = async (reportData: ReportData): Promise<AnalysisResult> => {
   try {
     // First, save the report to the database
-    const savedReport = await submitReport(reportData);
+    const savedReport: Report = await submitReport(reportData);
     
     // Check if savedReport exists and has an id
-    if (!savedReport || !savedReport.id) {
+    if (!savedReport?.id) {
       throw new Error('Failed to save report to database');
     }
     

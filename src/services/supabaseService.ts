@@ -23,30 +23,30 @@ export interface AnalysisResult {
 }
 
 export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>) => {
-  const { data, error } = await supabase
-    .from('reports' as any)
+  const { data, error } = await (supabase as any)
+    .from('reports')
     .insert([reportData])
     .select()
     .single();
     
   if (error) throw error;
-  return data;
+  return data as Report;
 };
 
 export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id' | 'created_at'>) => {
-  const { data, error } = await supabase
-    .from('analysis_results' as any)
+  const { data, error } = await (supabase as any)
+    .from('analysis_results')
     .insert([analysisData])
     .select()
     .single();
     
   if (error) throw error;
-  return data;
+  return data as AnalysisResult;
 };
 
 export const getReportsWithAnalysis = async () => {
-  const { data, error } = await supabase
-    .from('reports' as any)
+  const { data, error } = await (supabase as any)
+    .from('reports')
     .select(`
       *,
       analysis_results (*)
@@ -54,12 +54,12 @@ export const getReportsWithAnalysis = async () => {
     .order('created_at', { ascending: false });
     
   if (error) throw error;
-  return data;
+  return data as (Report & { analysis_results: AnalysisResult[] })[];
 };
 
 export const getRecentReports = async (limit = 10) => {
-  const { data, error } = await supabase
-    .from('reports' as any)
+  const { data, error } = await (supabase as any)
+    .from('reports')
     .select(`
       *,
       analysis_results (*)
@@ -68,5 +68,5 @@ export const getRecentReports = async (limit = 10) => {
     .limit(limit);
     
   if (error) throw error;
-  return data;
+  return data as (Report & { analysis_results: AnalysisResult[] })[];
 };
