@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Eye, Shield, TrendingUp, Zap, ArrowRight, Github, Database, Brain } from "lucide-react";
+import { Shield, TrendingUp, Zap, ArrowRight, Github, Database, Brain } from "lucide-react";
 
 const Index = () => {
   return (
@@ -9,8 +9,12 @@ const Index = () => {
       {/* Navigation */}
       <nav className="relative z-50 flex items-center justify-between p-6 md:p-8 border-b border-neutral-800/50 backdrop-blur-xl bg-black/80">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-900 rounded-lg flex items-center justify-center border border-red-800/30 shadow-lg shadow-red-900/20">
-            <Eye className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/dd588e4a-8e97-4a25-b069-daa5e68dca1d.png" 
+              alt="The Eye of Sauron Logo" 
+              className="w-8 h-8 object-contain"
+            />
           </div>
           <span className="text-2xl font-bold text-white tracking-tight font-mono">THE EYE OF SAURON</span>
         </div>
@@ -18,11 +22,6 @@ const Index = () => {
           <Link to="/submit">
             <Button variant="ghost" className="text-neutral-300 hover:text-white hover:bg-neutral-900/50 border border-transparent hover:border-neutral-700 transition-all duration-300">
               Submit Report
-            </Button>
-          </Link>
-          <Link to="/dashboard">
-            <Button className="bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg shadow-red-900/30 hover:shadow-red-900/50 transition-all duration-300">
-              Dashboard
             </Button>
           </Link>
         </div>
@@ -176,8 +175,12 @@ const Index = () => {
       <footer className="border-t border-neutral-800/50 px-6 md:px-8 py-16 bg-neutral-950/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-3 mb-6 md:mb-0">
-            <div className="w-6 h-6 bg-gradient-to-br from-red-600 to-red-900 rounded-md flex items-center justify-center border border-red-800/30">
-              <Eye className="w-4 h-4 text-white" />
+            <div className="w-6 h-6 flex items-center justify-center">
+              <img 
+                src="/lovable-uploads/dd588e4a-8e97-4a25-b069-daa5e68dca1d.png" 
+                alt="The Eye of Sauron Logo" 
+                className="w-6 h-6 object-contain"
+              />
             </div>
             <span className="text-lg font-semibold text-white font-mono">THE EYE OF SAURON</span>
           </div>
