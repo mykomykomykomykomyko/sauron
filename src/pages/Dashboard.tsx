@@ -12,7 +12,7 @@ interface ReportWithAnalysis {
   name: string;
   project: string;
   week: string;
-  created_at: string;
+  created_at?: string;
   analysis_results: Array<{
     score: number;
     status: string;
