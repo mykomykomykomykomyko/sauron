@@ -196,32 +196,32 @@ const Index = () => {
                 title: "Smart Reporting",
                 description: "Submit detailed progress reports with AI-powered validation and automatic insights generation.",
                 delay: 0.9,
-                gradient: "from-red-600/20 to-red-800/30"
+                gradient: "from-gray-900/80 to-black/90"
               },
               {
                 icon: Users,
                 title: "Role-Based Access",
                 description: "Contractors submit and view their own reports, while admins have full oversight with advanced analytics.",
                 delay: 1.2,
-                gradient: "from-red-700/20 to-red-900/30"
+                gradient: "from-gray-900/80 to-black/90"
               },
               {
                 icon: Bell,
                 title: "AI Notifications",
                 description: "Receive intelligent notifications about report patterns, deadlines, and automated quality assessments.",
                 delay: 1.5,
-                gradient: "from-red-500/20 to-red-700/30"
+                gradient: "from-gray-900/80 to-black/90"
               }
             ].map((feature, index) => (
               <Card 
                 key={index}
-                className={`bg-gradient-to-br ${feature.gradient} border-red-800/40 hover:bg-red-800/30 transition-all duration-700 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/30 group backdrop-blur-sm hover:border-red-600/60 cursor-pointer transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+                className={`bg-gradient-to-br ${feature.gradient} border-red-700/50 hover:border-red-500/70 transition-all duration-700 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20 group backdrop-blur-sm cursor-pointer transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
                 style={{ animationDelay: `${feature.delay}s` }}
               >
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-3 text-white font-mono">
-                    <div className="p-2 bg-red-900/60 rounded-lg border border-red-600/50 group-hover:scale-110 transition-all duration-300">
-                      <feature.icon className="w-6 h-6 text-red-400 group-hover:animate-pulse transition-all duration-300" />
+                    <div className="p-2 bg-red-900/60 rounded-lg border border-red-600/50 group-hover:scale-110 transition-all duration-300 group-hover:bg-red-800/70">
+                      <feature.icon className="w-6 h-6 text-red-400 group-hover:text-red-300 group-hover:animate-pulse transition-all duration-300" />
                     </div>
                     <span className="group-hover:text-red-300 transition-colors duration-300">{feature.title}</span>
                   </CardTitle>
