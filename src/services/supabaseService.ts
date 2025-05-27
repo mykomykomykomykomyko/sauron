@@ -8,6 +8,7 @@ export interface Report {
   project: string;
   week: string;
   report: string;
+  user_id?: string;
   created_at?: string;
 }
 
@@ -93,4 +94,25 @@ export const exportReportsAsCSV = async () => {
     .join('\n');
     
   return csvContent;
+};
+
+// Get notifications for the current user
+export const getUserNotifications = async () => {
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data;
+};
+
+// Mark notification as read
+export const markNotificationAsRead = async (notificationId: string) => {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('id', notificationId);
+    
+  if (error) throw error;
 };

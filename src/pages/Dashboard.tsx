@@ -1,10 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, ArrowLeft, TrendingUp, Download, CheckCircle, Clock, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getReportsWithAnalysis, exportReportsAsCSV } from "@/services/supabaseService";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface ReportWithAnalysis {
@@ -26,8 +26,20 @@ interface ReportWithAnalysis {
 const Dashboard = () => {
   const [reports, setReports] = useState<ReportWithAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    if (userRole !== 'admin') {
+      navigate('/submit');
+      return;
+    }
+
     const fetchReports = async () => {
       try {
         const data = await getReportsWithAnalysis();
@@ -41,7 +53,7 @@ const Dashboard = () => {
     };
 
     fetchReports();
-  }, []);
+  }, [user, userRole, navigate]);
 
   const handleExportCSV = async () => {
     try {
@@ -60,6 +72,11 @@ const Dashboard = () => {
       console.error('Error exporting CSV:', error);
       toast.error("Failed to export reports");
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
   const getStatusColor = (status: string) => {
@@ -131,6 +148,13 @@ const Dashboard = () => {
               Submit Report
             </Button>
           </Link>
+          <Button
+            onClick={handleSignOut}
+            variant="outline"
+            className="border-neutral-700 text-white hover:bg-neutral-900"
+          >
+            Sign Out
+          </Button>
         </div>
       </nav>
 

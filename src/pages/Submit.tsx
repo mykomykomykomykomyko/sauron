@@ -1,14 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, ArrowLeft, Send, Loader2, CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { submitReport } from "@/services/supabaseService";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Submit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,16 +21,31 @@ const Submit = () => {
     week: "",
     report: ""
   });
+  const { user, userRole, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("You must be logged in to submit a report");
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
       console.log('Submitting report:', formData);
       
-      // Simply save the report to the database
-      await submitReport(formData);
+      await submitReport({
+        ...formData,
+        user_id: user.id
+      });
       
       setIsSubmitted(true);
       toast.success("Report submitted successfully!");
@@ -56,6 +72,23 @@ const Submit = () => {
     setIsSubmitted(false);
   };
 
+  const handleSignOut = async () => {
+    const { signOut } = useAuth();
+    await signOut();
+    navigate('/');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <p className="text-neutral-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
@@ -69,11 +102,22 @@ const Submit = () => {
             <span className="text-2xl font-bold text-white tracking-tight font-mono">SAURON</span>
           </div>
         </Link>
-        <Link to="/dashboard">
-          <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
-            Dashboard
+        <div className="flex items-center space-x-4">
+          {userRole === 'admin' && (
+            <Link to="/dashboard">
+              <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
+                Dashboard
+              </Button>
+            </Link>
+          )}
+          <Button
+            onClick={handleSignOut}
+            variant="outline"
+            className="border-neutral-700 text-white hover:bg-neutral-900"
+          >
+            Sign Out
           </Button>
-        </Link>
+        </div>
       </nav>
 
       {/* Main Content */}
