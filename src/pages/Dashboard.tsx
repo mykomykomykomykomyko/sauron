@@ -5,7 +5,7 @@ import { Eye, ArrowLeft, TrendingUp, AlertTriangle, CheckCircle, Clock } from "l
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  // Mock data for demonstration
+  // Updated mock data with more realistic AI analysis results
   const reports = [
     {
       id: 1,
@@ -15,7 +15,7 @@ const Dashboard = () => {
       score: 8.5,
       status: "validated",
       flags: 0,
-      summary: "Completed user authentication system with OAuth integration"
+      summary: "Completed user authentication system with OAuth integration and comprehensive testing"
     },
     {
       id: 2,
@@ -25,7 +25,7 @@ const Dashboard = () => {
       score: 6.2,
       status: "review",
       flags: 2,
-      summary: "Infrastructure improvements and performance optimizations"
+      summary: "General infrastructure improvements mentioned without specific technical details"
     },
     {
       id: 3,
@@ -35,7 +35,7 @@ const Dashboard = () => {
       score: 9.1,
       status: "validated",
       flags: 0,
-      summary: "API development with comprehensive testing suite"
+      summary: "API development with comprehensive testing suite and detailed challenge resolution"
     },
     {
       id: 4,
@@ -45,7 +45,7 @@ const Dashboard = () => {
       score: 4.8,
       status: "flagged",
       flags: 4,
-      summary: "General development work and bug fixes"
+      summary: "Vague development work mentioned without specifics or measurable outcomes"
     }
   ];
 
@@ -103,10 +103,10 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight font-mono">
-              Oversight Dashboard
+              Analysis Dashboard
             </h1>
             <p className="text-xl text-neutral-400">
-              Real-time contractor performance and validation insights
+              AI-powered insights and performance analytics
             </p>
           </div>
 
@@ -140,7 +140,7 @@ const Dashboard = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-neutral-400 text-sm font-mono">Red Flags</p>
+                    <p className="text-neutral-400 text-sm font-mono">Issues Found</p>
                     <p className="text-3xl font-bold text-white font-mono">{totalFlags}</p>
                   </div>
                   <AlertTriangle className="w-8 h-8 text-red-500" />

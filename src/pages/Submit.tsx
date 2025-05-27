@@ -8,9 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eye, ArrowLeft, Send, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { analyzeReport } from "@/services/aiAnalysis";
+import AnalysisResult from "@/components/AnalysisResult";
 
 const Submit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,14 +25,29 @@ const Submit = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setAnalysisResult(null);
     
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    toast.success("Report submitted successfully! AI analysis in progress...");
-    
-    // Reset form
+    try {
+      // Simulate AI processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Analyze the report
+      const result = await analyzeReport(formData);
+      setAnalysisResult(result);
+      
+      toast.success("Report analyzed successfully!");
+    } catch (error) {
+      toast.error("Analysis failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const resetForm = () => {
     setFormData({
       name: "",
       email: "",
@@ -37,10 +55,7 @@ const Submit = () => {
       week: "",
       report: ""
     });
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setAnalysisResult(null);
   };
 
   return (
@@ -65,140 +80,162 @@ const Submit = () => {
 
       {/* Main Content */}
       <div className="px-6 md:px-8 py-16">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight font-mono">
               Submit Progress Report
             </h1>
             <p className="text-xl text-neutral-400 leading-relaxed">
-              SAURON will analyze your submission against real-world data sources
+              SAURON will analyze your submission and provide detailed feedback
             </p>
           </div>
 
-          <Card className="bg-neutral-900 border-neutral-800">
-            <CardHeader className="border-b border-neutral-800">
-              <CardTitle className="text-2xl text-white font-mono">Weekly Progress Report</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="name" className="text-neutral-300 font-mono">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange("name", e.target.value)}
-                      placeholder="Your full name"
-                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
-                      required
-                    />
+          {!analysisResult ? (
+            <Card className="bg-neutral-900 border-neutral-800">
+              <CardHeader className="border-b border-neutral-800">
+                <CardTitle className="text-2xl text-white font-mono">Weekly Progress Report</CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="name" className="text-neutral-300 font-mono">Full Name</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange("name", e.target.value)}
+                        placeholder="Your full name"
+                        className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="email" className="text-neutral-300 font-mono">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        placeholder="your.email@company.com"
+                        className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-3">
-                    <Label htmlFor="email" className="text-neutral-300 font-mono">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      placeholder="your.email@company.com"
-                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="project" className="text-neutral-300 font-mono">Project Name</Label>
-                    <Input
-                      id="project"
-                      value={formData.project}
-                      onChange={(e) => handleInputChange("project", e.target.value)}
-                      placeholder="Project Alpha"
-                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
-                      required
-                    />
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="project" className="text-neutral-300 font-mono">Project Name</Label>
+                      <Input
+                        id="project"
+                        value={formData.project}
+                        onChange={(e) => handleInputChange("project", e.target.value)}
+                        placeholder="Project Alpha"
+                        className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="week" className="text-neutral-300 font-mono">Week Ending</Label>
+                      <Input
+                        id="week"
+                        type="date"
+                        value={formData.week}
+                        onChange={(e) => handleInputChange("week", e.target.value)}
+                        className="bg-black border-neutral-700 text-white focus:border-red-500 transition-colors"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-3">
-                    <Label htmlFor="week" className="text-neutral-300 font-mono">Week Ending</Label>
-                    <Input
-                      id="week"
-                      type="date"
-                      value={formData.week}
-                      onChange={(e) => handleInputChange("week", e.target.value)}
-                      className="bg-black border-neutral-700 text-white focus:border-red-500 transition-colors"
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="report" className="text-neutral-300 font-mono">
-                    Progress Report
-                    <span className="text-sm text-neutral-500 ml-2 font-sans">
-                      (Be specific about tasks completed, challenges faced, and next steps)
-                    </span>
-                  </Label>
-                  <Textarea
-                    id="report"
-                    value={formData.report}
-                    onChange={(e) => handleInputChange("report", e.target.value)}
-                    placeholder="This week I completed the user authentication system by implementing OAuth 2.0 with Google and GitHub providers. I created 3 new API endpoints, wrote unit tests with 95% coverage, and deployed the changes to staging. 
+                  <div className="space-y-3">
+                    <Label htmlFor="report" className="text-neutral-300 font-mono">
+                      Progress Report
+                      <span className="text-sm text-neutral-500 ml-2 font-sans">
+                        (Be specific about tasks completed, challenges faced, and next steps)
+                      </span>
+                    </Label>
+                    <Textarea
+                      id="report"
+                      value={formData.report}
+                      onChange={(e) => handleInputChange("report", e.target.value)}
+                      placeholder="This week I completed the user authentication system by implementing OAuth 2.0 with Google and GitHub providers. I created 3 new API endpoints, wrote unit tests with 95% coverage, and deployed the changes to staging. 
 
 Challenges: Encountered rate limiting issues with the GitHub API which I resolved by implementing exponential backoff.
 
 Next week: I plan to work on the dashboard analytics feature and integrate with the reporting system..."
-                    className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 min-h-[200px] resize-none focus:border-red-500 transition-colors font-mono text-sm"
-                    required
-                  />
-                </div>
+                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 min-h-[200px] resize-none focus:border-red-500 transition-colors font-mono text-sm"
+                      required
+                    />
+                  </div>
 
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-red-900 hover:bg-red-800 text-white py-4 text-lg border border-red-800/30 transition-all duration-200 hover:scale-[1.02] font-mono"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        AI Analysis in Progress...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5 mr-2" />
+                        Submit for AI Analysis
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-8">
+              <AnalysisResult {...analysisResult} />
+              <div className="flex justify-center space-x-4">
                 <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-red-900 hover:bg-red-800 text-white py-4 text-lg border border-red-800/30 transition-all duration-200 hover:scale-[1.02] font-mono"
+                  onClick={resetForm}
+                  variant="outline"
+                  className="border-neutral-700 text-white hover:bg-neutral-900"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      AI Analysis in Progress...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5 mr-2" />
-                      Submit for AI Review
-                    </>
-                  )}
+                  Submit Another Report
                 </Button>
-              </form>
-            </CardContent>
-          </Card>
+                <Link to="/dashboard">
+                  <Button className="bg-red-900 hover:bg-red-800 text-white">
+                    View Dashboard
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
 
-          {/* Info Cards */}
-          <div className="mt-12 grid md:grid-cols-2 gap-6">
-            <Card className="bg-neutral-900 border-neutral-800">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-white mb-3 font-mono">What SAURON Checks</h3>
-                <ul className="text-sm text-neutral-400 space-y-2 font-mono">
-                  <li>• GitHub commits and PR activity</li>
-                  <li>• Specific vs. vague language</li>
-                  <li>• Timeline consistency</li>
-                  <li>• Technical accuracy</li>
-                </ul>
-              </CardContent>
-            </Card>
-            <Card className="bg-neutral-900 border-neutral-800">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-white mb-3 font-mono">Scoring Criteria</h3>
-                <ul className="text-sm text-neutral-400 space-y-2 font-mono">
-                  <li>• Specificity and detail level</li>
-                  <li>• Evidence-backed claims</li>
-                  <li>• Realistic time estimates</li>
-                  <li>• Problem-solving approach</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Info Cards - only show when form is visible */}
+          {!analysisResult && (
+            <div className="mt-12 grid md:grid-cols-2 gap-6">
+              <Card className="bg-neutral-900 border-neutral-800">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-white mb-3 font-mono">What SAURON Analyzes</h3>
+                  <ul className="text-sm text-neutral-400 space-y-2 font-mono">
+                    <li>• Report specificity and detail level</li>
+                    <li>• Technical accuracy and clarity</li>
+                    <li>• Challenge identification and resolution</li>
+                    <li>• Progress tracking and planning</li>
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card className="bg-neutral-900 border-neutral-800">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-white mb-3 font-mono">Scoring Criteria</h3>
+                  <ul className="text-sm text-neutral-400 space-y-2 font-mono">
+                    <li>• Specificity and detail level</li>
+                    <li>• Evidence-backed claims</li>
+                    <li>• Realistic time estimates</li>
+                    <li>• Problem-solving approach</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>
