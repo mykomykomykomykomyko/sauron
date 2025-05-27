@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Eye, Shield, TrendingUp, Zap, ArrowRight, Github, Database, Brain } from "lucide-react";
@@ -12,7 +11,7 @@ const Index = () => {
           <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-900 rounded-lg flex items-center justify-center border border-red-800/30 shadow-lg shadow-red-900/20">
             <Eye className="w-5 h-5 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white tracking-tight font-mono">SAURON</span>
+          <span className="text-2xl font-bold text-white tracking-tight font-mono">THE EYE OF SAURON</span>
         </div>
         <div className="flex items-center space-x-4">
           <Link to="/submit">
@@ -46,12 +45,12 @@ const Index = () => {
           
           <h1 className="text-7xl md:text-9xl font-bold text-white mb-8 tracking-tight leading-none">
             <span className="bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
-              SAURON
+              THE EYE OF SAURON
             </span>
           </h1>
           
           <p className="text-2xl md:text-3xl text-neutral-400 mb-6 leading-relaxed max-w-4xl mx-auto font-light">
-            System for Assessment Using Real-time Oversight
+            Efficient Yielding Engagement Optimized For Structured Assignments, Urgent Responsibilities, Ongoing Needs
           </p>
           
           <p className="text-lg text-neutral-500 mb-16 leading-relaxed max-w-3xl mx-auto">
@@ -65,11 +64,6 @@ const Index = () => {
               <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white border-0 px-8 py-4 text-lg font-medium shadow-lg shadow-red-900/30 hover:shadow-red-900/50 transition-all duration-300 group">
                 Submit Your Report
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </Button>
-            </Link>
-            <Link to="/dashboard">
-              <Button size="lg" variant="outline" className="border-neutral-600 text-white hover:bg-neutral-800/50 hover:border-neutral-500 px-8 py-4 text-lg font-medium backdrop-blur-sm transition-all duration-300">
-                View Dashboard
               </Button>
             </Link>
           </div>
@@ -184,10 +178,10 @@ const Index = () => {
             <div className="w-6 h-6 bg-gradient-to-br from-red-600 to-red-900 rounded-md flex items-center justify-center border border-red-800/30">
               <Eye className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg font-semibold text-white font-mono">SAURON</span>
+            <span className="text-lg font-semibold text-white font-mono">THE EYE OF SAURON</span>
           </div>
           <p className="text-neutral-500 text-sm font-mono">
-            © 2024 SAURON. System for Assessment Using Real-time Oversight & Navigation.
+            © 2024 THE EYE OF SAURON. Efficient Yielding Engagement Optimized For Structured Assignments, Urgent Responsibilities, Ongoing Needs.
           </p>
         </div>
       </footer>
