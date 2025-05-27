@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -139,20 +138,18 @@ const Dashboard = () => {
           <Button
             onClick={handleExportCSV}
             variant="outline"
-            className="border-neutral-700 text-white hover:bg-neutral-900"
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
           <Link to="/submit">
-            <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+            <Button>
               Submit Report
             </Button>
           </Link>
           <Button
             onClick={handleSignOut}
             variant="outline"
-            className="border-neutral-700 text-white hover:bg-neutral-900"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
@@ -240,7 +237,7 @@ const Dashboard = () => {
                 <div className="p-12 text-center">
                   <p className="text-neutral-400 text-lg mb-4">No reports submitted yet</p>
                   <Link to="/submit">
-                    <Button className="bg-red-900 hover:bg-red-800 text-white">
+                    <Button>
                       Submit First Report
                     </Button>
                   </Link>

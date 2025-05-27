@@ -103,7 +103,7 @@ const Submit = () => {
         <div className="flex items-center space-x-4">
           {userRole === 'admin' && (
             <Link to="/dashboard">
-              <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+              <Button>
                 Dashboard
               </Button>
             </Link>
@@ -111,7 +111,6 @@ const Submit = () => {
           <Button
             onClick={handleSignOut}
             variant="outline"
-            className="border-neutral-700 text-white hover:bg-neutral-900"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
@@ -213,7 +212,7 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-red-900 hover:bg-red-800 text-white py-4 text-lg border border-red-800/30 transition-all duration-200 hover:scale-[1.02] font-mono"
+                    className="w-full py-4 text-lg transition-all duration-200 hover:scale-[1.02] font-mono"
                   >
                     {isSubmitting ? (
                       <>
@@ -241,13 +240,12 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
                     <Button
                       onClick={resetForm}
                       variant="outline"
-                      className="border-neutral-700 text-white hover:bg-neutral-900"
                     >
                       Submit Another Report
                     </Button>
                     {userRole === 'admin' && (
                       <Link to="/dashboard">
-                        <Button className="bg-red-900 hover:bg-red-800 text-white">
+                        <Button>
                           View Dashboard
                         </Button>
                       </Link>

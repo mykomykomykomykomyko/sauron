@@ -130,7 +130,7 @@ const Auth = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-red-900 hover:bg-red-800 text-white py-3 border border-red-800/30 font-mono"
+                  className="w-full py-3 font-mono"
                 >
                   {loading ? (
                     <>

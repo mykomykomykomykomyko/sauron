@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileText, BarChart3, Shield, Users, Bell, LogOut } from "lucide-react";
+import { Eye, FileText, Shield, Users, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -29,25 +29,28 @@ const Index = () => {
           {user ? (
             <>
               <Link to="/submit">
-                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+                <Button>
                   Submit Report
                 </Button>
               </Link>
               <Link to="/dashboard">
-                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+                <Button>
                   Dashboard
                 </Button>
               </Link>
+              <Button onClick={handleSignOut} variant="outline">
+                Sign Out
+              </Button>
             </>
           ) : (
             <>
               <Link to="/auth">
-                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+                <Button>
                   Sign In
                 </Button>
               </Link>
               <Link to="/submit">
-                <Button className="bg-red-900 hover:bg-red-800 text-white border border-red-800/30">
+                <Button>
                   Submit Report
                 </Button>
               </Link>
@@ -68,13 +71,13 @@ const Index = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
             <Link to="/submit">
-              <Button size="lg" className="bg-red-900 hover:bg-red-800 text-white px-8 py-4 text-lg border border-red-800/30 transition-all duration-200 hover:scale-[1.02] font-mono">
+              <Button size="lg" className="px-8 py-4 text-lg transition-all duration-200 hover:scale-[1.02] font-mono">
                 <FileText className="w-5 h-5 mr-2" />
                 Submit Report
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="lg" className="bg-red-900 hover:bg-red-800 text-white px-8 py-4 text-lg border border-red-800/30 transition-all duration-200 hover:scale-[1.02] font-mono">
+              <Button size="lg" className="px-8 py-4 text-lg transition-all duration-200 hover:scale-[1.02] font-mono">
                 <Shield className="w-5 h-5 mr-2" />
                 Access Dashboard
               </Button>
