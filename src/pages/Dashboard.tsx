@@ -1,12 +1,11 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Eye, ArrowLeft, TrendingUp, Download, CheckCircle, Clock, Users, LogOut, Edit } from "lucide-react";
+import { Eye, ArrowLeft, TrendingUp, Download, CheckCircle, Clock, Users, LogOut, WandSparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { getReportsWithAnalysis, exportReportsAsCSV } from "@/services/supabaseService";
+import { getReportsWithAnalysis, exportReportsAsCSV, updateAnalysisStatus, triggerAIAnalysis } from "@/services/supabaseService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -30,6 +29,7 @@ interface ReportWithAnalysis {
 const Dashboard = () => {
   const [reports, setReports] = useState<ReportWithAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analyzingReports, setAnalyzingReports] = useState<Set<string>>(new Set());
   const [selectedReport, setSelectedReport] = useState<ReportWithAnalysis | null>(null);
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
@@ -86,6 +86,8 @@ const Dashboard = () => {
 
   const handleStatusChange = async (reportId: string, newStatus: string) => {
     try {
+      await updateAnalysisStatus(reportId, newStatus as 'validated' | 'review' | 'flagged' | 'pending');
+      
       // Update the local state immediately for better UX
       setReports(prev => prev.map(report => {
         if (report.id === reportId) {
@@ -104,6 +106,34 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error("Failed to update status");
+    }
+  };
+
+  const handleAIAnalysis = async (reportId: string) => {
+    if (!reportId) {
+      toast.error("Invalid report ID");
+      return;
+    }
+
+    setAnalyzingReports(prev => new Set([...prev, reportId]));
+    
+    try {
+      await triggerAIAnalysis(reportId);
+      
+      // Refresh the reports data to get the updated analysis
+      const updatedData = await getReportsWithAnalysis();
+      setReports(updatedData || []);
+      
+      toast.success("AI analysis completed successfully!");
+    } catch (error) {
+      console.error('Error analyzing report:', error);
+      toast.error("Failed to analyze report with AI");
+    } finally {
+      setAnalyzingReports(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(reportId);
+        return newSet;
+      });
     }
   };
 
@@ -275,6 +305,7 @@ const Dashboard = () => {
                   {reports.map((report, index) => {
                     const analysis = report.analysis_results[0];
                     const status = analysis?.status || 'pending';
+                    const isAnalyzing = analyzingReports.has(report.id!);
                     return (
                       <div
                         key={report.id}
@@ -296,13 +327,25 @@ const Dashboard = () => {
                             {report.report.substring(0, 150)}...
                           </p>
                         </div>
-                        <div className="flex items-center space-x-6">
+                        <div className="flex items-center space-x-4">
                           <div className="text-right">
                             <p className="text-neutral-400 text-xs font-mono">
                               {report.created_at ? new Date(report.created_at).toLocaleDateString() : 'Unknown'}
                             </p>
                             <p className="text-xs text-neutral-500 font-mono">Submitted</p>
                           </div>
+                          
+                          {/* AI Analysis Button */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAIAnalysis(report.id!)}
+                            disabled={isAnalyzing}
+                            className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-800/30 hover:from-purple-900/30 hover:to-blue-900/30"
+                          >
+                            <WandSparkles className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
+                            {isAnalyzing ? 'Analyzing...' : 'Analyze with AI'}
+                          </Button>
                           
                           {/* Status Selector */}
                           <Select value={status} onValueChange={(value) => handleStatusChange(report.id!, value)}>

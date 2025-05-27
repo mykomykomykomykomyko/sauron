@@ -128,3 +128,13 @@ export const markNotificationAsRead = async (notificationId: string) => {
     
   if (error) throw error;
 };
+
+// Trigger AI analysis for a report
+export const triggerAIAnalysis = async (reportId: string) => {
+  const { data, error } = await supabase.functions.invoke('analyze-report', {
+    body: { reportId }
+  });
+  
+  if (error) throw error;
+  return data;
+};
