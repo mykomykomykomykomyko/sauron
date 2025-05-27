@@ -8,7 +8,7 @@ import { getReportsWithAnalysis } from "@/services/supabaseService";
 import { toast } from "sonner";
 
 interface ReportWithAnalysis {
-  id: string;
+  id?: string;
   name: string;
   project: string;
   week: string;
