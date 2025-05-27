@@ -148,6 +148,42 @@ const Index = () => {
         </div>
       </nav>
 
+      {/* Floating Sign Out Button (only show if user is logged in) */}
+      {user && (
+        <div className="fixed top-6 right-6 z-50">
+          <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 hover:scale-105 transition-all duration-300 backdrop-blur-sm bg-black/80">
+                Sign Out
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-gray-900 border-red-700/50">
+              <DialogHeader>
+                <DialogTitle className="text-red-400">Sign Out</DialogTitle>
+                <DialogDescription className="text-gray-300">
+                  Are you sure you want to sign out of The Eye of Sauron?
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-3 mt-4">
+                <Button 
+                  onClick={handleSignOut}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Yes, Sign Out
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowSignOutDialog(false)}
+                  className="border-red-600/50 text-red-400 hover:bg-red-900/30"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
+
       {/* Hero Section */}
       <div className="px-6 md:px-8 py-24 relative z-10">
         <div className="max-w-6xl mx-auto text-center">
