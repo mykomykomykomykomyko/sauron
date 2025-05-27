@@ -44,98 +44,98 @@ const Submit = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 md:p-8">
-        <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-          <ArrowLeft className="w-5 h-5 text-slate-400" />
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+      <nav className="flex items-center justify-between p-6 md:p-8 border-b border-neutral-800">
+        <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <ArrowLeft className="w-5 h-5 text-neutral-400" />
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-red-900 to-red-800 rounded-lg flex items-center justify-center border border-red-800/30">
               <Eye className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white tracking-tight">SAURON</span>
+            <span className="text-2xl font-bold text-white tracking-tight font-mono">SAURON</span>
           </div>
         </Link>
         <Link to="/dashboard">
-          <Button variant="outline" className="border-slate-400 text-white hover:bg-slate-800">
+          <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
             Dashboard
           </Button>
         </Link>
       </nav>
 
       {/* Main Content */}
-      <div className="px-6 md:px-8 py-12">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+      <div className="px-6 md:px-8 py-16">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight font-mono">
               Submit Progress Report
             </h1>
-            <p className="text-xl text-slate-300">
+            <p className="text-xl text-neutral-400 leading-relaxed">
               SAURON will analyze your submission against real-world data sources
             </p>
           </div>
 
-          <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-2xl text-white">Weekly Progress Report</CardTitle>
+          <Card className="bg-neutral-900 border-neutral-800">
+            <CardHeader className="border-b border-neutral-800">
+              <CardTitle className="text-2xl text-white font-mono">Weekly Progress Report</CardTitle>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-slate-300">Full Name</Label>
+            <CardContent className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="name" className="text-neutral-300 font-mono">Full Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange("name", e.target.value)}
                       placeholder="Your full name"
-                      className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-slate-300">Email</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="email" className="text-neutral-300 font-mono">Email</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       placeholder="your.email@company.com"
-                      className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="project" className="text-slate-300">Project Name</Label>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="project" className="text-neutral-300 font-mono">Project Name</Label>
                     <Input
                       id="project"
                       value={formData.project}
                       onChange={(e) => handleInputChange("project", e.target.value)}
                       placeholder="Project Alpha"
-                      className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500"
+                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500 transition-colors"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="week" className="text-slate-300">Week Ending</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="week" className="text-neutral-300 font-mono">Week Ending</Label>
                     <Input
                       id="week"
                       type="date"
                       value={formData.week}
                       onChange={(e) => handleInputChange("week", e.target.value)}
-                      className="bg-slate-900/50 border-slate-600 text-white"
+                      className="bg-black border-neutral-700 text-white focus:border-red-500 transition-colors"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="report" className="text-slate-300">
+                <div className="space-y-3">
+                  <Label htmlFor="report" className="text-neutral-300 font-mono">
                     Progress Report
-                    <span className="text-sm text-slate-500 ml-2">
+                    <span className="text-sm text-neutral-500 ml-2 font-sans">
                       (Be specific about tasks completed, challenges faced, and next steps)
                     </span>
                   </Label>
@@ -148,7 +148,7 @@ const Submit = () => {
 Challenges: Encountered rate limiting issues with the GitHub API which I resolved by implementing exponential backoff.
 
 Next week: I plan to work on the dashboard analytics feature and integrate with the reporting system..."
-                    className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 min-h-[200px] resize-none"
+                    className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 min-h-[200px] resize-none focus:border-red-500 transition-colors font-mono text-sm"
                     required
                   />
                 </div>
@@ -156,7 +156,7 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white py-3 text-lg"
+                  className="w-full bg-red-900 hover:bg-red-800 text-white py-4 text-lg border border-red-800/30 transition-all duration-200 hover:scale-[1.02] font-mono"
                 >
                   {isSubmitting ? (
                     <>
@@ -175,11 +175,11 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
           </Card>
 
           {/* Info Cards */}
-          <div className="mt-8 grid md:grid-cols-2 gap-4">
-            <Card className="bg-slate-800/30 backdrop-blur-sm border-slate-700">
+          <div className="mt-12 grid md:grid-cols-2 gap-6">
+            <Card className="bg-neutral-900 border-neutral-800">
               <CardContent className="p-6">
-                <h3 className="font-semibold text-white mb-2">What SAURON Checks</h3>
-                <ul className="text-sm text-slate-400 space-y-1">
+                <h3 className="font-semibold text-white mb-3 font-mono">What SAURON Checks</h3>
+                <ul className="text-sm text-neutral-400 space-y-2 font-mono">
                   <li>• GitHub commits and PR activity</li>
                   <li>• Specific vs. vague language</li>
                   <li>• Timeline consistency</li>
@@ -187,10 +187,10 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
                 </ul>
               </CardContent>
             </Card>
-            <Card className="bg-slate-800/30 backdrop-blur-sm border-slate-700">
+            <Card className="bg-neutral-900 border-neutral-800">
               <CardContent className="p-6">
-                <h3 className="font-semibold text-white mb-2">Scoring Criteria</h3>
-                <ul className="text-sm text-slate-400 space-y-1">
+                <h3 className="font-semibold text-white mb-3 font-mono">Scoring Criteria</h3>
+                <ul className="text-sm text-neutral-400 space-y-2 font-mono">
                   <li>• Specificity and detail level</li>
                   <li>• Evidence-backed claims</li>
                   <li>• Realistic time estimates</li>
