@@ -24,7 +24,7 @@ export interface AnalysisResult {
 
 export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>) => {
   const { data, error } = await supabase
-    .from('reports')
+    .from('reports' as any)
     .insert([reportData])
     .select()
     .single();
@@ -35,7 +35,7 @@ export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>
 
 export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id' | 'created_at'>) => {
   const { data, error } = await supabase
-    .from('analysis_results')
+    .from('analysis_results' as any)
     .insert([analysisData])
     .select()
     .single();
@@ -46,7 +46,7 @@ export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id'
 
 export const getReportsWithAnalysis = async () => {
   const { data, error } = await supabase
-    .from('reports')
+    .from('reports' as any)
     .select(`
       *,
       analysis_results (*)
@@ -59,7 +59,7 @@ export const getReportsWithAnalysis = async () => {
 
 export const getRecentReports = async (limit = 10) => {
   const { data, error } = await supabase
-    .from('reports')
+    .from('reports' as any)
     .select(`
       *,
       analysis_results (*)
