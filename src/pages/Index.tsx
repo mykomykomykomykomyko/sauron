@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, FileText, BarChart3, Shield, Users, Bell, LogOut } from "lucide-react";
@@ -38,14 +37,6 @@ const Index = () => {
                   Dashboard
                 </Button>
               </Link>
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                className="border-neutral-700 text-white hover:bg-neutral-900"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
             </>
           ) : (
             <>
