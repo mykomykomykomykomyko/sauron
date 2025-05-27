@@ -15,7 +15,7 @@ export interface AnalysisResult {
   id?: string;
   report_id: string;
   score: number;
-  status: 'validated' | 'review' | 'flagged';
+  status: 'validated' | 'review' | 'flagged' | 'pending';
   flags: number;
   summary: string;
   detailed_feedback: any;
@@ -23,7 +23,7 @@ export interface AnalysisResult {
 }
 
 export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('reports')
     .insert([reportData])
     .select()
@@ -34,7 +34,7 @@ export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>
 };
 
 export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id' | 'created_at'>) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('analysis_results')
     .insert([analysisData])
     .select()
@@ -45,7 +45,7 @@ export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id'
 };
 
 export const getReportsWithAnalysis = async () => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('reports')
     .select(`
       *,
@@ -58,7 +58,7 @@ export const getReportsWithAnalysis = async () => {
 };
 
 export const getRecentReports = async (limit = 10) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('reports')
     .select(`
       *,
@@ -69,4 +69,28 @@ export const getRecentReports = async (limit = 10) => {
     
   if (error) throw error;
   return data as (Report & { analysis_results: AnalysisResult[] })[];
+};
+
+// Export reports as CSV format
+export const exportReportsAsCSV = async () => {
+  const reports = await getReportsWithAnalysis();
+  
+  const csvHeaders = ['ID', 'Name', 'Email', 'Project', 'Week', 'Report', 'Created At', 'Status', 'Score'];
+  const csvRows = reports.map(report => [
+    report.id || '',
+    report.name,
+    report.email,
+    report.project,
+    report.week,
+    `"${report.report.replace(/"/g, '""')}"`, // Escape quotes in report content
+    report.created_at || '',
+    report.analysis_results[0]?.status || 'pending',
+    report.analysis_results[0]?.score || 0
+  ]);
+  
+  const csvContent = [csvHeaders, ...csvRows]
+    .map(row => row.join(','))
+    .join('\n');
+    
+  return csvContent;
 };

@@ -5,15 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, ArrowLeft, Send, Loader2 } from "lucide-react";
+import { Eye, ArrowLeft, Send, Loader2, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { analyzeReport } from "@/services/aiAnalysis";
-import AnalysisResult from "@/components/AnalysisResult";
+import { submitReport } from "@/services/supabaseService";
 
 const Submit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,19 +24,18 @@ const Submit = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setAnalysisResult(null);
     
     try {
       console.log('Submitting report:', formData);
       
-      // Analyze the report (this also saves it to the database)
-      const result = await analyzeReport(formData);
-      setAnalysisResult(result);
+      // Simply save the report to the database
+      await submitReport(formData);
       
-      toast.success("Report analyzed and saved successfully!");
+      setIsSubmitted(true);
+      toast.success("Report submitted successfully!");
     } catch (error) {
-      console.error('Analysis error:', error);
-      toast.error("Analysis failed. Please try again.");
+      console.error('Submission error:', error);
+      toast.error("Failed to submit report. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -55,7 +53,7 @@ const Submit = () => {
       week: "",
       report: ""
     });
-    setAnalysisResult(null);
+    setIsSubmitted(false);
   };
 
   return (
@@ -86,11 +84,11 @@ const Submit = () => {
               Submit Progress Report
             </h1>
             <p className="text-xl text-neutral-400 leading-relaxed">
-              SAURON will analyze your submission and provide detailed feedback
+              Submit your weekly progress report for review
             </p>
           </div>
 
-          {!analysisResult ? (
+          {!isSubmitted ? (
             <Card className="bg-neutral-900 border-neutral-800">
               <CardHeader className="border-b border-neutral-800">
                 <CardTitle className="text-2xl text-white font-mono">Weekly Progress Report</CardTitle>
@@ -177,12 +175,12 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
                     {isSubmitting ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        AI Analysis in Progress...
+                        Submitting Report...
                       </>
                     ) : (
                       <>
                         <Send className="w-5 h-5 mr-2" />
-                        Submit for AI Analysis
+                        Submit Report
                       </>
                     )}
                   </Button>
@@ -190,47 +188,53 @@ Next week: I plan to work on the dashboard analytics feature and integrate with 
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-8">
-              <AnalysisResult {...analysisResult} />
-              <div className="flex justify-center space-x-4">
-                <Button
-                  onClick={resetForm}
-                  variant="outline"
-                  className="border-neutral-700 text-white hover:bg-neutral-900"
-                >
-                  Submit Another Report
-                </Button>
-                <Link to="/dashboard">
-                  <Button className="bg-red-900 hover:bg-red-800 text-white">
-                    View Dashboard
-                  </Button>
-                </Link>
-              </div>
+            <div className="text-center space-y-8">
+              <Card className="bg-green-900/20 border-green-800/30">
+                <CardContent className="p-8">
+                  <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-white mb-2 font-mono">Report Submitted Successfully!</h2>
+                  <p className="text-green-300 mb-6">Your progress report has been saved and will be reviewed by the admin team.</p>
+                  <div className="flex justify-center space-x-4">
+                    <Button
+                      onClick={resetForm}
+                      variant="outline"
+                      className="border-neutral-700 text-white hover:bg-neutral-900"
+                    >
+                      Submit Another Report
+                    </Button>
+                    <Link to="/dashboard">
+                      <Button className="bg-red-900 hover:bg-red-800 text-white">
+                        View Dashboard
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
           {/* Info Cards - only show when form is visible */}
-          {!analysisResult && (
+          {!isSubmitted && (
             <div className="mt-12 grid md:grid-cols-2 gap-6">
               <Card className="bg-neutral-900 border-neutral-800">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-white mb-3 font-mono">What SAURON Analyzes</h3>
+                  <h3 className="font-semibold text-white mb-3 font-mono">Report Guidelines</h3>
                   <ul className="text-sm text-neutral-400 space-y-2 font-mono">
-                    <li>• Report specificity and detail level</li>
-                    <li>• Technical accuracy and clarity</li>
-                    <li>• Challenge identification and resolution</li>
-                    <li>• Progress tracking and planning</li>
+                    <li>• Include specific tasks completed</li>
+                    <li>• Mention any challenges encountered</li>
+                    <li>• Outline your next steps</li>
+                    <li>• Be detailed and professional</li>
                   </ul>
                 </CardContent>
               </Card>
               <Card className="bg-neutral-900 border-neutral-800">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-white mb-3 font-mono">Scoring Criteria</h3>
+                  <h3 className="font-semibold text-white mb-3 font-mono">Submission Process</h3>
                   <ul className="text-sm text-neutral-400 space-y-2 font-mono">
-                    <li>• Specificity and detail level</li>
-                    <li>• Evidence-backed claims</li>
-                    <li>• Realistic time estimates</li>
-                    <li>• Problem-solving approach</li>
+                    <li>• Report will be saved immediately</li>
+                    <li>• Admin team will review submissions</li>
+                    <li>• Check dashboard for all reports</li>
+                    <li>• Export data available in CSV format</li>
                   </ul>
                 </CardContent>
               </Card>

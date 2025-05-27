@@ -9,7 +9,77 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_results: {
+        Row: {
+          created_at: string
+          detailed_feedback: Json | null
+          flags: number | null
+          id: string
+          report_id: string
+          score: number | null
+          status: string | null
+          summary: string | null
+        }
+        Insert: {
+          created_at?: string
+          detailed_feedback?: Json | null
+          flags?: number | null
+          id?: string
+          report_id: string
+          score?: number | null
+          status?: string | null
+          summary?: string | null
+        }
+        Update: {
+          created_at?: string
+          detailed_feedback?: Json | null
+          flags?: number | null
+          id?: string
+          report_id?: string
+          score?: number | null
+          status?: string | null
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_results_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          project: string
+          report: string
+          week: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          project: string
+          report: string
+          week: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          project?: string
+          report?: string
+          week?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
