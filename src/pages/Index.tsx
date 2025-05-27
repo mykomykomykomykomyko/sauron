@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target, TrendingUp, Globe, Clock, CheckCircle } from "lucide-react";
@@ -44,9 +43,13 @@ const Index = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut();
-    setShowSignOutDialog(false);
-    navigate('/');
+    try {
+      await signOut();
+      setShowSignOutDialog(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const particles = Array.from({ length: 20 }, (_, i) => ({
@@ -103,7 +106,10 @@ const Index = () => {
         <div className="fixed top-6 right-6 z-50">
           <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 hover:scale-105 transition-all duration-300 backdrop-blur-sm bg-black/80">
+              <Button 
+                variant="outline" 
+                className="border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 hover:scale-105 transition-all duration-300 backdrop-blur-sm bg-black/80 shadow-lg"
+              >
                 Sign Out
               </Button>
             </DialogTrigger>
