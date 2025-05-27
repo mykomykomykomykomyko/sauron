@@ -1,57 +1,126 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileText, Shield, Users, Bell } from "lucide-react";
+import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [scrollY, setScrollY] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1,
+    delay: Math.random() * 5,
+  }));
+
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-black via-red-950/10 to-black text-white overflow-hidden relative">
+      {/* Dynamic cursor glow */}
+      <div 
+        className="fixed w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none z-0 transition-all duration-300"
+        style={{
+          left: mousePosition.x - 192,
+          top: mousePosition.y - 192,
+        }}
+      />
+
+      {/* Floating particles */}
+      {particles.map((particle) => (
+        <div
+          key={particle.id}
+          className="absolute w-1 h-1 bg-red-500/30 rounded-full animate-pulse pointer-events-none"
+          style={{
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            animationDelay: `${particle.delay}s`,
+            transform: `translateY(${scrollY * 0.1}px)`,
+          }}
+        />
+      ))}
+
       {/* Header */}
-      <nav className="flex items-center justify-between p-6 md:p-8 border-b border-neutral-800 animate-fade-in">
+      <nav className={`flex items-center justify-between p-6 md:p-8 border-b border-red-800/20 backdrop-blur-sm bg-black/30 relative z-10 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="flex items-center space-x-3 group">
-          <div className="w-8 h-8 bg-gradient-to-br from-red-900 to-red-800 rounded-lg flex items-center justify-center border border-red-800/30 group-hover:scale-110 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-red-500/20">
-            <Eye className="w-5 h-5 text-white group-hover:animate-pulse" />
+          <div className="w-10 h-10 bg-gradient-to-br from-red-900 to-red-700 rounded-xl flex items-center justify-center border border-red-600/50 group-hover:scale-110 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-red-500/30 group-hover:rotate-12">
+            <Eye className="w-6 h-6 text-white group-hover:animate-pulse" />
           </div>
-          <span className="text-2xl font-bold text-white tracking-tight font-mono group-hover:text-red-400 transition-colors duration-300">SAURON</span>
+          <span className="text-2xl font-bold text-white tracking-tight font-mono group-hover:text-red-400 transition-all duration-300 group-hover:scale-105">SAURON</span>
+          <div className="hidden md:flex items-center space-x-1 ml-4">
+            <Sparkles className="w-4 h-4 text-red-400 animate-pulse" />
+            <span className="text-xs text-red-400 font-mono">AI-POWERED</span>
+          </div>
         </div>
-        <div className="flex space-x-4">
+        <div className="flex space-x-3">
           {user ? (
             <>
               <Link to="/submit">
-                <Button className="hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/20">
-                  Submit Report
+                <Button className="hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
+                  <FileText className="w-4 h-4 mr-2 relative z-10" />
+                  <span className="relative z-10">Submit Report</span>
                 </Button>
               </Link>
               <Link to="/dashboard">
-                <Button className="hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/20">
-                  Dashboard
+                <Button className="hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
+                  <Shield className="w-4 h-4 mr-2 relative z-10" />
+                  <span className="relative z-10">Dashboard</span>
                 </Button>
               </Link>
-              <Button onClick={handleSignOut} variant="outline" className="hover:scale-105 transition-all duration-200">
+              <Button onClick={handleSignOut} variant="outline" className="hover:scale-110 transition-all duration-300 border-red-600/50 hover:bg-red-900/30">
                 Sign Out
               </Button>
             </>
           ) : (
             <>
               <Link to="/auth">
-                <Button className="hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/20">
-                  Sign In
+                <Button className="hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
+                  <Shield className="w-4 h-4 mr-2 relative z-10" />
+                  <span className="relative z-10">Sign In</span>
                 </Button>
               </Link>
               <Link to="/submit">
-                <Button className="hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/20">
-                  Submit Report
+                <Button className="hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
+                  <FileText className="w-4 h-4 mr-2 relative z-10" />
+                  <span className="relative z-10">Submit Report</span>
                 </Button>
               </Link>
             </>
@@ -59,107 +128,154 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-red-500 rounded-full animate-pulse opacity-30"></div>
-        <div className="absolute top-40 right-20 w-1 h-1 bg-red-400 rounded-full animate-ping opacity-20"></div>
-        <div className="absolute bottom-32 left-1/4 w-3 h-3 bg-red-600 rounded-full animate-pulse opacity-25"></div>
-        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-red-500 rounded-full animate-ping opacity-15"></div>
-        <div className="absolute bottom-20 right-10 w-2 h-2 bg-red-400 rounded-full animate-pulse opacity-20"></div>
-      </div>
-
       {/* Hero Section */}
-      <div className="px-6 md:px-8 py-24 relative">
+      <div className="px-6 md:px-8 py-24 relative z-10">
         <div className="max-w-6xl mx-auto text-center">
+          {/* Animated background glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-red-900/10 to-red-500/5 rounded-full blur-3xl animate-pulse scale-150"></div>
+          
           <div className="relative">
-            <h1 className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tight font-mono animate-fade-in">
-              <span className="inline-block hover:scale-110 hover:text-red-400 transition-all duration-500 cursor-default">S</span>
-              <span className="inline-block hover:scale-110 hover:text-red-400 transition-all duration-500 cursor-default" style={{animationDelay: '0.1s'}}>A</span>
-              <span className="inline-block hover:scale-110 hover:text-red-400 transition-all duration-500 cursor-default" style={{animationDelay: '0.2s'}}>U</span>
-              <span className="inline-block hover:scale-110 hover:text-red-400 transition-all duration-500 cursor-default" style={{animationDelay: '0.3s'}}>R</span>
-              <span className="inline-block hover:scale-110 hover:text-red-400 transition-all duration-500 cursor-default" style={{animationDelay: '0.4s'}}>O</span>
-              <span className="inline-block hover:scale-110 hover:text-red-400 transition-all duration-500 cursor-default" style={{animationDelay: '0.5s'}}>N</span>
+            <div className="mb-6 flex justify-center">
+              <div className="flex items-center space-x-2 bg-red-900/20 border border-red-600/30 rounded-full px-6 py-2 backdrop-blur-sm">
+                <Zap className="w-4 h-4 text-red-400 animate-pulse" />
+                <span className="text-sm font-mono text-red-300">NEXT-GEN OVERSIGHT</span>
+                <Sparkles className="w-4 h-4 text-red-400 animate-pulse" />
+              </div>
+            </div>
+
+            <h1 className={`text-6xl md:text-8xl font-bold text-white mb-8 tracking-tight font-mono transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+              {['S', 'A', 'U', 'R', 'O', 'N'].map((letter, index) => (
+                <span 
+                  key={index}
+                  className="inline-block hover:scale-125 hover:text-red-400 hover:rotate-12 transition-all duration-500 cursor-default hover:drop-shadow-2xl"
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    transform: `translateY(${Math.sin((scrollY + index * 100) * 0.01) * 10}px)`,
+                  }}
+                >
+                  {letter}
+                </span>
+              ))}
             </h1>
-            <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-gradient-to-r from-red-500/10 to-red-900/10 rounded-full blur-3xl animate-pulse"></div>
+            
+            <div className="mb-4">
+              <div className="inline-flex items-center space-x-2 text-red-400 font-mono text-sm mb-2">
+                <Target className="w-4 h-4 animate-spin" />
+                <span>Efficient Yielding Engagement Optimized For Structured Assignments</span>
+              </div>
+            </div>
           </div>
           
-          <p className="text-xl md:text-2xl text-neutral-400 mb-12 leading-relaxed max-w-3xl mx-auto animate-fade-in" style={{animationDelay: '0.3s'}}>
-            The all-seeing progress report management system. Submit, track, and analyze team progress with intelligent oversight.
+          <p className={`text-xl md:text-2xl text-neutral-300 mb-12 leading-relaxed max-w-4xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+            The all-seeing <span className="text-red-400 font-semibold">AI-powered</span> progress report management system. Submit, track, and analyze team progress with intelligent oversight and real-time insights.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20 animate-fade-in" style={{animationDelay: '0.6s'}}>
+          <div className={`flex flex-col sm:flex-row gap-6 justify-center mb-20 transition-all duration-1000 delay-600 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
             <Link to="/submit">
-              <Button size="lg" className="px-8 py-4 text-lg transition-all duration-300 hover:scale-105 font-mono group relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
-                <FileText className="w-5 h-5 mr-2 relative z-10" />
+              <Button size="lg" className="px-8 py-4 text-lg transition-all duration-300 hover:scale-110 font-mono group relative overflow-hidden border border-red-600/50 hover:border-red-400">
+                <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-red-800 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"></div>
+                <FileText className="w-5 h-5 mr-2 relative z-10 group-hover:animate-pulse" />
                 <span className="relative z-10">Submit Report</span>
+                <Sparkles className="w-4 h-4 ml-2 relative z-10 group-hover:animate-spin" />
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="lg" className="px-8 py-4 text-lg transition-all duration-300 hover:scale-105 font-mono group relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
-                <Shield className="w-5 h-5 mr-2 relative z-10" />
-                <span className="relative z-10">Access Dashboard</span>
+              <Button size="lg" variant="outline" className="px-8 py-4 text-lg transition-all duration-300 hover:scale-110 font-mono group relative overflow-hidden border-red-600/50 hover:bg-red-900/30">
+                <Shield className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                <span>Access Dashboard</span>
+                <Eye className="w-4 h-4 ml-2 group-hover:animate-pulse" />
               </Button>
             </Link>
           </div>
 
-          {/* Feature Cards */}
+          {/* Enhanced Feature Cards */}
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="bg-neutral-900 border-neutral-800 hover:bg-neutral-800/50 transition-all duration-500 hover:scale-105 hover:shadow-xl hover:shadow-red-500/10 group animate-fade-in" style={{animationDelay: '0.9s'}}>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-3 text-white font-mono">
-                  <FileText className="w-6 h-6 text-red-500 group-hover:animate-pulse transition-all duration-300" />
-                  <span className="group-hover:text-red-400 transition-colors duration-300">Easy Reporting</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300">
-                  Submit detailed progress reports with a clean, intuitive interface. Track your weekly accomplishments and challenges.
-                </p>
-              </CardContent>
-            </Card>
+            {[
+              {
+                icon: FileText,
+                title: "Smart Reporting",
+                description: "Submit detailed progress reports with AI-powered validation and automatic insights generation.",
+                delay: 0.9,
+                gradient: "from-red-600/20 to-red-800/20"
+              },
+              {
+                icon: Users,
+                title: "Role-Based Access",
+                description: "Contractors submit and view their own reports, while admins have full oversight with advanced analytics.",
+                delay: 1.2,
+                gradient: "from-red-700/20 to-red-900/20"
+              },
+              {
+                icon: Bell,
+                title: "AI Notifications",
+                description: "Receive intelligent notifications about report patterns, deadlines, and automated quality assessments.",
+                delay: 1.5,
+                gradient: "from-red-500/20 to-red-700/20"
+              }
+            ].map((feature, index) => (
+              <Card 
+                key={index}
+                className={`bg-gradient-to-br ${feature.gradient} border-red-800/30 hover:bg-red-800/20 transition-all duration-700 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20 group backdrop-blur-sm hover:border-red-600/50 cursor-pointer transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+                style={{ animationDelay: `${feature.delay}s` }}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-3 text-white font-mono">
+                    <div className="p-2 bg-red-900/50 rounded-lg border border-red-600/30 group-hover:scale-110 transition-all duration-300">
+                      <feature.icon className="w-6 h-6 text-red-400 group-hover:animate-pulse transition-all duration-300" />
+                    </div>
+                    <span className="group-hover:text-red-300 transition-colors duration-300">{feature.title}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-neutral-300 group-hover:text-neutral-200 transition-colors duration-300 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-            <Card className="bg-neutral-900 border-neutral-800 hover:bg-neutral-800/50 transition-all duration-500 hover:scale-105 hover:shadow-xl hover:shadow-red-500/10 group animate-fade-in" style={{animationDelay: '1.2s'}}>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-3 text-white font-mono">
-                  <Users className="w-6 h-6 text-red-500 group-hover:animate-pulse transition-all duration-300" />
-                  <span className="group-hover:text-red-400 transition-colors duration-300">Role-Based Access</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300">
-                  Contractors submit and view their own reports, while admins have full oversight and management capabilities.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-neutral-900 border-neutral-800 hover:bg-neutral-800/50 transition-all duration-500 hover:scale-105 hover:shadow-xl hover:shadow-red-500/10 group animate-fade-in" style={{animationDelay: '1.5s'}}>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-3 text-white font-mono">
-                  <Bell className="w-6 h-6 text-red-500 group-hover:animate-pulse transition-all duration-300" />
-                  <span className="group-hover:text-red-400 transition-colors duration-300">Smart Notifications</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300">
-                  Receive timely notifications about report deadlines and requirements. Stay on top of your reporting schedule.
-                </p>
-              </CardContent>
-            </Card>
+          {/* Stats Section */}
+          <div className={`mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 transition-all duration-1000 delay-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+            {[
+              { label: "Reports Analyzed", value: "10K+" },
+              { label: "AI Accuracy", value: "99.7%" },
+              { label: "Time Saved", value: "80%" },
+              { label: "Active Users", value: "500+" }
+            ].map((stat, index) => (
+              <div key={index} className="text-center group cursor-pointer">
+                <div className="text-3xl md:text-4xl font-bold text-red-400 font-mono group-hover:scale-110 transition-transform duration-300">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-neutral-400 mt-2 group-hover:text-neutral-300 transition-colors duration-300">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Floating Animation Elements */}
+      {/* Enhanced Floating Elements */}
       <div className="fixed bottom-10 right-10 pointer-events-none">
-        <div className="w-4 h-4 bg-red-500/20 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
+        <div className="relative">
+          <div className="w-6 h-6 bg-red-500/30 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
+          <div className="absolute -top-2 -right-2 w-3 h-3 bg-red-400/40 rounded-full animate-ping"></div>
+        </div>
       </div>
       <div className="fixed bottom-20 right-20 pointer-events-none">
-        <div className="w-2 h-2 bg-red-400/30 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
+        <div className="w-4 h-4 bg-red-400/25 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
       </div>
       <div className="fixed bottom-16 right-32 pointer-events-none">
-        <div className="w-3 h-3 bg-red-600/15 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
+        <div className="w-5 h-5 bg-red-600/20 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-none">
+        <div className="flex flex-col items-center space-y-2 text-red-400/60">
+          <span className="text-xs font-mono animate-pulse">SCROLL FOR MORE</span>
+          <div className="w-0.5 h-8 bg-gradient-to-b from-red-400/60 to-transparent animate-pulse"></div>
+        </div>
       </div>
     </div>
   );
