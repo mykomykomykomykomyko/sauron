@@ -94,10 +94,7 @@ const QuickReportForm = () => {
         
         {/* Animated border glow */}
         {isFocused && (
-          <div className="absolute inset-0 border-2 border-red-400/50 animate-pulse rounded-lg pointer-events-none" 
-               style={{
-                 animation: 'border-glow 2s ease-in-out infinite alternate'
-               }} />
+          <div className="absolute inset-0 border-2 border-red-400/50 animate-pulse rounded-lg pointer-events-none border-glow" />
         )}
 
         <div className="p-8 relative z-10">
@@ -177,7 +174,11 @@ const QuickReportForm = () => {
         </div>
       </Card>
 
-      <style jsx>{`
+      <style>{`
+        .border-glow {
+          animation: border-glow 2s ease-in-out infinite alternate;
+        }
+        
         @keyframes border-glow {
           0% {
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
