@@ -18,79 +18,43 @@ interface ReportDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Clean markdown renderer that properly handles all formatting
-const renderMarkdownText = (text: string) => {
-  if (!text) return null;
+// Simple markdown-to-JSX renderer for analysis content
+const renderAnalysisContent = (content: string) => {
+  if (!content) return null;
 
-  // Clean up problematic formatting first
-  let cleanText = text
-    .replace(/\*{3,}/g, '') // Remove excessive asterisks
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Convert **bold** to HTML
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>') // Convert *italic* to HTML
-    .trim();
-
-  const lines = cleanText.split('\n');
+  const lines = content.split('\n');
   const elements: JSX.Element[] = [];
   let currentTableRows: string[][] = [];
   let tableHeaders: string[] = [];
   let inTable = false;
   let tableKey = 0;
 
-  const processHtmlText = (text: string) => {
-    // Process HTML tags and return JSX elements
-    const parts = [];
-    const htmlRegex = /<(strong|em)>([^<]+)<\/(strong|em)>/g;
-    let lastIndex = 0;
-    let match;
-
-    while ((match = htmlRegex.exec(text)) !== null) {
-      // Add text before the match
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
-      }
-      // Add the formatted text
-      if (match[1] === 'strong') {
-        parts.push(<strong key={`strong-${match.index}`} className="text-white font-semibold">{match[2]}</strong>);
-      } else if (match[1] === 'em') {
-        parts.push(<em key={`em-${match.index}`} className="text-blue-300 italic">{match[2]}</em>);
-      }
-      lastIndex = htmlRegex.lastIndex;
-    }
-    
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
-    }
-
-    return parts.length > 0 ? parts : text;
-  };
-
   const finishTable = () => {
     if (currentTableRows.length > 0 && tableHeaders.length > 0) {
       elements.push(
         <div key={`table-${tableKey++}`} className="my-4 overflow-x-auto">
-          <Table className="w-full border-collapse">
-            <TableHeader>
-              <TableRow className="border-b border-gray-600">
+          <table className="w-full border border-gray-600 text-sm">
+            <thead>
+              <tr className="bg-gray-800 border-b border-gray-600">
                 {tableHeaders.map((header, index) => (
-                  <TableHead key={index} className="border border-gray-600 px-3 py-2 text-left text-gray-200 font-medium bg-gray-800">
-                    {processHtmlText(header)}
-                  </TableHead>
+                  <th key={index} className="border-r border-gray-600 px-3 py-2 text-left text-gray-200 font-medium">
+                    {header.replace(/\*\*/g, '')}
+                  </th>
                 ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+              </tr>
+            </thead>
+            <tbody>
               {currentTableRows.map((row, rowIndex) => (
-                <TableRow key={rowIndex} className="border-b border-gray-600">
+                <tr key={rowIndex} className="border-b border-gray-700">
                   {row.map((cell, cellIndex) => (
-                    <TableCell key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
-                      {processHtmlText(cell)}
-                    </TableCell>
+                    <td key={cellIndex} className="border-r border-gray-600 px-3 py-2 text-gray-300">
+                      {cell.replace(/\*\*/g, '')}
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
       );
     }
@@ -103,14 +67,13 @@ const renderMarkdownText = (text: string) => {
     const trimmedLine = line.trim();
     const key = `line-${index}`;
     
-    // Skip empty lines
     if (!trimmedLine) {
       if (inTable) finishTable();
       elements.push(<div key={key} className="h-2"></div>);
       return;
     }
 
-    // Table detection - look for pipes and common table headers
+    // Table detection
     if (trimmedLine.includes('|') && (trimmedLine.includes('Metric') || trimmedLine.includes('Score') || trimmedLine.includes('Category'))) {
       if (inTable) finishTable();
       inTable = true;
@@ -118,7 +81,7 @@ const renderMarkdownText = (text: string) => {
       return;
     }
     
-    // Table separator line (ignore)
+    // Table separator line
     if (trimmedLine.includes('|') && trimmedLine.includes('---')) {
       return;
     }
@@ -132,28 +95,40 @@ const renderMarkdownText = (text: string) => {
       return;
     }
 
-    // If we reach here and were in a table, finish it
+    // Finish table if we're no longer in one
     if (inTable) {
       finishTable();
     }
 
+    // Process text formatting
+    const processText = (text: string) => {
+      // Remove problematic markdown and clean up
+      let cleanText = text
+        .replace(/\*{3,}/g, '') // Remove excessive asterisks
+        .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold formatting
+        .replace(/\*([^*]+)\*/g, '$1') // Remove italic formatting
+        .trim();
+
+      return cleanText;
+    };
+
     // Headers
     if (trimmedLine.startsWith('# ')) {
       elements.push(
-        <h1 key={key} className="text-xl font-bold text-white mt-6 mb-4 border-b border-gray-700 pb-2">
-          {processHtmlText(trimmedLine.substring(2))}
+        <h1 key={key} className="text-xl font-bold text-blue-400 mt-6 mb-4 border-b border-gray-700 pb-2">
+          {processText(trimmedLine.substring(2))}
         </h1>
       );
     } else if (trimmedLine.startsWith('## ')) {
       elements.push(
         <h2 key={key} className="text-lg font-semibold text-blue-300 mt-5 mb-3">
-          {processHtmlText(trimmedLine.substring(3))}
+          {processText(trimmedLine.substring(3))}
         </h2>
       );
     } else if (trimmedLine.startsWith('### ')) {
       elements.push(
         <h3 key={key} className="text-base font-semibold text-purple-300 mt-4 mb-2">
-          {processHtmlText(trimmedLine.substring(4))}
+          {processText(trimmedLine.substring(4))}
         </h3>
       );
     }
@@ -163,7 +138,7 @@ const renderMarkdownText = (text: string) => {
         <div key={key} className="flex items-start space-x-2 mb-2 ml-4">
           <span className="text-blue-400 mt-1 text-xs">•</span>
           <span className="text-gray-300 text-sm flex-1">
-            {processHtmlText(trimmedLine.substring(2))}
+            {processText(trimmedLine.substring(2))}
           </span>
         </div>
       );
@@ -176,7 +151,7 @@ const renderMarkdownText = (text: string) => {
     else if (trimmedLine) {
       elements.push(
         <p key={key} className="text-gray-300 text-sm mb-3 leading-relaxed">
-          {processHtmlText(trimmedLine)}
+          {processText(trimmedLine)}
         </p>
       );
     }
@@ -197,7 +172,6 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
   const analysisMutation = useMutation({
     mutationFn: triggerAIAnalysis,
     onSuccess: () => {
-      // Invalidate and refetch both reports and the specific report data
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       queryClient.invalidateQueries({ queryKey: ['report', report.id] });
       toast.success("AI analysis completed successfully");
@@ -237,17 +211,26 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
 
   const analysis = report.analysis_results?.[0];
 
-  // Extract the feedback content from the detailed_feedback
-  const getFeedbackContent = (detailedFeedback: any) => {
-    if (typeof detailedFeedback === 'string') {
-      return detailedFeedback;
+  // Extract content from detailed_feedback
+  const getDetailedFeedback = () => {
+    if (!analysis?.detailed_feedback) return '';
+    
+    if (typeof analysis.detailed_feedback === 'string') {
+      return analysis.detailed_feedback;
     }
-    if (detailedFeedback && typeof detailedFeedback === 'object') {
-      // Try to get the feedback field first, fallback to full object
-      return detailedFeedback.feedback || detailedFeedback.detailedFeedback || JSON.stringify(detailedFeedback, null, 2);
+    
+    if (typeof analysis.detailed_feedback === 'object') {
+      // Try different possible field names
+      return analysis.detailed_feedback.feedback || 
+             analysis.detailed_feedback.detailedFeedback || 
+             analysis.detailed_feedback.detailed_feedback || 
+             JSON.stringify(analysis.detailed_feedback, null, 2);
     }
-    return 'No detailed feedback available';
+    
+    return '';
   };
+
+  const detailedFeedbackContent = getDetailedFeedback();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -357,16 +340,16 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                     <div>
                       <h4 className="text-white font-mono mb-2">Summary</h4>
                       <div className="bg-black/20 p-4 rounded-lg">
-                        {renderMarkdownText(analysis.summary)}
+                        {renderAnalysisContent(analysis.summary)}
                       </div>
                     </div>
                   )}
                   
-                  {analysis.detailed_feedback && (
+                  {detailedFeedbackContent && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Detailed Feedback</h4>
                       <div className="bg-black/20 p-4 rounded-lg max-h-96 overflow-y-auto">
-                        {renderMarkdownText(getFeedbackContent(analysis.detailed_feedback))}
+                        {renderAnalysisContent(detailedFeedbackContent)}
                       </div>
                     </div>
                   )}
