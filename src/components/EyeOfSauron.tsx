@@ -10,7 +10,7 @@ const EyeOfSauron = ({ mousePosition }: EyeOfSauronProps) => {
   const calculatePupilPosition = () => {
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2 + 200;
-    const maxDistance = 6;
+    const maxDistance = 4;
     
     const deltaX = mousePosition.x - centerX;
     const deltaY = mousePosition.y - centerY;
@@ -18,8 +18,8 @@ const EyeOfSauron = ({ mousePosition }: EyeOfSauronProps) => {
     
     if (distance === 0) return { x: 0, y: 0 };
     
-    const normalizedX = (deltaX / distance) * Math.min(distance / 60, maxDistance);
-    const normalizedY = (deltaY / distance) * Math.min(distance / 60, maxDistance);
+    const normalizedX = (deltaX / distance) * Math.min(distance / 80, maxDistance);
+    const normalizedY = (deltaY / distance) * Math.min(distance / 80, maxDistance);
     
     return { x: normalizedX, y: normalizedY };
   };
@@ -28,135 +28,126 @@ const EyeOfSauron = ({ mousePosition }: EyeOfSauronProps) => {
 
   return (
     <div className="relative mb-16 flex justify-center">
-      <div className="w-20 h-20 sm:w-24 sm:h-24 relative cursor-pointer group">
+      <div className="w-24 h-24 sm:w-28 sm:h-28 relative cursor-pointer group">
         
-        {/* Outer gentle glow - matching page theme */}
-        <div className="absolute -inset-6 sm:-inset-8 opacity-40">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500/30 via-purple-500/20 to-red-500/30 animate-pulse blur-xl"></div>
-          <div className="absolute inset-2 rounded-full bg-gradient-to-r from-red-400/20 via-orange-400/15 to-red-400/20 animate-pulse blur-lg"></div>
+        {/* Gentle friendly glow */}
+        <div className="absolute -inset-8 sm:-inset-10 opacity-30">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 via-purple-400/15 to-red-400/20 animate-pulse blur-2xl"></div>
+          <div className="absolute inset-2 rounded-full bg-gradient-to-r from-cyan-300/15 via-blue-300/10 to-purple-300/15 animate-pulse blur-xl"></div>
         </div>
         
-        {/* Professional outer ring */}
-        <div className="absolute -inset-4 sm:-inset-6 opacity-60">
-          <div className="absolute inset-0 rounded-full border border-red-400/20 bg-gradient-to-br from-red-800/15 via-black to-purple-800/15"></div>
-          <div className="absolute inset-1 rounded-full border border-red-300/15 bg-gradient-to-br from-orange-800/20 via-black to-red-800/20"></div>
+        {/* Outer cartoon ring */}
+        <div className="absolute -inset-6 sm:-inset-8 opacity-50">
+          <div className="absolute inset-0 rounded-full border-2 border-blue-300/30 bg-gradient-to-br from-blue-100/10 via-purple-100/5 to-red-100/10"></div>
+          <div className="absolute inset-2 rounded-full border border-cyan-200/20 bg-gradient-to-br from-cyan-50/15 via-blue-50/10 to-purple-50/15"></div>
         </div>
         
-        {/* Main Eye Structure - Professional looking */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-700 via-black to-purple-700 shadow-xl shadow-red-500/30 overflow-hidden border border-red-400/30">
+        {/* Main Eye Structure - Cartoon friendly */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-300 via-yellow-200 to-red-300 shadow-xl shadow-orange-300/20 overflow-hidden border-2 border-orange-200/50">
           
-          {/* Base elegant layer */}
-          <div className="absolute inset-0 bg-gradient-to-br from-red-600/70 via-black to-purple-600/60"></div>
+          {/* Friendly base layer */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-200/80 via-yellow-100/60 to-red-200/70"></div>
           
-          {/* Subtle scanning lines */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-1/3 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-red-300 to-transparent animate-pulse"></div>
-            <div className="absolute top-2/3 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-red-300 to-transparent animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          {/* Gentle cartoon highlights */}
+          <div className="absolute inset-0 opacity-40">
+            <div className="absolute top-2 left-3 w-2 h-1 bg-white/60 rounded-full blur-sm"></div>
+            <div className="absolute top-3 right-4 w-1 h-1 bg-yellow-100/70 rounded-full blur-sm"></div>
           </div>
           
-          {/* Gentle shimmer */}
-          <div className="absolute inset-0 bg-gradient-to-tl from-red-500/40 via-orange-400/30 to-purple-500/40 opacity-50 animate-pulse"></div>
+          {/* Soft animated shimmer */}
+          <div className="absolute inset-0 bg-gradient-to-tl from-yellow-300/30 via-orange-200/20 to-red-300/25 opacity-60 animate-pulse"></div>
           
-          {/* Professional grid pattern */}
-          <div className="absolute inset-0 opacity-15">
-            {Array.from({ length: 6 }, (_, i) => (
+          {/* Cartoon-style gentle pattern */}
+          <div className="absolute inset-0 opacity-20">
+            {Array.from({ length: 8 }, (_, i) => (
               <div
                 key={i}
-                className="absolute top-1/2 left-1/2 w-0.5 h-full bg-gradient-to-t from-red-300/40 via-transparent to-red-300/40"
+                className="absolute top-1/2 left-1/2 w-0.5 h-full bg-gradient-to-t from-orange-400/30 via-transparent to-orange-400/30 rounded-full"
                 style={{
-                  transform: `translate(-50%, -50%) rotate(${i * 30}deg)`,
+                  transform: `translate(-50%, -50%) rotate(${i * 45}deg)`,
                   transformOrigin: '50% 50%'
                 }}
               />
             ))}
           </div>
           
-          {/* Inner iris chamber */}
-          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-red-500/60 via-black to-orange-500/60 overflow-hidden shadow-inner border border-red-300/20">
+          {/* Inner iris - cartoon style */}
+          <div className="absolute inset-3 rounded-full bg-gradient-to-br from-amber-400/70 via-orange-300/80 to-red-400/60 overflow-hidden shadow-inner border border-orange-100/30">
             
             {/* Gentle rotating layer */}
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600/50 via-orange-500/40 to-red-600/50 opacity-70 animate-spin" style={{ animationDuration: '15s' }}></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/40 via-orange-300/50 to-amber-400/40 opacity-60 animate-spin" style={{ animationDuration: '20s' }}></div>
             
-            {/* Counter-rotating professional layer */}
-            <div className="absolute inset-0 bg-gradient-to-l from-purple-500/30 via-red-500/40 to-orange-500/30 opacity-60 animate-spin" style={{ animationDuration: '25s', animationDirection: 'reverse' }}></div>
+            {/* Counter-rotating friendly layer */}
+            <div className="absolute inset-0 bg-gradient-to-l from-red-300/20 via-orange-200/30 to-yellow-300/25 opacity-50 animate-spin" style={{ animationDuration: '30s', animationDirection: 'reverse' }}></div>
             
-            {/* Subtle texture points */}
-            <div className="absolute inset-0 opacity-40">
-              <div className="absolute top-2 left-2 w-0.5 h-0.5 bg-red-200/60 rounded-full animate-pulse blur-sm"></div>
-              <div className="absolute bottom-2 right-2 w-0.5 h-0.5 bg-orange-200/60 rounded-full animate-pulse blur-sm"></div>
-              <div className="absolute top-3 right-3 w-0.5 h-0.5 bg-red-100/60 rounded-full animate-pulse blur-sm"></div>
+            {/* Cartoon sparkles */}
+            <div className="absolute inset-0 opacity-60">
+              <div className="absolute top-1 left-2 w-1 h-1 bg-white/80 rounded-full animate-pulse blur-sm"></div>
+              <div className="absolute bottom-1 right-1 w-0.5 h-0.5 bg-yellow-200/80 rounded-full animate-pulse blur-sm"></div>
+              <div className="absolute top-2 right-2 w-0.5 h-0.5 bg-orange-100/80 rounded-full animate-pulse blur-sm"></div>
             </div>
             
-            {/* The Professional Vertical Slit Pupil */}
-            <div className="absolute inset-1 rounded-full bg-gradient-to-br from-red-600/70 via-black to-purple-600/60 overflow-hidden">
+            {/* The Friendly Round Pupil */}
+            <div className="absolute inset-1 rounded-full bg-gradient-to-br from-orange-500/80 via-red-400/60 to-amber-500/70 overflow-hidden">
               
-              {/* Inner professional chamber */}
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/60 via-black to-orange-500/50"></div>
+              {/* Inner friendly chamber */}
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/70 via-orange-300/50 to-red-400/60"></div>
               
-              {/* The elegant vertical slit */}
+              {/* The cartoon pupil - round and friendly */}
               <div 
-                className="absolute w-0.5 h-3 sm:h-4 bg-black top-1/2 left-1/2 transition-transform duration-300 ease-out"
+                className="absolute w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-gray-800 via-black to-gray-700 rounded-full top-1/2 left-1/2 transition-transform duration-500 ease-out shadow-lg"
                 style={{
                   transform: `translate(-50%, -50%) translate(${pupilPosition.x}px, ${pupilPosition.y}px)`,
-                  boxShadow: '0 0 8px rgba(239, 68, 68, 0.6), inset 0 0 4px rgba(0, 0, 0, 1)'
+                  boxShadow: '0 0 6px rgba(0, 0, 0, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.2)'
                 }}
               >
-                {/* Gentle glowing edges */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-red-400/60 via-orange-300/50 to-red-400/60 blur-sm"></div>
+                {/* Friendly pupil highlight */}
+                <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-white/60 rounded-full blur-sm"></div>
                 
-                {/* Professional void core */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black via-red-900 to-black"></div>
+                {/* Gentle glow */}
+                <div className="absolute -inset-1 bg-gradient-radial from-orange-200/20 via-yellow-100/15 to-transparent opacity-60 blur-sm animate-pulse"></div>
                 
-                {/* Subtle center line */}
-                <div className="absolute inset-0.5 bg-black">
-                  <div className="absolute top-0 left-1/2 w-0.5 h-full bg-gradient-to-b from-red-300/40 via-transparent to-red-300/40 transform -translate-x-1/2 animate-pulse"></div>
-                </div>
-                
-                {/* Professional attention light */}
-                <div className="absolute top-1/2 left-1/2 w-6 h-6 bg-gradient-radial from-red-100/30 via-orange-200/20 to-transparent opacity-50 blur-md transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
-                
-                {/* Core professional glow */}
-                <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gradient-radial from-white/30 via-red-200/30 to-transparent opacity-60 blur-sm transform -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+                {/* Cartoon shine */}
+                <div className="absolute top-0 left-0 w-1.5 h-1.5 bg-gradient-radial from-white/40 via-yellow-100/30 to-transparent opacity-80 rounded-full blur-sm"></div>
               </div>
               
-              {/* Professional highlights */}
-              <div className="absolute top-1 left-1 w-0.5 h-0.5 bg-red-300/50 rounded-full opacity-30 blur-sm animate-pulse"></div>
-              <div className="absolute bottom-1 right-1 w-0.5 h-0.5 bg-orange-300/50 rounded-full opacity-20 blur-sm animate-pulse"></div>
+              {/* Friendly highlights around pupil */}
+              <div className="absolute top-1 left-1 w-0.5 h-0.5 bg-orange-200/60 rounded-full opacity-40 blur-sm animate-pulse"></div>
+              <div className="absolute bottom-1 right-1 w-0.5 h-0.5 bg-yellow-200/60 rounded-full opacity-30 blur-sm animate-pulse"></div>
             </div>
           </div>
         </div>
         
-        {/* Professional beam effects */}
-        <div className="absolute -inset-4 sm:-inset-6 opacity-30">
-          {/* Gentle directional indicators */}
-          <div className="absolute top-0 left-1/2 w-0.5 h-4 sm:h-6 bg-gradient-to-t from-red-500/40 via-red-300/30 to-transparent transform -translate-x-1/2 animate-pulse blur-sm"></div>
-          <div className="absolute bottom-0 left-1/2 w-0.5 h-4 sm:h-6 bg-gradient-to-b from-red-500/40 via-red-300/30 to-transparent transform -translate-x-1/2 animate-pulse blur-sm"></div>
-          <div className="absolute top-1/2 left-0 w-4 sm:w-6 h-0.5 bg-gradient-to-l from-red-500/40 via-red-300/30 to-transparent transform -translate-y-1/2 animate-pulse blur-sm"></div>
-          <div className="absolute top-1/2 right-0 w-4 sm:w-6 h-0.5 bg-gradient-to-r from-red-500/40 via-red-300/30 to-transparent transform -translate-y-1/2 animate-pulse blur-sm"></div>
+        {/* Cartoon-style gentle beams */}
+        <div className="absolute -inset-6 sm:-inset-8 opacity-20">
+          <div className="absolute top-0 left-1/2 w-1 h-6 sm:h-8 bg-gradient-to-t from-orange-300/40 via-yellow-200/30 to-transparent transform -translate-x-1/2 animate-pulse blur-sm rounded-full"></div>
+          <div className="absolute bottom-0 left-1/2 w-1 h-6 sm:h-8 bg-gradient-to-b from-orange-300/40 via-yellow-200/30 to-transparent transform -translate-x-1/2 animate-pulse blur-sm rounded-full"></div>
+          <div className="absolute top-1/2 left-0 w-6 sm:w-8 h-1 bg-gradient-to-l from-orange-300/40 via-yellow-200/30 to-transparent transform -translate-y-1/2 animate-pulse blur-sm rounded-full"></div>
+          <div className="absolute top-1/2 right-0 w-6 sm:w-8 h-1 bg-gradient-to-r from-orange-300/40 via-yellow-200/30 to-transparent transform -translate-y-1/2 animate-pulse blur-sm rounded-full"></div>
         </div>
         
-        {/* Gentle rotating indicators */}
-        <div className="absolute -inset-6 sm:-inset-8 animate-spin opacity-25" style={{ animationDuration: '40s' }}>
-          {Array.from({ length: 4 }, (_, i) => (
+        {/* Gentle rotating cartoon indicators */}
+        <div className="absolute -inset-8 sm:-inset-10 animate-spin opacity-15" style={{ animationDuration: '60s' }}>
+          {Array.from({ length: 6 }, (_, i) => (
             <div
               key={i}
-              className="absolute w-0.5 h-1.5 bg-gradient-to-t from-red-400/40 via-red-300/30 to-transparent opacity-50 blur-sm"
+              className="absolute w-1 h-2 bg-gradient-to-t from-orange-300/30 via-yellow-200/25 to-transparent opacity-40 blur-sm rounded-full"
               style={{
                 top: '50%',
                 left: '50%',
-                transform: `translate(-50%, -50%) rotate(${i * 90}deg) translateY(-1.5rem)`,
-                transformOrigin: '50% 1.5rem'
+                transform: `translate(-50%, -50%) rotate(${i * 60}deg) translateY(-2rem)`,
+                transformOrigin: '50% 2rem'
               }}
             />
           ))}
         </div>
         
-        {/* Subtle professional aura */}
-        <div className="absolute -inset-8 sm:-inset-10 bg-gradient-radial from-red-500/15 via-red-500/8 to-transparent rounded-full animate-pulse opacity-40"></div>
-        <div className="absolute -inset-4 sm:-inset-6 bg-gradient-radial from-red-400/8 via-transparent to-transparent rounded-full animate-pulse opacity-30" style={{ animationDelay: '2s' }}></div>
+        {/* Soft cartoon aura */}
+        <div className="absolute -inset-10 sm:-inset-12 bg-gradient-radial from-orange-200/10 via-yellow-100/5 to-transparent rounded-full animate-pulse opacity-30"></div>
+        <div className="absolute -inset-6 sm:-inset-8 bg-gradient-radial from-amber-100/8 via-transparent to-transparent rounded-full animate-pulse opacity-25" style={{ animationDelay: '3s' }}></div>
         
-        {/* Professional monitoring effect */}
-        <div className="absolute -inset-2 sm:-inset-3 bg-gradient-radial from-transparent via-red-300/5 to-transparent animate-pulse blur-lg opacity-40"></div>
+        {/* Gentle monitoring effect */}
+        <div className="absolute -inset-4 sm:-inset-5 bg-gradient-radial from-transparent via-orange-100/5 to-transparent animate-pulse blur-xl opacity-30"></div>
       </div>
     </div>
   );
