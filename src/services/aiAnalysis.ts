@@ -1,4 +1,3 @@
-
 import { submitReport, saveAnalysisResult, Report } from './supabaseService';
 
 interface AnalysisResult {
@@ -86,16 +85,16 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   
   if (technicalTermCount >= 5) {
     technicalContentScore += 200;
-    strengths.push("Report demonstrates strong technical vocabulary and implementation details");
+    strengths.push("Report demonstrates exceptional technical depth with comprehensive implementation details");
   } else if (technicalTermCount >= 3) {
     technicalContentScore += 120;
-    strengths.push("Report includes adequate technical terminology");
+    strengths.push("Report includes solid technical content and implementation terminology");
   } else if (technicalTermCount >= 1) {
     technicalContentScore += 60;
-    improvements.push("Include more specific technical implementation details");
+    improvements.push("Include more specific technical implementation details and methodologies");
   } else {
     technicalContentScore += 0;
-    improvements.push("**CRITICAL:** Report lacks technical content and implementation details");
+    improvements.push("**CRITICAL DEFICIENCY:** Report completely lacks technical content and implementation details");
     flags++;
   }
   
@@ -103,16 +102,16 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   if (lowerReport.includes('code') || lowerReport.includes('implementation') || 
       lowerReport.includes('solution') || lowerReport.includes('approach')) {
     technicalContentScore += 50;
-    strengths.push("Report mentions specific implementation approaches");
+    strengths.push("Report demonstrates technical problem-solving with specific implementation approaches");
   }
   
   // Technical challenges and problem-solving
   if (lowerReport.includes('challenge') || lowerReport.includes('problem') || 
       lowerReport.includes('issue') || lowerReport.includes('bug')) {
     technicalContentScore += 50;
-    strengths.push("Report acknowledges and addresses technical challenges");
+    strengths.push("Report shows excellent technical awareness by addressing challenges and obstacles");
   } else {
-    improvements.push("Include challenges faced and how they were resolved");
+    improvements.push("Include detailed discussion of technical challenges faced and resolution strategies");
   }
   
   // === DELIVERABLE ANALYSIS (250 points) ===
@@ -133,20 +132,20 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   
   if (meetingMentions > 2 && deliverableCount === 0) {
     deliverableScore = 0;
-    improvements.push("**RED FLAG:** Multiple meetings mentioned but no concrete deliverables identified");
+    improvements.push("**🚨 MAJOR RED FLAG:** Multiple meetings mentioned but zero concrete deliverables identified - this is unacceptable");
     flags += 2;
   } else if (deliverableCount >= 3) {
     deliverableScore += 200;
-    strengths.push("Report clearly identifies multiple concrete deliverables");
+    strengths.push("Outstanding deliverable focus with multiple concrete accomplishments clearly identified");
   } else if (deliverableCount >= 2) {
     deliverableScore += 130;
-    strengths.push("Report mentions specific deliverables");
+    strengths.push("Good deliverable reporting with specific completed tasks mentioned");
   } else if (deliverableCount >= 1) {
     deliverableScore += 70;
-    improvements.push("Include more specific deliverables and outcomes");
+    improvements.push("Expand on deliverables with more specific outcomes and measurable results");
   } else {
     deliverableScore = 0;
-    improvements.push("**CRITICAL:** No concrete deliverables or accomplishments identified");
+    improvements.push("**🚨 CRITICAL FAILURE:** No concrete deliverables, accomplishments, or tangible outputs identified");
     flags += 2;
   }
   
@@ -155,21 +154,22 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
       lowerReport.includes('improvement')) {
     deliverableScore += 50;
   } else {
-    improvements.push("Include specific progress metrics and advancement indicators");
+    improvements.push("Include specific progress metrics, advancement indicators, and measurable outcomes");
   }
   
   // === CLARITY AND COMMUNICATION (200 points) ===
   if (wordCount >= 200) {
     clarityScore += 100;
-    strengths.push("Report provides comprehensive detail and context");
+    strengths.push("Excellent report comprehensiveness with detailed explanations and context");
   } else if (wordCount >= 100) {
     clarityScore += 60;
+    strengths.push("Adequate report length with reasonable detail provided");
   } else if (wordCount >= 50) {
     clarityScore += 30;
-    improvements.push("Expand report with more detailed explanations");
+    improvements.push("Significantly expand report with more detailed explanations and context");
   } else {
     clarityScore = 0;
-    improvements.push("**CRITICAL:** Report is too brief and lacks sufficient detail");
+    improvements.push("**🚨 UNACCEPTABLE:** Report is far too brief and lacks sufficient professional detail");
     flags++;
   }
   
@@ -177,20 +177,21 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   const sentences = reportText.split(/[.!?]+/).filter(s => s.trim().length > 0);
   if (sentences.length >= 5) {
     clarityScore += 50;
-    strengths.push("Report is well-structured with multiple detailed points");
+    strengths.push("Excellent structural organization with multiple well-developed points");
   } else if (sentences.length >= 3) {
     clarityScore += 30;
+    strengths.push("Good sentence structure with adequate point development");
   } else {
     clarityScore += 0;
-    improvements.push("Organize report into multiple clear, detailed sentences");
+    improvements.push("Organize report into multiple clear, detailed sentences with better structure");
   }
   
   // Professional language
   if (reportText.match(/[A-Z]/g) && !reportText.match(/^[a-z]/)) {
     clarityScore += 50;
-    strengths.push("Report uses proper capitalization and professional formatting");
+    strengths.push("Professional formatting and language standards maintained throughout");
   } else {
-    improvements.push("Use proper capitalization and professional language");
+    improvements.push("Implement proper capitalization, grammar, and professional language standards");
   }
   
   // === PROACTIVITY AND PLANNING (150 points) ===
@@ -205,16 +206,16 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   
   if (futureCount >= 3) {
     proactivityScore += 100;
-    strengths.push("Report demonstrates strong forward planning and goal setting");
+    strengths.push("Exceptional forward planning with comprehensive goal setting and strategic thinking");
   } else if (futureCount >= 2) {
     proactivityScore += 60;
-    strengths.push("Report includes future planning elements");
+    strengths.push("Good future planning elements with adequate forward-thinking approach");
   } else if (futureCount >= 1) {
     proactivityScore += 30;
-    improvements.push("Expand on future plans and upcoming milestones");
+    improvements.push("Expand on future plans, upcoming milestones, and strategic objectives");
   } else {
     proactivityScore = 0;
-    improvements.push("**REQUIRED:** Include specific next steps and future planning");
+    improvements.push("**⚠️ MANDATORY REQUIREMENT:** Include specific next steps, future planning, and strategic roadmap");
     flags++;
   }
   
@@ -222,7 +223,7 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   if (lowerReport.includes('initiative') || lowerReport.includes('proactive') || 
       lowerReport.includes('suggested') || lowerReport.includes('proposed')) {
     proactivityScore += 50;
-    strengths.push("Report shows initiative and proactive thinking");
+    strengths.push("Demonstrates exceptional initiative and proactive leadership thinking");
   }
   
   // === PROFESSIONALISM (100 points) ===
@@ -240,16 +241,16 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   if (!lowerReport.includes('kinda') && !lowerReport.includes('sorta') && 
       !lowerReport.includes('dunno') && !lowerReport.includes('gonna')) {
     professionalismScore += 25;
-    strengths.push("Report maintains professional tone and language");
+    strengths.push("Maintains excellent professional tone and business communication standards");
   } else {
-    improvements.push("Use more professional language and avoid informal expressions");
+    improvements.push("Eliminate informal expressions and maintain strict professional language standards");
   }
   
   // Time references and specificity
   if (lowerReport.includes('hour') || lowerReport.includes('day') || 
       lowerReport.includes('week') || lowerReport.includes('specific date')) {
     professionalismScore += 25;
-    strengths.push("Report includes specific time references and scheduling details");
+    strengths.push("Excellent time management awareness with specific scheduling and time references");
   }
   
   // === CALCULATE FINAL SCORE ===
@@ -279,7 +280,7 @@ const performDetailedAnalysis = (reportText: string): AnalysisResult => {
   // === GENERATE DETAILED FEEDBACK ===
   const feedback = generateDetailedFeedback(totalScore, technicalContentScore, 
     deliverableScore, clarityScore, proactivityScore, professionalismScore, 
-    strengths, improvements, flags);
+    strengths, improvements, flags, wordCount, reportLength);
   
   return {
     score: totalScore,
@@ -300,108 +301,171 @@ const generateDetailedFeedback = (
   professionalismScore: number,
   strengths: string[],
   improvements: string[],
-  flags: number
+  flags: number,
+  wordCount: number,
+  reportLength: number
 ): string => {
-  let feedback = `# SAURON Analysis Report\n\n`;
+  let feedback = `# 🔍 SAURON COMPREHENSIVE ANALYSIS REPORT\n\n`;
   
-  feedback += `## Overall Score: ${totalScore}/1000\n\n`;
+  feedback += `## 📊 Overall Score: **${totalScore}/1000**\n\n`;
   
-  // Score interpretation
+  // Score interpretation with detailed analysis
   if (totalScore >= 800) {
-    feedback += `**🏆 EXCEPTIONAL PERFORMANCE** - This report demonstrates outstanding quality and professionalism.\n\n`;
+    feedback += `### 🏆 **EXCEPTIONAL PERFORMANCE - TIER S**\n\n`;
+    feedback += `**OUTSTANDING ACHIEVEMENT!** This report demonstrates exceptional quality, comprehensive technical depth, and exemplary professional standards. This contractor is delivering exceptional value and should be recognized for their outstanding work ethic and technical excellence.\n\n`;
+    feedback += `**🚀 SPEED & QUALITY COMMENDATION:** This level of detail and technical precision suggests rapid execution combined with meticulous attention to quality - a rare and valuable combination in professional development.\n\n`;
   } else if (totalScore >= 650) {
-    feedback += `**✅ GOOD PERFORMANCE** - This report meets professional standards with room for enhancement.\n\n`;
+    feedback += `### ✅ **GOOD PERFORMANCE - TIER A**\n\n`;
+    feedback += `**SOLID PROFESSIONAL WORK:** This report meets professional standards with good technical content and deliverable focus. The contractor demonstrates competent work execution and professional communication skills.\n\n`;
+    if (totalScore >= 750) {
+      feedback += `**⚡ EFFICIENCY RECOGNITION:** The quality and depth achieved indicates efficient work execution and good time management skills.\n\n`;
+    }
   } else if (totalScore >= 400) {
-    feedback += `**⚠️ NEEDS IMPROVEMENT** - This report requires significant enhancement to meet professional standards.\n\n`;
+    feedback += `### ⚠️ **NEEDS SIGNIFICANT IMPROVEMENT - TIER C**\n\n`;
+    feedback += `**BELOW PROFESSIONAL STANDARDS:** This report requires substantial enhancement to meet minimum professional expectations. Critical deficiencies must be addressed immediately.\n\n`;
+    feedback += `**📈 URGENT ACTION REQUIRED:** The contractor must dramatically improve reporting quality, technical detail, and deliverable focus to maintain professional standing.\n\n`;
   } else {
-    feedback += `**🚨 UNACCEPTABLE** - This report fails to meet minimum professional requirements and must be resubmitted.\n\n`;
+    feedback += `### 🚨 **UNACCEPTABLE - TIER F**\n\n`;
+    feedback += `**CRITICAL FAILURE:** This report completely fails to meet minimum professional requirements and represents unacceptable work standards. Immediate corrective action and potential performance review required.\n\n`;
+    feedback += `**⛔ ESCALATION RECOMMENDED:** This level of reporting suggests serious issues with work execution, professional standards, or commitment that require management intervention.\n\n`;
   }
   
-  // Detailed score breakdown
-  feedback += `## Score Breakdown\n\n`;
-  feedback += `| Category | Score | Max | Percentage |\n`;
-  feedback += `|----------|-------|-----|------------|\n`;
-  feedback += `| Technical Content | ${technicalScore} | 300 | ${Math.round((technicalScore/300)*100)}% |\n`;
-  feedback += `| Deliverables | ${deliverableScore} | 250 | ${Math.round((deliverableScore/250)*100)}% |\n`;
-  feedback += `| Clarity & Communication | ${clarityScore} | 200 | ${Math.round((clarityScore/200)*100)}% |\n`;
-  feedback += `| Proactivity & Planning | ${proactivityScore} | 150 | ${Math.round((proactivityScore/150)*100)}% |\n`;
-  feedback += `| Professionalism | ${professionalismScore} | 100 | ${Math.round((professionalismScore/100)*100)}% |\n\n`;
+  // Detailed metrics analysis
+  feedback += `## 📈 **COMPREHENSIVE SCORING BREAKDOWN**\n\n`;
+  feedback += `| **Category** | **Score** | **Max** | **Performance** | **Grade** |\n`;
+  feedback += `|--------------|-----------|---------|-----------------|----------|\n`;
+  feedback += `| **🔧 Technical Content** | **${technicalScore}** | 300 | ${Math.round((technicalScore/300)*100)}% | ${technicalScore >= 240 ? '🏆 A+' : technicalScore >= 180 ? '✅ B+' : technicalScore >= 120 ? '⚠️ C' : '🚨 F'} |\n`;
+  feedback += `| **📦 Deliverables** | **${deliverableScore}** | 250 | ${Math.round((deliverableScore/250)*100)}% | ${deliverableScore >= 200 ? '🏆 A+' : deliverableScore >= 150 ? '✅ B+' : deliverableScore >= 100 ? '⚠️ C' : '🚨 F'} |\n`;
+  feedback += `| **💬 Communication** | **${clarityScore}** | 200 | ${Math.round((clarityScore/200)*100)}% | ${clarityScore >= 160 ? '🏆 A+' : clarityScore >= 120 ? '✅ B+' : clarityScore >= 80 ? '⚠️ C' : '🚨 F'} |\n`;
+  feedback += `| **🎯 Planning** | **${proactivityScore}** | 150 | ${Math.round((proactivityScore/150)*100)}% | ${proactivityScore >= 120 ? '🏆 A+' : proactivityScore >= 90 ? '✅ B+' : proactivityScore >= 60 ? '⚠️ C' : '🚨 F'} |\n`;
+  feedback += `| **👔 Professionalism** | **${professionalismScore}** | 100 | ${Math.round((professionalismScore/100)*100)}% | ${professionalismScore >= 80 ? '🏆 A+' : professionalismScore >= 60 ? '✅ B+' : professionalismScore >= 40 ? '⚠️ C' : '🚨 F'} |\n\n`;
   
-  // Flags section
+  // Report statistics
+  feedback += `## 📋 **REPORT ANALYTICS**\n\n`;
+  feedback += `- **📝 Word Count:** ${wordCount} words ${wordCount >= 200 ? '(Excellent detail)' : wordCount >= 100 ? '(Adequate)' : '(Insufficient)'}\n`;
+  feedback += `- **📏 Character Length:** ${reportLength} characters\n`;
+  feedback += `- **⏱️ Estimated Reading Time:** ${Math.ceil(wordCount / 200)} minute(s)\n`;
+  feedback += `- **🔍 Detail Density:** ${(wordCount / Math.max(1, reportLength) * 100).toFixed(1)}% word efficiency\n\n`;
+  
+  // Flags section with detailed analysis
   if (flags > 0) {
-    feedback += `## 🚩 Red Flags: ${flags}\n\n`;
+    feedback += `## 🚩 **RED FLAGS DETECTED: ${flags}**\n\n`;
     if (flags >= 3) {
-      feedback += `**CRITICAL ISSUES DETECTED** - This report contains multiple serious deficiencies that require immediate attention.\n\n`;
+      feedback += `### 🚨 **CRITICAL ALERT - MULTIPLE SERIOUS DEFICIENCIES**\n\n`;
+      feedback += `**IMMEDIATE INTERVENTION REQUIRED:** This report contains ${flags} serious deficiencies that indicate fundamental issues with work execution, professional standards, or reporting competency. Management review and corrective action plan required immediately.\n\n`;
+      feedback += `**📋 RECOMMENDED ACTIONS:**\n`;
+      feedback += `- Immediate one-on-one performance discussion\n`;
+      feedback += `- Mandatory reporting standards training\n`;
+      feedback += `- Weekly check-ins until standards improve\n`;
+      feedback += `- Potential performance improvement plan consideration\n\n`;
     } else if (flags >= 1) {
-      feedback += `**WARNING** - This report contains issues that need to be addressed in future submissions.\n\n`;
+      feedback += `### ⚠️ **WARNING - ISSUES REQUIRING ATTENTION**\n\n`;
+      feedback += `**CORRECTIVE ACTION NEEDED:** This report contains ${flags} issue(s) that must be addressed in future submissions to maintain professional standards.\n\n`;
+    }
+  } else {
+    feedback += `## ✅ **NO RED FLAGS - CLEAN PROFESSIONAL REPORT**\n\n`;
+    feedback += `**EXCELLENT STANDARDS:** This report maintains professional standards without any critical deficiencies detected.\n\n`;
+  }
+  
+  // Strengths section with detailed commendation
+  if (strengths.length > 0) {
+    feedback += `## 🌟 **IDENTIFIED STRENGTHS & COMMENDATIONS**\n\n`;
+    strengths.forEach((strength, index) => {
+      feedback += `### ✅ **Strength ${index + 1}:** ${strength}\n\n`;
+    });
+    
+    if (totalScore >= 800) {
+      feedback += `**🏆 SPECIAL RECOGNITION:** The combination of these strengths demonstrates exceptional professional competency and work execution that significantly exceeds standard expectations.\n\n`;
     }
   }
   
-  // Strengths section
-  if (strengths.length > 0) {
-    feedback += `## ✅ Strengths\n\n`;
-    strengths.forEach(strength => {
-      feedback += `- ${strength}\n`;
-    });
-    feedback += `\n`;
-  }
-  
-  // Improvements section
+  // Improvements section with actionable guidance
   if (improvements.length > 0) {
-    feedback += `## 📈 Areas for Improvement\n\n`;
-    improvements.forEach(improvement => {
-      feedback += `- ${improvement}\n`;
+    feedback += `## 📈 **PRIORITY IMPROVEMENT AREAS**\n\n`;
+    improvements.forEach((improvement, index) => {
+      feedback += `### 🎯 **Priority ${index + 1}:** ${improvement}\n\n`;
     });
-    feedback += `\n`;
   }
   
-  // Specific recommendations
-  feedback += `## 🎯 Specific Recommendations\n\n`;
+  // Specific tactical recommendations by category
+  feedback += `## 💡 **TACTICAL IMPROVEMENT RECOMMENDATIONS**\n\n`;
   
   if (technicalScore < 200) {
-    feedback += `**Technical Content (${technicalScore}/300):** Your report lacks sufficient technical detail. Include specific:\n`;
-    feedback += `- Implementation approaches and methodologies\n`;
-    feedback += `- Technical challenges encountered and solutions applied\n`;
-    feedback += `- Code snippets, algorithms, or technical specifications\n`;
-    feedback += `- Technology stack details and architectural decisions\n\n`;
+    feedback += `### 🔧 **Technical Content Enhancement (${technicalScore}/300)**\n\n`;
+    feedback += `**CRITICAL TECHNICAL DEFICIENCIES:** Your report severely lacks technical substance. Implement these **mandatory** improvements:\n\n`;
+    feedback += `- **🛠️ Implementation Details:** Include specific technical approaches, methodologies, and tools used\n`;
+    feedback += `- **⚡ Problem-Solving:** Document technical challenges encountered and exact solutions implemented\n`;
+    feedback += `- **💻 Code & Architecture:** Reference specific code snippets, algorithms, or architectural decisions\n`;
+    feedback += `- **🔗 Technology Integration:** Detail how different technologies and components work together\n`;
+    feedback += `- **📊 Performance Metrics:** Include technical performance indicators and optimization results\n\n`;
+  } else if (technicalScore >= 240) {
+    feedback += `### 🏆 **Technical Excellence Achieved (${technicalScore}/300)**\n\n`;
+    feedback += `**OUTSTANDING TECHNICAL DEPTH:** Your technical reporting demonstrates exceptional competency and attention to implementation detail.\n\n`;
   }
   
   if (deliverableScore < 150) {
-    feedback += `**Deliverables (${deliverableScore}/250):** Focus on concrete outputs rather than activities:\n`;
-    feedback += `- List specific features, modules, or components completed\n`;
-    feedback += `- Quantify your accomplishments with metrics\n`;
-    feedback += `- Avoid excessive focus on meetings without corresponding deliverables\n`;
-    feedback += `- Demonstrate tangible progress and outcomes\n\n`;
+    feedback += `### 📦 **Deliverable Focus Critical Upgrade (${deliverableScore}/250)**\n\n`;
+    feedback += `**UNACCEPTABLE DELIVERABLE REPORTING:** Transform your approach immediately:\n\n`;
+    feedback += `- **🎯 Concrete Outputs:** List specific features, modules, components, or systems completed\n`;
+    feedback += `- **📊 Quantifiable Results:** Provide metrics, percentages, and measurable outcomes\n`;
+    feedback += `- **🚫 Meeting Reduction:** Minimize meeting mentions unless tied to specific deliverable outcomes\n`;
+    feedback += `- **✅ Completion Status:** Clearly state what percentage or stage of completion each deliverable has reached\n`;
+    feedback += `- **🔗 Value Demonstration:** Explain how each deliverable contributes to project success\n\n`;
+  } else if (deliverableScore >= 200) {
+    feedback += `### 🎯 **Exceptional Deliverable Focus (${deliverableScore}/250)**\n\n`;
+    feedback += `**OUTSTANDING RESULTS ORIENTATION:** Your deliverable reporting demonstrates excellent focus on concrete outcomes and measurable progress.\n\n`;
   }
   
   if (clarityScore < 120) {
-    feedback += `**Clarity (${clarityScore}/200):** Enhance communication effectiveness:\n`;
-    feedback += `- Expand report length with detailed explanations\n`;
-    feedback += `- Use clear, structured sentences and proper formatting\n`;
-    feedback += `- Provide context and background for your work\n`;
-    feedback += `- Ensure professional language and grammar\n\n`;
+    feedback += `### 💬 **Communication Standards Overhaul (${clarityScore}/200)**\n\n`;
+    feedback += `**INADEQUATE PROFESSIONAL COMMUNICATION:** Implement immediate improvements:\n\n`;
+    feedback += `- **📝 Length Expansion:** Aim for minimum 150-200 words with comprehensive detail\n`;
+    feedback += `- **🏗️ Structure Improvement:** Use clear paragraphs, bullet points, and logical flow\n`;
+    feedback += `- **📚 Context Provision:** Include background, methodology, and contextual information\n`;
+    feedback += `- **✍️ Professional Language:** Maintain formal business communication standards throughout\n`;
+    feedback += `- **🔍 Detail Enhancement:** Provide specific examples, explanations, and supporting information\n\n`;
   }
   
   if (proactivityScore < 90) {
-    feedback += `**Planning (${proactivityScore}/150):** Demonstrate forward-thinking:\n`;
-    feedback += `- Include specific next steps and upcoming milestones\n`;
-    feedback += `- Set clear goals and objectives for future work\n`;
-    feedback += `- Show initiative and proactive problem-solving\n`;
-    feedback += `- Provide timelines and delivery expectations\n\n`;
+    feedback += `### 🎯 **Strategic Planning Development (${proactivityScore}/150)**\n\n`;
+    feedback += `**INSUFFICIENT FORWARD THINKING:** Enhance your strategic approach:\n\n`;
+    feedback += `- **📅 Next Steps:** Provide specific, actionable next steps with timelines\n`;
+    feedback += `- **🎯 Goal Setting:** Define clear objectives and milestones for upcoming work\n`;
+    feedback += `- **💡 Initiative Display:** Show proactive problem-solving and improvement suggestions\n`;
+    feedback += `- **📊 Timeline Planning:** Include realistic delivery expectations and scheduling\n`;
+    feedback += `- **🔮 Risk Anticipation:** Identify potential challenges and mitigation strategies\n\n`;
   }
   
-  // Final assessment
-  feedback += `## 📋 Final Assessment\n\n`;
+  // Final strategic assessment
+  feedback += `## 🎯 **FINAL STRATEGIC ASSESSMENT**\n\n`;
   
   if (totalScore >= 800) {
-    feedback += `This report exemplifies professional excellence. Continue maintaining this high standard of reporting and technical execution.`;
+    feedback += `### 🚀 **EXCEPTIONAL CONTRACTOR - TIER S PERFORMANCE**\n\n`;
+    feedback += `This contractor demonstrates **exceptional professional competency** that significantly exceeds industry standards. The combination of technical excellence, deliverable focus, and professional communication indicates a high-value team member who should be:\n\n`;
+    feedback += `- **🏆 Recognized** for outstanding performance\n`;
+    feedback += `- **📈 Considered** for advanced responsibilities or leadership roles\n`;
+    feedback += `- **💰 Prioritized** for continued engagement and potential rate increases\n`;
+    feedback += `- **🎯 Utilized** as a standard-setting example for other contractors\n\n`;
+    feedback += `**⚡ EFFICIENCY EXCELLENCE:** The speed and quality combination demonstrated here represents optimal contractor value delivery.\n\n`;
   } else if (totalScore >= 650) {
-    feedback += `This report meets professional standards. Address the identified improvement areas to achieve exceptional performance.`;
+    feedback += `### ✅ **COMPETENT PROFESSIONAL - TIER A PERFORMANCE**\n\n`;
+    feedback += `This contractor meets professional standards with room for growth. Continue engagement while implementing the identified improvements to achieve exceptional performance levels.\n\n`;
   } else if (totalScore >= 400) {
-    feedback += `This report requires significant improvement. Please review all recommendations and resubmit with enhanced technical detail and deliverable focus.`;
+    feedback += `### ⚠️ **PERFORMANCE IMPROVEMENT REQUIRED - TIER C**\n\n`;
+    feedback += `This contractor requires **immediate and comprehensive improvement** across all categories. Implement a structured improvement plan with weekly check-ins and specific milestones. Consider additional training and mentorship resources.\n\n`;
   } else {
-    feedback += `This report is unacceptable for professional standards. Immediate and comprehensive improvements are required across all categories before resubmission.`;
+    feedback += `### 🚨 **CRITICAL PERFORMANCE FAILURE - TIER F**\n\n`;
+    feedback += `This contractor demonstrates **unacceptable professional standards** that require immediate intervention. Recommend:\n\n`;
+    feedback += `- **📋 Immediate** performance review and improvement plan\n`;
+    feedback += `- **🎓 Mandatory** professional development and reporting training\n`;
+    feedback += `- **👥 Mentorship** assignment with proven high-performing contractor\n`;
+    feedback += `- **⏰ Probationary** period with weekly performance monitoring\n`;
+    feedback += `- **💼 Consider** contract renegotiation or alternative arrangements if no improvement\n\n`;
   }
+  
+  feedback += `---\n\n`;
+  feedback += `**🤖 Analysis completed by SAURON AI - The ultimate contractor evaluation system**\n`;
+  feedback += `*This analysis uses advanced AI evaluation techniques to ensure no BS reporting passes undetected.*`;
   
   return feedback;
 };

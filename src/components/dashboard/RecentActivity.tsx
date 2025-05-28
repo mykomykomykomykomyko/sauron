@@ -84,7 +84,7 @@ export const RecentActivity = ({
                 <div className="flex items-center space-x-2">
                   {report.analysis_results[0] && (
                     <Badge className={`text-xs ${getScoreColor(report.analysis_results[0].score)} bg-white/10`}>
-                      AI: {report.analysis_results[0].score}%
+                      AI: {report.analysis_results[0].score}/1000
                     </Badge>
                   )}
                   <Badge className={`text-xs ${getPriorityColor(report.priority || 'low')}`}>

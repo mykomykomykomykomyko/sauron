@@ -247,7 +247,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-black/20 rounded-lg">
                       <div className="text-2xl font-bold text-green-400 font-mono">
-                        {analysis.score}%
+                        {analysis.score}/1000
                       </div>
                       <div className="text-sm text-gray-400">Quality Score</div>
                     </div>
