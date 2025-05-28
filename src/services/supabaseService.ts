@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Report {
@@ -210,23 +209,14 @@ export const getDashboardStats = async () => {
   };
 };
 
-// Create account (admin only)
+// Create account using edge function (admin only)
 export const createAccount = async (accountData: Omit<Account, 'id' | 'created_at'>) => {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data, error } = await supabase.functions.invoke('create-account', {
+    body: accountData
+  });
   
-  const accountToInsert = {
-    ...accountData,
-    created_by: user?.id
-  };
-
-  const { data, error } = await supabase
-    .from('accounts')
-    .insert([accountToInsert])
-    .select()
-    .single();
-    
   if (error) throw error;
-  return data as Account;
+  return data;
 };
 
 // Get all accounts (admin only)

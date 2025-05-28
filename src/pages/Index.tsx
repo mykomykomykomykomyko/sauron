@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,7 +125,7 @@ const Index = () => {
             <h1 className="text-xl font-bold bg-gradient-to-r from-red-400 to-purple-400 bg-clip-text text-transparent">
               The Eye of Sauron
             </h1>
-            <p className="text-xs text-gray-400 font-mono">Contractor Intelligence System</p>
+            <p className="text-xs text-gray-400 font-mono">Efficient Yielding Engagement Optimized For Structured Assignments</p>
           </div>
         </div>
 
@@ -176,7 +175,7 @@ const Index = () => {
         <div className="text-center mb-16 pt-8">
           <div className="mb-8">
             <Badge className="bg-red-500/20 text-red-400 border-red-500/30 mb-4 font-mono">
-              AI-POWERED CONTRACTOR MONITORING
+              AI-POWERED PROGRESS TRACKING
             </Badge>
             <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-red-400 via-purple-400 to-red-600 bg-clip-text text-transparent">
@@ -186,8 +185,8 @@ const Index = () => {
               <span className="text-white/80">OF SAURON</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-mono">
-              Advanced AI surveillance system for contractor performance monitoring. 
-              Submit reports, track progress, and ensure quality with unmatched precision.
+              The all-seeing AI-powered progress report management system. 
+              Submit, track, and analyze team progress with intelligent oversight and real-time insights.
             </p>
           </div>
 
