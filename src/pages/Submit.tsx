@@ -159,7 +159,7 @@ const Submit = () => {
           left: mousePosition.x - 192,
           top: mousePosition.y - 192,
         }}
-      />
+      ></div>
 
       {/* Floating particles */}
       {particles.map((particle) => (
@@ -274,7 +274,7 @@ const Submit = () => {
           <Card className={`bg-black/40 border-white/20 backdrop-blur-xl shadow-2xl transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
             <CardHeader className="text-center pb-6">
               <CardTitle className="text-2xl font-mono text-white flex items-center justify-center space-x-3">
-                <steps[currentStep - 1]?.icon && <steps[currentStep - 1].icon className="w-6 h-6 text-red-400" />}
+                {steps[currentStep - 1]?.icon && <steps[currentStep - 1].icon className="w-6 h-6 text-red-400" />}
                 <span>{steps[currentStep - 1]?.title}</span>
               </CardTitle>
               <CardDescription className="text-gray-300">
