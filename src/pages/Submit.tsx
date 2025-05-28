@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Upload, Send, Eye, Brain, CheckCircle, AlertCircle, Sparkles, Target, ArrowRight, Zap, Clock, Shield, Code, Wrench, Calendar } from "lucide-react";
+import { Eye, Shield, Send, Sparkles, ArrowRight, Brain, Target } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { analyzeReport } from "@/services/aiAnalysis";
+import StepNavigation from "@/components/StepNavigation";
 
 const Submit = () => {
   // Basic info
@@ -63,6 +63,12 @@ const Submit = () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [user, navigate]);
+
+  const handleStepChange = (step: number) => {
+    if (step <= currentStep || isStepComplete(step)) {
+      setCurrentStep(step);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -328,46 +334,13 @@ WORK PERIOD: ${workPeriod}
             </p>
           </div>
 
-          {/* Progress Steps */}
-          <div className={`mb-12 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-            <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-8 overflow-x-auto">
-              {steps.map((step, index) => (
-                <div key={index} className="flex items-center flex-shrink-0">
-                  <div className={`flex items-center space-x-2 transition-all duration-500 ${
-                    currentStep >= step.number ? 'scale-110' : 'scale-100 opacity-60'
-                  }`}>
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
-                      currentStep > step.number 
-                        ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-400 shadow-lg shadow-green-500/30'
-                        : currentStep === step.number
-                        ? 'bg-gradient-to-br from-red-500 to-purple-600 border-red-400 shadow-lg shadow-red-500/30'
-                        : 'bg-black/40 border-white/20'
-                    }`}>
-                      {currentStep > step.number ? (
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                      ) : (
-                        <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                      )}
-                    </div>
-                    <div className="hidden md:block">
-                      <div className={`text-xs sm:text-sm font-mono transition-colors duration-300 ${
-                        currentStep >= step.number ? 'text-white' : 'text-gray-500'
-                      }`}>
-                        {step.title}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {index < steps.length - 1 && (
-                    <div className={`w-4 sm:w-8 h-0.5 mx-1 sm:mx-2 transition-all duration-500 flex-shrink-0 ${
-                      currentStep > step.number 
-                        ? 'bg-gradient-to-r from-green-400 to-emerald-400'
-                        : 'bg-white/20'
-                    }`} />
-                  )}
-                </div>
-              ))}
-            </div>
+          {/* Step Navigation */}
+          <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+            <StepNavigation 
+              currentStep={currentStep}
+              onStepChange={handleStepChange}
+              isStepComplete={isStepComplete}
+            />
           </div>
 
           {/* Form Card */}
