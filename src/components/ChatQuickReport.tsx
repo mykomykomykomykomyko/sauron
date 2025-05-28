@@ -75,31 +75,34 @@ const ChatQuickReport = () => {
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto mb-8">
+    <div className="w-full max-w-4xl mx-auto mb-8 px-4">
       <Card className={`bg-black/80 border-2 transition-all duration-300 backdrop-blur-sm ${
         isFocused ? 'border-red-500/70 shadow-lg shadow-red-500/20' : 'border-white/20'
       }`}>
-        <div className="p-4">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
+              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-white font-mono font-semibold">Quick Report</h3>
-              <p className="text-gray-400 text-sm">Submit your progress instantly</p>
+              <h3 className="text-white font-mono font-semibold text-sm sm:text-base">Quick Report</h3>
+              <p className="text-gray-400 text-xs sm:text-sm">Submit your progress instantly</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <Calendar className="w-4 h-4 text-red-400" />
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-red-400" />
+                <span className="text-white font-mono text-xs sm:text-sm">Period:</span>
+              </div>
               <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className="w-48 bg-black/20 border-white/20 text-white font-mono text-sm">
+                <SelectTrigger className="w-full sm:w-48 bg-black/20 border-white/20 text-white font-mono text-xs sm:text-sm">
                   <SelectValue placeholder="Select period..." />
                 </SelectTrigger>
                 <SelectContent className="bg-black/90 border-white/20">
                   {periodOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="text-white">
+                    <SelectItem key={option.value} value={option.value} className="text-white text-xs sm:text-sm">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -107,7 +110,7 @@ const ChatQuickReport = () => {
               </Select>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
               <div className="flex-1">
                 <Textarea
                   value={report}
@@ -115,7 +118,7 @@ const ChatQuickReport = () => {
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   placeholder="Describe your progress, achievements, challenges, and next steps..."
-                  className={`bg-black/20 border-white/20 text-white placeholder:text-gray-500 font-mono resize-none transition-all duration-300 ${
+                  className={`bg-black/20 border-white/20 text-white placeholder:text-gray-500 font-mono resize-none transition-all duration-300 text-xs sm:text-sm ${
                     isFocused ? 'border-red-500/70' : ''
                   }`}
                   rows={3}
@@ -125,7 +128,7 @@ const ChatQuickReport = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting || !report.trim() || !period}
-                className={`px-6 py-3 font-mono self-end ${
+                className={`px-4 sm:px-6 py-2 sm:py-3 font-mono self-end w-full sm:w-auto text-xs sm:text-sm ${
                   isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                 } ${
                   report.trim() && period ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'
@@ -133,13 +136,15 @@ const ChatQuickReport = () => {
               >
                 {isSubmitting ? (
                   <>
-                    <Sparkles className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing...
+                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-2 animate-spin" />
+                    <span className="hidden sm:inline">Analyzing...</span>
+                    <span className="sm:hidden">...</span>
                   </>
                 ) : (
                   <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Submit
+                    <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                    <span className="hidden sm:inline">Submit</span>
+                    <span className="sm:hidden">Send</span>
                   </>
                 )}
               </Button>
