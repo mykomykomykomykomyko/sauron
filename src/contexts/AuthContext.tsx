@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,10 +70,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     
-    // Clear local state immediately
+    // Clear local state and session storage immediately
     setUser(null);
     setSession(null);
     setUserRole(null);
+    sessionStorage.removeItem('user_logged_in');
   };
 
   useEffect(() => {
