@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertTriangle, Clock, TrendingUp } from "lucide-react";
+import { CheckCircle, AlertTriangle, Clock, TrendingUp, Flag } from "lucide-react";
 
 interface AnalysisResultProps {
   score: number;
@@ -40,9 +40,24 @@ const AnalysisResult = ({ score, feedback, strengths, improvements, flags, statu
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 8) return "text-green-400";
-    if (score >= 6) return "text-yellow-400";
+    if (score >= 800) return "text-green-400";
+    if (score >= 650) return "text-blue-400";
+    if (score >= 400) return "text-yellow-400";
     return "text-red-400";
+  };
+
+  const getScoreTier = (score: number) => {
+    if (score >= 800) return "EXCEPTIONAL";
+    if (score >= 650) return "GOOD";
+    if (score >= 400) return "NEEDS IMPROVEMENT";
+    return "UNACCEPTABLE";
+  };
+
+  const getScoreDescription = (score: number) => {
+    if (score >= 800) return "Outstanding performance with comprehensive technical detail";
+    if (score >= 650) return "Good performance meeting professional standards";
+    if (score >= 400) return "Below standards, requires significant improvement";
+    return "Fails to meet minimum professional requirements";
   };
 
   return (
@@ -51,42 +66,54 @@ const AnalysisResult = ({ score, feedback, strengths, improvements, flags, statu
       <Card className="bg-neutral-900 border-neutral-800">
         <CardHeader className="border-b border-neutral-800">
           <CardTitle className="text-xl text-white font-mono flex items-center justify-between">
-            Analysis Results
-            <Badge className={`${getStatusColor(status)} border font-mono`}>
-              {getStatusIcon(status)}
-              <span className="ml-1 capitalize">{status}</span>
-            </Badge>
+            SAURON Analysis Results
+            <div className="flex items-center gap-3">
+              {flags > 0 && (
+                <Badge className="bg-red-900/20 text-red-400 border-red-800/30 border font-mono">
+                  <Flag className="w-3 h-3 mr-1" />
+                  {flags} Flag{flags > 1 ? 's' : ''}
+                </Badge>
+              )}
+              <Badge className={`${getStatusColor(status)} border font-mono`}>
+                {getStatusIcon(status)}
+                <span className="ml-1 capitalize">{status}</span>
+              </Badge>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex items-center space-x-6 mb-6">
             <div className="text-center">
-              <div className={`text-4xl font-bold font-mono ${getScoreColor(score)}`}>
+              <div className={`text-5xl font-bold font-mono ${getScoreColor(score)}`}>
                 {score}
               </div>
-              <div className="text-sm text-neutral-400 font-mono">SAURON Score</div>
+              <div className="text-lg text-neutral-400 font-mono">/ 1000</div>
+              <div className={`text-sm font-mono mt-1 ${getScoreColor(score)}`}>
+                {getScoreTier(score)}
+              </div>
             </div>
             <div className="flex-1">
-              <div className="w-full bg-neutral-800 rounded-full h-3">
+              <div className="w-full bg-neutral-800 rounded-full h-4">
                 <div
-                  className={`h-3 rounded-full transition-all duration-500 ${
-                    score >= 8 ? 'bg-green-500' : score >= 6 ? 'bg-yellow-500' : 'bg-red-500'
+                  className={`h-4 rounded-full transition-all duration-1000 ${
+                    score >= 800 ? 'bg-green-500' : 
+                    score >= 650 ? 'bg-blue-500' :
+                    score >= 400 ? 'bg-yellow-500' : 'bg-red-500'
                   }`}
-                  style={{ width: `${(score / 10) * 100}%` }}
+                  style={{ width: `${(score / 1000) * 100}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between text-xs text-neutral-400 mt-1 font-mono">
+              <div className="flex justify-between text-xs text-neutral-400 mt-2 font-mono">
                 <span>0</span>
-                <span>5</span>
-                <span>10</span>
+                <span>400</span>
+                <span>650</span>
+                <span>800</span>
+                <span>1000</span>
+              </div>
+              <div className="text-sm text-neutral-300 mt-2 font-mono">
+                {getScoreDescription(score)}
               </div>
             </div>
-            {flags > 0 && (
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-400 font-mono">{flags}</div>
-                <div className="text-sm text-neutral-400 font-mono">Flags</div>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -96,31 +123,50 @@ const AnalysisResult = ({ score, feedback, strengths, improvements, flags, statu
         <CardHeader className="border-b border-neutral-800">
           <CardTitle className="text-xl text-white font-mono flex items-center">
             <TrendingUp className="w-5 h-5 mr-2 text-red-500" />
-            Detailed Feedback
+            Detailed Analysis Report
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="prose prose-invert max-w-none">
-            <div className="text-neutral-300 whitespace-pre-line font-mono text-sm">
-              {feedback}
-            </div>
+            <div 
+              className="text-neutral-300 font-mono text-sm leading-relaxed"
+              dangerouslySetInnerHTML={{ 
+                __html: feedback
+                  .replace(/\n/g, '<br>')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+                  .replace(/\*(.*?)\*/g, '<em class="text-yellow-400">$1</em>')
+                  .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold text-red-400 mb-4 mt-6">$1</h1>')
+                  .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold text-red-300 mb-3 mt-5">$1</h2>')
+                  .replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold text-red-200 mb-2 mt-4">$1</h3>')
+                  .replace(/^\| (.*$)/gm, '<div class="font-mono text-xs bg-neutral-800 p-2 border-l-2 border-red-500">$1</div>')
+                  .replace(/^- (.*$)/gm, '<div class="flex items-start space-x-2 mb-1"><span class="text-red-400 mt-1">•</span><span>$1</span></div>')
+                  .replace(/🏆/g, '<span class="text-yellow-400">🏆</span>')
+                  .replace(/✅/g, '<span class="text-green-400">✅</span>')
+                  .replace(/⚠️/g, '<span class="text-yellow-400">⚠️</span>')
+                  .replace(/🚨/g, '<span class="text-red-400">🚨</span>')
+                  .replace(/🚩/g, '<span class="text-red-400">🚩</span>')
+                  .replace(/📈/g, '<span class="text-blue-400">📈</span>')
+                  .replace(/🎯/g, '<span class="text-purple-400">🎯</span>')
+                  .replace(/📋/g, '<span class="text-cyan-400">📋</span>')
+              }}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Strengths and Improvements */}
+      {/* Strengths and Improvements Summary */}
       {(strengths.length > 0 || improvements.length > 0) && (
         <div className="grid md:grid-cols-2 gap-6">
           {strengths.length > 0 && (
             <Card className="bg-neutral-900 border-neutral-800">
               <CardHeader className="border-b border-neutral-800">
                 <CardTitle className="text-lg text-green-400 font-mono">
-                  Strengths
+                  ✅ Key Strengths
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <ul className="space-y-2">
-                  {strengths.map((strength, index) => (
+                <ul className="space-y-3">
+                  {strengths.slice(0, 5).map((strength, index) => (
                     <li key={index} className="flex items-start space-x-2">
                       <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                       <span className="text-neutral-300 text-sm font-mono">{strength}</span>
@@ -135,12 +181,12 @@ const AnalysisResult = ({ score, feedback, strengths, improvements, flags, statu
             <Card className="bg-neutral-900 border-neutral-800">
               <CardHeader className="border-b border-neutral-800">
                 <CardTitle className="text-lg text-yellow-400 font-mono">
-                  Improvements
+                  📈 Priority Improvements
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <ul className="space-y-2">
-                  {improvements.map((improvement, index) => (
+                <ul className="space-y-3">
+                  {improvements.slice(0, 5).map((improvement, index) => (
                     <li key={index} className="flex items-start space-x-2">
                       <TrendingUp className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
                       <span className="text-neutral-300 text-sm font-mono">{improvement}</span>
