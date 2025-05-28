@@ -1,271 +1,392 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, ArrowLeft, LogIn, Loader2, KeyRound, UserPlus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, Shield, Lock, Mail, User, ArrowRight, Brain, Network, Sparkles, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { toast } from "sonner";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [isRegister, setIsRegister] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: ""
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState("signin");
+
+  const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
+    setIsVisible(true);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      if (isRegister) {
-        // Registration
-        if (formData.password !== formData.confirmPassword) {
-          toast.error("Passwords don't match");
-          setLoading(false);
-          return;
-        }
-
-        if (formData.password.length < 6) {
-          toast.error("Password must be at least 6 characters");
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        if (error) throw error;
-        toast.success("Registration successful! Please check your email to verify your account.");
-        setIsLogin(true);
-        setIsRegister(false);
-      } else if (isLogin) {
-        // Login
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        if (error) throw error;
-        toast.success("Logged in successfully!");
-        navigate('/dashboard');
-      } else {
-        // Forgot password
-        const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-          redirectTo: `${window.location.origin}/auth`,
-        });
-
-        if (error) throw error;
-        toast.success("Password reset email sent! Check your inbox.");
-        setIsLogin(true);
-      }
+      await signIn(email, password);
+      toast.success("Welcome back to The Eye of Sauron!");
+      navigate("/dashboard");
     } catch (error: any) {
-      console.error('Auth error:', error);
-      if (error.message.includes('User already registered')) {
-        toast.error("This email is already registered. Please sign in instead.");
-      } else if (error.message.includes('Invalid login credentials')) {
-        toast.error("Invalid email or password. Please check your credentials.");
-      } else {
-        toast.error(error.message || "Authentication failed");
-      }
+      console.error("Sign in error:", error);
+      toast.error(error.message || "Failed to sign in. Please check your credentials.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await signUp(email, password, fullName);
+      toast.success("Account created successfully! Check your email to verify your account.");
+      setActiveTab("signin");
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      toast.error(error.message || "Failed to create account. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const switchToRegister = () => {
-    setIsLogin(false);
-    setIsRegister(true);
-    setFormData({ email: "", password: "", confirmPassword: "" });
-  };
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1,
+    delay: Math.random() * 5,
+    duration: Math.random() * 15 + 10,
+  }));
 
-  const switchToLogin = () => {
-    setIsLogin(true);
-    setIsRegister(false);
-    setFormData({ email: "", password: "", confirmPassword: "" });
-  };
-
-  const switchToForgotPassword = () => {
-    setIsLogin(false);
-    setIsRegister(false);
-    setFormData({ email: "", password: "", confirmPassword: "" });
-  };
-
-  const getTitle = () => {
-    if (isRegister) return 'Create Account';
-    if (isLogin) return 'Sign In';
-    return 'Reset Password';
-  };
-
-  const getDescription = () => {
-    if (isRegister) return 'Join the SAURON system';
-    if (isLogin) return 'Access the SAURON system';
-    return 'Enter your email to reset your password';
-  };
+  const features = [
+    {
+      icon: Brain,
+      title: "AI-Powered Analysis",
+      description: "Advanced machine learning validates every report"
+    },
+    {
+      icon: Shield,
+      title: "Enterprise Security",
+      description: "Bank-grade encryption protects your data"
+    },
+    {
+      icon: Network,
+      title: "Real-time Insights",
+      description: "Get instant feedback and performance metrics"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 md:p-8 border-b border-neutral-800">
-        <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-          <ArrowLeft className="w-5 h-5 text-neutral-400" />
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-red-900 to-red-800 rounded-lg flex items-center justify-center border border-red-800/30">
-              <Eye className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white tracking-tight font-mono">SAURON</span>
-          </div>
-        </Link>
-      </nav>
+    <div className="min-h-screen bg-black text-white overflow-hidden relative flex items-center justify-center">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-black to-red-900/30"></div>
+      <div className="fixed inset-0 bg-gradient-to-tr from-blue-900/10 via-transparent to-orange-900/10"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-black to-transparent"></div>
+
+      {/* Animated mesh gradient */}
+      <div className="fixed inset-0 opacity-30">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
+      </div>
+
+      {/* Dynamic cursor glow */}
+      <div 
+        className="fixed w-96 h-96 bg-gradient-radial from-red-500/15 via-purple-500/8 to-transparent rounded-full blur-3xl pointer-events-none z-0 transition-all duration-500 hidden md:block"
+        style={{
+          left: mousePosition.x - 192,
+          top: mousePosition.y - 192,
+        }}
+      />
+
+      {/* Floating particles */}
+      {particles.map((particle) => (
+        <div
+          key={particle.id}
+          className="absolute rounded-full pointer-events-none animate-pulse"
+          style={{
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            background: `linear-gradient(45deg, #ef4444, #8b5cf6, #06b6d4)`,
+            animationDelay: `${particle.delay}s`,
+            animationDuration: `${particle.duration}s`,
+            opacity: 0.4,
+          }}
+        />
+      ))}
+
+      {/* Back to Home */}
+      <Link 
+        to="/" 
+        className="fixed top-6 left-6 z-50 flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 group"
+      >
+        <div className="w-10 h-10 bg-gradient-to-br from-red-500/20 to-purple-500/20 rounded-xl border border-white/20 flex items-center justify-center backdrop-blur-xl group-hover:scale-110 transition-all duration-300">
+          <Eye className="w-5 h-5" />
+        </div>
+        <span className="font-mono text-sm hidden sm:inline">Back to Home</span>
+      </Link>
 
       {/* Main Content */}
-      <div className="px-6 md:px-8 py-16">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4 tracking-tight font-mono">
-              {getTitle()}
-            </h1>
-            <p className="text-neutral-400">
-              {getDescription()}
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          
+          {/* Left Side - Branding */}
+          <div className={`text-center lg:text-left transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'}`}>
+            <div className="flex items-center justify-center lg:justify-start space-x-3 mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-500 via-purple-600 to-red-700 rounded-2xl flex items-center justify-center border border-white/20 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                <Eye className="w-8 h-8 text-white relative z-10" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-3xl font-bold text-white tracking-tight font-mono">
+                  THE EYE OF SAURON
+                </h1>
+                <div className="flex items-center space-x-2 mt-1">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-400 font-mono">AI-POWERED OVERSIGHT</span>
+                </div>
+              </div>
+            </div>
+
+            <h2 className="text-4xl sm:text-5xl font-bold font-mono mb-6 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
+              SECURE ACCESS
+            </h2>
+            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+              Join the next generation of intelligent project oversight. Your reports, analyzed and validated by advanced AI.
             </p>
+
+            {/* Features List */}
+            <div className="space-y-4 mb-8">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-start space-x-4 group">
+                  <div className="p-2 bg-gradient-to-br from-white/10 to-white/5 rounded-lg border border-white/20 group-hover:scale-110 transition-all duration-300">
+                    <feature.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white font-mono text-sm">{feature.title}</h4>
+                    <p className="text-gray-400 text-sm">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-400">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span>Enterprise Grade</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span>SOC 2 Compliant</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                <span>99.9% Uptime</span>
+              </div>
+            </div>
           </div>
 
-          <Card className="bg-neutral-900 border-neutral-800">
-            <CardHeader>
-              <CardTitle className="text-white font-mono">
-                {isRegister ? 'Register' : isLogin ? 'Login' : 'Forgot Password'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-neutral-300 font-mono">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="your.email@company.com"
-                    className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500"
-                    required
-                  />
+          {/* Right Side - Auth Forms */}
+          <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'}`}>
+            <Card className="bg-black/40 border-white/20 backdrop-blur-xl shadow-2xl">
+              <CardHeader className="text-center pb-6">
+                <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-500/20 to-purple-500/20 border border-white/20 rounded-full px-4 py-2 backdrop-blur-xl mb-4">
+                  <Sparkles className="w-4 h-4 text-red-400" />
+                  <span className="text-sm font-mono text-white/90">SECURE LOGIN</span>
+                  <Lock className="w-4 h-4 text-purple-400" />
                 </div>
-
-                {(isLogin || isRegister) && (
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-neutral-300 font-mono">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                      placeholder="Enter your password"
-                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                )}
-
-                {isRegister && (
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-neutral-300 font-mono">Confirm Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      placeholder="Confirm your password"
-                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 font-mono"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {isRegister ? 'Creating Account...' : isLogin ? 'Signing In...' : 'Sending Reset Email...'}
-                    </>
-                  ) : (
-                    <>
-                      {isRegister ? <UserPlus className="w-4 h-4 mr-2" /> : isLogin ? <LogIn className="w-4 h-4 mr-2" /> : <KeyRound className="w-4 h-4 mr-2" />}
-                      {isRegister ? 'Create Account' : isLogin ? 'Sign In' : 'Send Reset Email'}
-                    </>
-                  )}
-                </Button>
-
-                <div className="text-center space-y-2">
-                  {isLogin && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={switchToRegister}
-                        className="text-neutral-400 hover:text-white transition-colors font-mono text-sm block w-full"
-                      >
-                        Don't have an account? Register here
-                      </button>
-                      <button
-                        type="button"
-                        onClick={switchToForgotPassword}
-                        className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
-                      >
-                        Forgot your password?
-                      </button>
-                    </>
-                  )}
-                  {isRegister && (
-                    <button
-                      type="button"
-                      onClick={switchToLogin}
-                      className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
+                <CardTitle className="text-2xl font-mono text-white">
+                  Access Your Dashboard
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  Enter your credentials to continue your oversight journey
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 bg-black/20 border border-white/20">
+                    <TabsTrigger 
+                      value="signin" 
+                      className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
                     >
-                      Already have an account? Sign in here
-                    </button>
-                  )}
-                  {!isLogin && !isRegister && (
-                    <button
-                      type="button"
-                      onClick={switchToLogin}
-                      className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
+                      Sign In
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="signup"
+                      className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
                     >
-                      Back to sign in
-                    </button>
-                  )}
+                      Sign Up
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="signin" className="space-y-4 mt-6">
+                    <form onSubmit={handleSignIn} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signin-email" className="text-white font-mono flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email</span>
+                        </Label>
+                        <Input
+                          id="signin-email"
+                          type="email"
+                          placeholder="your@email.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signin-password" className="text-white font-mono flex items-center space-x-2">
+                          <Lock className="w-4 h-4" />
+                          <span>Password</span>
+                        </Label>
+                        <Input
+                          id="signin-password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                        <Shield className="w-4 h-4 mr-2 relative z-10" />
+                        <span className="relative z-10">{isLoading ? "Authenticating..." : "Sign In"}</span>
+                        <ArrowRight className="w-4 h-4 ml-2 relative z-10 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </form>
+                  </TabsContent>
+                  
+                  <TabsContent value="signup" className="space-y-4 mt-6">
+                    <form onSubmit={handleSignUp} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-name" className="text-white font-mono flex items-center space-x-2">
+                          <User className="w-4 h-4" />
+                          <span>Full Name</span>
+                        </Label>
+                        <Input
+                          id="signup-name"
+                          type="text"
+                          placeholder="John Doe"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          required
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email" className="text-white font-mono flex items-center space-x-2">
+                          <Mail className="w-4 h-4" />
+                          <span>Email</span>
+                        </Label>
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          placeholder="your@email.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password" className="text-white font-mono flex items-center space-x-2">
+                          <Lock className="w-4 h-4" />
+                          <span>Password</span>
+                        </Label>
+                        <Input
+                          id="signup-password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm-password" className="text-white font-mono flex items-center space-x-2">
+                          <Lock className="w-4 h-4" />
+                          <span>Confirm Password</span>
+                        </Label>
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                        <User className="w-4 h-4 mr-2 relative z-10" />
+                        <span className="relative z-10">{isLoading ? "Creating Account..." : "Create Account"}</span>
+                        <ArrowRight className="w-4 h-4 ml-2 relative z-10 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
+
+                {/* Additional Info */}
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-gray-400">
+                    By continuing, you agree to our Terms of Service and Privacy Policy
+                  </p>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
+
+      {/* Custom styles */}
+      <style>{`
+        .bg-gradient-radial {
+          background: radial-gradient(var(--tw-gradient-stops));
+        }
+      `}</style>
     </div>
   );
 };

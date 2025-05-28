@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target, TrendingUp, Globe, Clock, CheckCircle, ArrowRight, Brain, Network, Cpu } from "lucide-react";
+import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target, TrendingUp, Globe, Clock, CheckCircle, ArrowRight, Brain, Network, Cpu, Database, BarChart3, MessageSquare, Lock, Workflow, Star, Award, ChevronRight, PlayCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,7 @@ const Index = () => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
@@ -39,9 +40,15 @@ const Index = () => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
     
+    // Auto-cycle through workflow steps
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev + 1) % 4);
+    }, 3000);
+    
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
+      clearInterval(interval);
     };
   }, []);
 
@@ -73,6 +80,61 @@ const Index = () => {
     size: Math.random() * 150 + 50,
     delay: Math.random() * 10,
   }));
+
+  const workflowSteps = [
+    {
+      title: "Submit Report",
+      description: "Contractors submit detailed progress reports through our intuitive interface",
+      icon: FileText,
+      color: "from-blue-500 to-cyan-500",
+      features: ["Smart form validation", "Auto-save functionality", "Rich text editing", "File attachments"]
+    },
+    {
+      title: "AI Analysis",
+      description: "Advanced AI processes and validates the report against multiple data sources",
+      icon: Brain,
+      color: "from-purple-500 to-pink-500",
+      features: ["Natural language processing", "Data cross-validation", "Pattern recognition", "Quality assessment"]
+    },
+    {
+      title: "Real-time Insights",
+      description: "Generate actionable insights and identify potential issues immediately",
+      icon: BarChart3,
+      color: "from-red-500 to-orange-500",
+      features: ["Instant feedback", "Performance metrics", "Risk assessment", "Trend analysis"]
+    },
+    {
+      title: "Admin Review",
+      description: "Admins receive comprehensive dashboards with all validated data and insights",
+      icon: Shield,
+      color: "from-green-500 to-emerald-500",
+      features: ["Executive dashboards", "Detailed analytics", "Export capabilities", "Team oversight"]
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Chen",
+      role: "Project Manager",
+      company: "TechCorp",
+      content: "The Eye of Sauron has revolutionized how we track contractor progress. The AI insights are incredibly accurate.",
+      rating: 5
+    },
+    {
+      name: "Marcus Rodriguez",
+      role: "Operations Director",
+      company: "BuildTech",
+      content: "We've saved 80% of our time on report validation. The automated analysis catches issues we would have missed.",
+      rating: 5
+    },
+    {
+      name: "Emily Watson",
+      role: "Team Lead",
+      company: "DataFlow",
+      content: "The real-time insights help us make better decisions faster. Our project success rate has increased significantly.",
+      rating: 5
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
@@ -363,6 +425,290 @@ const Index = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Workflow Section */}
+      <div className="px-4 sm:px-6 md:px-8 py-24 sm:py-32 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 sm:mb-20">
+            <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/20 rounded-full px-6 py-3 backdrop-blur-xl mb-8">
+              <Workflow className="w-5 h-5 text-blue-400" />
+              <span className="text-sm font-mono text-white/90">HOW IT WORKS</span>
+              <Zap className="w-5 h-5 text-purple-400" />
+            </div>
+            <h2 className="text-4xl sm:text-6xl font-bold font-mono mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              INTELLIGENT WORKFLOW
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Experience the power of AI-driven report management with our streamlined four-step process
+            </p>
+          </div>
+
+          {/* Interactive Workflow Visualization */}
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Workflow Steps */}
+            <div className="space-y-6">
+              {workflowSteps.map((step, index) => (
+                <div 
+                  key={index}
+                  className={`group cursor-pointer transition-all duration-500 ${
+                    currentStep === index ? 'scale-105' : 'hover:scale-102'
+                  }`}
+                  onClick={() => setCurrentStep(index)}
+                >
+                  <Card className={`bg-black/40 border-white/20 backdrop-blur-xl transition-all duration-500 ${
+                    currentStep === index 
+                      ? 'border-white/60 shadow-2xl shadow-red-500/20' 
+                      : 'hover:border-white/40'
+                  }`}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <div className={`p-3 rounded-xl bg-gradient-to-br ${step.color} relative overflow-hidden`}>
+                          <step.icon className="w-6 h-6 text-white relative z-10" />
+                          {currentStep === index && (
+                            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <span className="text-sm font-mono text-gray-400">STEP {index + 1}</span>
+                            {currentStep === index && (
+                              <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                            )}
+                          </div>
+                          <h3 className="text-xl font-bold text-white mb-2 font-mono">{step.title}</h3>
+                          <p className="text-gray-300 mb-4 leading-relaxed">{step.description}</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {step.features.map((feature, featureIndex) => (
+                              <div key={featureIndex} className="flex items-center space-x-2">
+                                <CheckCircle className="w-4 h-4 text-green-400" />
+                                <span className="text-sm text-gray-400">{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <ChevronRight className={`w-5 h-5 text-gray-400 transition-all duration-300 ${
+                          currentStep === index ? 'text-white rotate-90' : 'group-hover:translate-x-1'
+                        }`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+
+            {/* Visual Representation */}
+            <div className="relative">
+              <div className="aspect-square max-w-md mx-auto relative">
+                {/* Central Hub */}
+                <div className="absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center border-4 border-white/20 backdrop-blur-xl">
+                  <Eye className="w-12 h-12 text-white animate-pulse" />
+                </div>
+
+                {/* Workflow Nodes */}
+                {workflowSteps.map((step, index) => {
+                  const angle = (index * 90) - 45; // Position around circle
+                  const radius = 140;
+                  const x = Math.cos((angle * Math.PI) / 180) * radius;
+                  const y = Math.sin((angle * Math.PI) / 180) * radius;
+                  
+                  return (
+                    <div
+                      key={index}
+                      className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
+                      style={{
+                        left: `calc(50% + ${x}px)`,
+                        top: `calc(50% + ${y}px)`,
+                        transform: `translate(-50%, -50%) scale(${currentStep === index ? 1.2 : 1})`,
+                      }}
+                    >
+                      <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center border-2 transition-all duration-500 ${
+                        currentStep === index ? 'border-white shadow-2xl' : 'border-white/20'
+                      }`}>
+                        <step.icon className="w-8 h-8 text-white" />
+                      </div>
+                      
+                      {/* Connection Line */}
+                      <div 
+                        className={`absolute top-1/2 left-1/2 w-20 h-0.5 bg-gradient-to-r origin-left transition-all duration-500 ${
+                          currentStep === index 
+                            ? 'from-white to-red-400 opacity-100' 
+                            : 'from-white/20 to-white/10 opacity-50'
+                        }`}
+                        style={{
+                          transform: `translate(-50%, -50%) rotate(${angle + 135}deg)`,
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+
+                {/* Progress Indicator */}
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                  {workflowSteps.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        currentStep === index ? 'bg-red-400 w-8' : 'bg-white/20'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Deep Dive */}
+      <div className="px-4 sm:px-6 md:px-8 py-24 sm:py-32 relative z-10 bg-gradient-to-b from-transparent via-black/50 to-transparent">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold font-mono mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              ADVANCED CAPABILITIES
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Powered by cutting-edge AI technology and designed for enterprise-scale operations
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "AI-Powered Analysis",
+                description: "Advanced machine learning algorithms analyze reports for consistency, accuracy, and potential issues",
+                icon: Brain,
+                features: ["Natural Language Processing", "Pattern Recognition", "Anomaly Detection", "Predictive Analytics"],
+                color: "from-purple-500 to-pink-500"
+              },
+              {
+                title: "Real-Time Monitoring",
+                description: "Track progress and performance metrics with live dashboards and instant notifications",
+                icon: TrendingUp,
+                features: ["Live Dashboards", "Custom Alerts", "Performance Metrics", "Trend Analysis"],
+                color: "from-blue-500 to-cyan-500"
+              },
+              {
+                title: "Enterprise Security",
+                description: "Bank-grade security with role-based access control and comprehensive audit trails",
+                icon: Lock,
+                features: ["End-to-End Encryption", "Role-Based Access", "Audit Trails", "Compliance Ready"],
+                color: "from-red-500 to-orange-500"
+              }
+            ].map((feature, index) => (
+              <Card key={index} className="bg-black/40 border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 group backdrop-blur-xl">
+                <CardHeader>
+                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                    <feature.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <CardTitle className="text-xl font-mono text-white group-hover:text-white transition-colors">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-300 mb-6 leading-relaxed">{feature.description}</p>
+                  <ul className="space-y-2">
+                    {feature.features.map((item, itemIndex) => (
+                      <li key={itemIndex} className="flex items-center space-x-3">
+                        <CheckCircle className="w-4 h-4 text-green-400" />
+                        <span className="text-sm text-gray-400">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonials */}
+      <div className="px-4 sm:px-6 md:px-8 py-24 sm:py-32 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-6xl font-bold font-mono mb-6 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+              TRUSTED BY LEADERS
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              See what industry professionals are saying about The Eye of Sauron
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="bg-black/40 border-white/20 hover:border-white/40 transition-all duration-500 group backdrop-blur-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-300 mb-6 leading-relaxed italic">"{testimonial.content}"</p>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">
+                        {testimonial.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold">{testimonial.name}</div>
+                      <div className="text-gray-400 text-sm">{testimonial.role}</div>
+                      <div className="text-gray-500 text-sm">{testimonial.company}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Final CTA Section */}
+      <div className="px-4 sm:px-6 md:px-8 py-24 sm:py-32 relative z-10 bg-gradient-to-t from-black via-red-900/10 to-transparent">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-500/20 to-purple-500/20 border border-white/20 rounded-full px-6 py-3 backdrop-blur-xl mb-8">
+            <Sparkles className="w-5 h-5 text-red-400" />
+            <span className="text-sm font-mono text-white/90">READY TO BEGIN?</span>
+            <Zap className="w-5 h-5 text-purple-400" />
+          </div>
+          
+          <h2 className="text-4xl sm:text-6xl font-bold font-mono mb-6 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
+            START YOUR OVERSIGHT
+          </h2>
+          <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+            Join hundreds of organizations already using The Eye of Sauron to revolutionize their project management
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link to={user ? "/submit" : "/auth"}>
+              <Button size="lg" className="px-12 py-6 text-xl bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-110 font-mono group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                <PlayCircle className="w-6 h-6 mr-3 relative z-10" />
+                <span className="relative z-10">{user ? "Submit Report" : "Get Started"}</span>
+                <ArrowRight className="w-5 h-5 ml-3 relative z-10 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="px-12 py-6 text-xl border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50 transition-all duration-500 hover:scale-110 font-mono backdrop-blur-xl">
+              <MessageSquare className="w-6 h-6 mr-3" />
+              Contact Sales
+            </Button>
+          </div>
+          
+          <div className="mt-12 grid grid-cols-3 gap-8 text-center opacity-60">
+            <div>
+              <Award className="w-8 h-8 mx-auto mb-2 text-yellow-400" />
+              <div className="text-sm text-gray-400">Award Winning</div>
+            </div>
+            <div>
+              <Globe className="w-8 h-8 mx-auto mb-2 text-blue-400" />
+              <div className="text-sm text-gray-400">Global Scale</div>
+            </div>
+            <div>
+              <Clock className="w-8 h-8 mx-auto mb-2 text-green-400" />
+              <div className="text-sm text-gray-400">24/7 Support</div>
+            </div>
           </div>
         </div>
       </div>
