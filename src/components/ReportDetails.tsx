@@ -17,6 +17,94 @@ interface ReportDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Helper function to render markdown-like text as JSX
+const renderMarkdownText = (text: string) => {
+  if (!text) return null;
+
+  // Split by lines and process each line
+  const lines = text.split('\n');
+  const elements: JSX.Element[] = [];
+  let currentIndex = 0;
+
+  lines.forEach((line, index) => {
+    const key = `line-${index}`;
+    
+    // Headers
+    if (line.startsWith('# ')) {
+      elements.push(<h1 key={key} className="text-2xl font-bold text-white mt-6 mb-3">{line.substring(2)}</h1>);
+    } else if (line.startsWith('## ')) {
+      elements.push(<h2 key={key} className="text-xl font-bold text-blue-400 mt-5 mb-2">{line.substring(3)}</h2>);
+    } else if (line.startsWith('### ')) {
+      elements.push(<h3 key={key} className="text-lg font-bold text-purple-400 mt-4 mb-2">{line.substring(4)}</h3>);
+    }
+    // Table headers
+    else if (line.includes('|') && line.includes('Category')) {
+      elements.push(
+        <div key={key} className="overflow-x-auto mt-3 mb-3">
+          <table className="w-full border-collapse border border-gray-600">
+            <thead>
+              <tr className="bg-gray-800">
+                {line.split('|').filter(cell => cell.trim()).map((cell, cellIndex) => (
+                  <th key={cellIndex} className="border border-gray-600 px-3 py-2 text-left text-gray-300 font-semibold">
+                    {cell.trim()}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+          </table>
+        </div>
+      );
+    }
+    // Table separator line (ignore)
+    else if (line.includes('|') && line.includes('---')) {
+      return;
+    }
+    // Table rows
+    else if (line.includes('|') && !line.includes('Category')) {
+      const cells = line.split('|').filter(cell => cell.trim());
+      if (cells.length > 1) {
+        elements.push(
+          <div key={key} className="overflow-x-auto -mt-3 mb-3">
+            <table className="w-full border-collapse border border-gray-600">
+              <tbody>
+                <tr>
+                  {cells.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
+                      {cell.trim()}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+    }
+    // Bold text
+    else if (line.includes('**')) {
+      const parts = line.split('**');
+      const processed = parts.map((part, partIndex) => 
+        partIndex % 2 === 1 ? <strong key={partIndex} className="text-yellow-400 font-bold">{part}</strong> : part
+      );
+      elements.push(<p key={key} className="text-gray-300 mb-2">{processed}</p>);
+    }
+    // List items
+    else if (line.startsWith('- ')) {
+      elements.push(<li key={key} className="text-gray-300 ml-4 mb-1 list-disc">{line.substring(2)}</li>);
+    }
+    // Regular paragraphs
+    else if (line.trim()) {
+      elements.push(<p key={key} className="text-gray-300 mb-2">{line}</p>);
+    }
+    // Empty lines
+    else {
+      elements.push(<br key={key} />);
+    }
+  });
+
+  return <div className="space-y-1">{elements}</div>;
+};
+
 export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const queryClient = useQueryClient();
@@ -24,7 +112,9 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
   const analysisMutation = useMutation({
     mutationFn: triggerAIAnalysis,
     onSuccess: () => {
+      // Invalidate and refetch both reports and the specific report data
       queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['report', report.id] });
       toast.success("AI analysis completed successfully");
       setIsAnalyzing(false);
     },
@@ -61,6 +151,17 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
   };
 
   const analysis = report.analysis_results?.[0];
+
+  // Extract the feedback content from the detailed_feedback
+  const getFeedbackContent = (detailedFeedback: any) => {
+    if (typeof detailedFeedback === 'string') {
+      return detailedFeedback;
+    }
+    if (detailedFeedback && typeof detailedFeedback === 'object') {
+      return detailedFeedback.feedback || JSON.stringify(detailedFeedback, null, 2);
+    }
+    return 'No detailed feedback available';
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -179,11 +280,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                     <div>
                       <h4 className="text-white font-mono mb-2">Detailed Feedback</h4>
                       <div className="bg-black/20 p-4 rounded-lg">
-                        <pre className="text-gray-300 text-sm whitespace-pre-wrap">
-                          {typeof analysis.detailed_feedback === 'string' 
-                            ? analysis.detailed_feedback 
-                            : JSON.stringify(analysis.detailed_feedback, null, 2)}
-                        </pre>
+                        {renderMarkdownText(getFeedbackContent(analysis.detailed_feedback))}
                       </div>
                     </div>
                   )}
