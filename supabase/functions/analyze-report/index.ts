@@ -57,30 +57,30 @@ serve(async (req) => {
     // Enhanced analysis prompt with strict evaluation criteria
     const analysisPrompt = `You are SAURON, a strict AI evaluator for contractor progress reports. Your job is to rigorously assess reports and identify contractors who are not delivering real work.
 
-SCORING SYSTEM: Rate from 0-1000 points based on these criteria:
+SCORING SYSTEM: Rate from 0-100 points based on these criteria:
 
-**TECHNICAL CONTENT (300 points max):**
-- Specific implementation details, code, algorithms (200 points)
-- Technical challenges and problem-solving (50 points)  
-- Technology stack and architectural decisions (50 points)
+**TECHNICAL CONTENT (30 points max):**
+- Specific implementation details, code, algorithms (20 points)
+- Technical challenges and problem-solving (5 points)  
+- Technology stack and architectural decisions (5 points)
 
-**DELIVERABLES (250 points max):**
-- Concrete completed features/modules (200 points)
-- Measurable progress and outcomes (50 points)
+**DELIVERABLES (25 points max):**
+- Concrete completed features/modules (20 points)
+- Measurable progress and outcomes (5 points)
 - RED FLAG: Multiple meetings mentioned without deliverables = 0 points + flags
 
-**CLARITY & COMMUNICATION (200 points max):**
-- Report length and detail (100 points)
-- Structure and organization (50 points)
-- Professional language and formatting (50 points)
+**CLARITY & COMMUNICATION (20 points max):**
+- Report length and detail (10 points)
+- Structure and organization (5 points)
+- Professional language and formatting (5 points)
 
-**PROACTIVITY & PLANNING (150 points max):**
-- Specific next steps and timelines (100 points)
-- Initiative and forward-thinking (50 points)
+**PROACTIVITY & PLANNING (15 points max):**
+- Specific next steps and timelines (10 points)
+- Initiative and forward-thinking (5 points)
 
-**PROFESSIONALISM (100 points max):**
-- Proper formatting and grammar (50 points)
-- Professional tone and time specificity (50 points)
+**PROFESSIONALISM (10 points max):**
+- Proper formatting and grammar (5 points)
+- Professional tone and time specificity (5 points)
 
 **STRICT EVALUATION RULES:**
 1. Committee meetings without deliverables = RED FLAG + point deduction
@@ -90,9 +90,9 @@ SCORING SYSTEM: Rate from 0-1000 points based on these criteria:
 5. Reports under 50 words = unacceptable
 
 **FLAGS SYSTEM:**
-- 0 flags: Validated (score typically 650+)
-- 1-2 flags: Needs Review (score typically 400-649)
-- 3+ flags: Flagged/Unacceptable (score typically <400)
+- 0 flags: Validated (score typically 65+)
+- 1-2 flags: Needs Review (score typically 40-64)
+- 3+ flags: Flagged/Unacceptable (score typically <40)
 
 Report to analyze:
 - Name: ${report.name}
@@ -103,13 +103,13 @@ Report to analyze:
 Provide analysis in JSON format with markdown-formatted detailed_feedback:
 
 {
-  "score": number_0_to_1000,
+  "score": number_0_to_100,
   "summary": "brief summary with score tier (EXCEPTIONAL/GOOD/NEEDS IMPROVEMENT/UNACCEPTABLE)",
   "strengths": ["specific strength 1", "specific strength 2"],
   "improvements": ["specific improvement 1", "specific improvement 2"],
   "flags": number_of_red_flags,
   "status": "validated|review|flagged",
-  "detailed_feedback": "# SAURON Analysis Report\\n\\n## Overall Score: X/1000\\n\\n**TIER:** Description\\n\\n## Score Breakdown\\n\\n| Category | Score | Max | Percentage |\\n|----------|-------|-----|------------|\\n| Technical Content | X | 300 | X% |\\n| Deliverables | X | 250 | X% |\\n| Clarity & Communication | X | 200 | X% |\\n| Proactivity & Planning | X | 150 | X% |\\n| Professionalism | X | 100 | X% |\\n\\n## 🚩 Red Flags: X\\n\\n[flag descriptions if any]\\n\\n## ✅ Strengths\\n\\n- [list strengths]\\n\\n## 📈 Areas for Improvement\\n\\n- [list improvements]\\n\\n## 🎯 Specific Recommendations\\n\\n[detailed recommendations by category]\\n\\n## 📋 Final Assessment\\n\\n[final assessment paragraph]"
+  "detailed_feedback": "# SAURON Analysis Report\\n\\n## Overall Score: X/100\\n\\n**TIER:** Description\\n\\n## Score Breakdown\\n\\n| Category | Score | Max | Percentage |\\n|----------|-------|-----|------------|\\n| Technical Content | X | 30 | X% |\\n| Deliverables | X | 25 | X% |\\n| Clarity & Communication | X | 20 | X% |\\n| Proactivity & Planning | X | 15 | X% |\\n| Professionalism | X | 10 | X% |\\n\\n## 🚩 Red Flags: X\\n\\n[flag descriptions if any]\\n\\n## ✅ Strengths\\n\\n- [list strengths]\\n\\n## 📈 Areas for Improvement\\n\\n- [list improvements]\\n\\n## 🎯 Specific Recommendations\\n\\n[detailed recommendations by category]\\n\\n## 📋 Final Assessment\\n\\n[final assessment paragraph]"
 }
 
 Be extremely strict. No work done = low score. Meetings without outputs = flags. Demand concrete technical deliverables.`;
@@ -162,8 +162,8 @@ Be extremely strict. No work done = low score. Meetings without outputs = flags.
       const jsonText = jsonMatch ? jsonMatch[0] : analysisText;
       analysis = JSON.parse(jsonText);
       
-      // Ensure score is within 0-1000 range
-      analysis.score = Math.max(0, Math.min(1000, analysis.score));
+      // Ensure score is within 0-100 range (database expects this range)
+      analysis.score = Math.max(0, Math.min(100, analysis.score));
       
     } catch (parseError) {
       console.error('Failed to parse Gemini response:', parseError);
@@ -174,18 +174,18 @@ Be extremely strict. No work done = low score. Meetings without outputs = flags.
       const hasDeliverables = report.report.toLowerCase().includes('completed') || 
                              report.report.toLowerCase().includes('implemented');
       
-      let fallbackScore = 200; // Start low
-      if (hasDeliverables) fallbackScore += 200;
-      if (reportLength > 100) fallbackScore += 150;
+      let fallbackScore = 20; // Start low (out of 100)
+      if (hasDeliverables) fallbackScore += 20;
+      if (reportLength > 100) fallbackScore += 15;
       
       analysis = {
-        score: fallbackScore,
-        summary: `Report analyzed with fallback system - Score: ${fallbackScore}/1000`,
+        score: Math.min(100, fallbackScore), // Ensure max 100
+        summary: `Report analyzed with fallback system - Score: ${fallbackScore}/100`,
         strengths: hasDeliverables ? ["Contains deliverable mentions"] : [],
         improvements: ["Provide more technical implementation details", "Include specific completed features"],
         flags: hasDeliverables ? 1 : 3,
-        status: fallbackScore < 400 ? "flagged" : (fallbackScore < 650 ? "review" : "validated"),
-        detailed_feedback: `# SAURON Analysis Report\n\n## Overall Score: ${fallbackScore}/1000\n\n**FALLBACK ANALYSIS** - Original AI response could not be parsed.\n\n## Assessment\n\nThis report received a fallback analysis. ${hasDeliverables ? 'Some deliverables mentioned.' : 'No clear deliverables identified.'} Report requires more technical detail and specific implementation information.`
+        status: fallbackScore < 40 ? "flagged" : (fallbackScore < 65 ? "review" : "validated"),
+        detailed_feedback: `# SAURON Analysis Report\n\n## Overall Score: ${fallbackScore}/100\n\n**FALLBACK ANALYSIS** - Original AI response could not be parsed.\n\n## Assessment\n\nThis report received a fallback analysis. ${hasDeliverables ? 'Some deliverables mentioned.' : 'No clear deliverables identified.'} Report requires more technical detail and specific implementation information.`
       };
     }
 
@@ -194,7 +194,7 @@ Be extremely strict. No work done = low score. Meetings without outputs = flags.
       .from('analysis_results')
       .upsert({
         report_id: reportId,
-        score: analysis.score,
+        score: analysis.score, // Now properly in 0-100 range
         status: analysis.status,
         flags: analysis.flags,
         summary: analysis.summary,
