@@ -38,13 +38,8 @@ import ChatQuickReport from "@/components/ChatQuickReport";
 const Index = () => {
   const { user, signOut } = useAuth();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [quickReport, setQuickReport] = useState("");
   const [isVisible, setIsVisible] = useState(false);
-  const [liveStats, setLiveStats] = useState({
-    reportsProcessed: 15420,
-    activeUsers: 2847,
-    avgProcessingTime: 0.3
-  });
+  const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
@@ -55,13 +50,9 @@ const Index = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
     
-    // Animate live stats
+    // Animate workflow steps
     const interval = setInterval(() => {
-      setLiveStats(prev => ({
-        reportsProcessed: prev.reportsProcessed + Math.floor(Math.random() * 3),
-        activeUsers: prev.activeUsers + Math.floor(Math.random() * 5) - 2,
-        avgProcessingTime: Number((0.2 + Math.random() * 0.3).toFixed(1))
-      }));
+      setActiveStep(prev => (prev + 1) % 4);
     }, 3000);
     
     return () => {
@@ -91,54 +82,38 @@ const Index = () => {
     {
       number: 1,
       title: "Submit Report",
-      description: "Contractors submit detailed progress reports",
+      description: "Contractors submit detailed progress reports through our intuitive interface",
       icon: Upload,
-      color: "from-blue-500 to-cyan-400"
+      color: "from-blue-500 to-cyan-400",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-500/30"
     },
     {
       number: 2,
       title: "AI Analysis",
-      description: "Advanced AI processes and validates submissions",
+      description: "Advanced neural networks process and validate submissions in real-time",
       icon: Brain,
-      color: "from-purple-500 to-pink-400"
+      color: "from-purple-500 to-pink-400",
+      bgColor: "bg-purple-500/10",
+      borderColor: "border-purple-500/30"
     },
     {
       number: 3,
       title: "Quality Review",
-      description: "Automated quality checks and validation",
+      description: "Automated quality checks ensure compliance and accuracy",
       icon: Shield,
-      color: "from-green-500 to-emerald-400"
+      color: "from-green-500 to-emerald-400",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/30"
     },
     {
       number: 4,
       title: "Dashboard Insights",
-      description: "Real-time analytics and performance metrics",
+      description: "Generate actionable insights and performance metrics",
       icon: BarChart3,
-      color: "from-orange-500 to-red-400"
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Project Manager",
-      company: "TechCorp",
-      quote: "The Eye of Sauron has revolutionized how we track contractor progress. AI-powered insights save us hours every week.",
-      avatar: "SC"
-    },
-    {
-      name: "Marcus Rodriguez",
-      role: "Operations Director",
-      company: "BuildRight",
-      quote: "Real-time analysis and automated quality checks have improved our project delivery by 40%.",
-      avatar: "MR"
-    },
-    {
-      name: "Emily Watson",
-      role: "Team Lead",
-      company: "DevSolutions",
-      quote: "The intelligent oversight gives us confidence that nothing falls through the cracks.",
-      avatar: "EW"
+      color: "from-orange-500 to-red-400",
+      bgColor: "bg-orange-500/10",
+      borderColor: "border-orange-500/30"
     }
   ];
 
@@ -292,94 +267,81 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Workflow Steps */}
+        {/* Enhanced Workflow Visualization */}
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-center mb-12 font-mono">
             HOW THE SYSTEM <span className="text-red-400">WORKS</span>
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {workflowSteps.map((step, index) => {
-              const IconComponent = step.icon;
-              return (
-                <Card key={step.number} className="bg-black/40 border-white/10 hover:border-red-500/30 transition-all duration-300 group">
-                  <CardHeader className="text-center">
-                    <div className={`w-16 h-16 mx-auto rounded-full bg-gradient-to-r ${step.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                      <IconComponent className="w-8 h-8 text-white" />
+          {/* Workflow Container */}
+          <div className="max-w-6xl mx-auto">
+            {/* Flow Line */}
+            <div className="relative">
+              <div className="absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 via-green-500 to-orange-500 opacity-30"></div>
+              
+              {/* Steps */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+                {workflowSteps.map((step, index) => {
+                  const IconComponent = step.icon;
+                  const isActive = activeStep === index;
+                  
+                  return (
+                    <div key={step.number} className="relative">
+                      {/* Connector Line */}
+                      {index < workflowSteps.length - 1 && (
+                        <div className="hidden md:block absolute top-24 -right-4 w-8 h-0.5 bg-gradient-to-r from-white/20 to-transparent"></div>
+                      )}
+                      
+                      {/* Step Card */}
+                      <div className={`relative group transition-all duration-500 ${isActive ? 'scale-105' : ''}`}>
+                        {/* Animated Background */}
+                        <div className={`absolute inset-0 rounded-xl ${step.bgColor} ${step.borderColor} border-2 transition-all duration-500 ${isActive ? 'opacity-100 scale-105' : 'opacity-50'}`}></div>
+                        
+                        {/* Content */}
+                        <div className="relative p-6 text-center">
+                          {/* Icon Circle */}
+                          <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r ${step.color} flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${isActive ? 'scale-110 shadow-lg' : ''}`}>
+                            <IconComponent className="w-10 h-10 text-white" />
+                          </div>
+                          
+                          {/* Step Number Badge */}
+                          <div className={`w-8 h-8 mx-auto mb-3 rounded-full border-2 ${step.borderColor} ${step.bgColor} flex items-center justify-center transition-all duration-500 ${isActive ? 'scale-110' : ''}`}>
+                            <span className="text-white font-bold text-sm">{step.number}</span>
+                          </div>
+                          
+                          {/* Title */}
+                          <h3 className="text-xl font-bold text-white mb-3 font-mono">{step.title}</h3>
+                          
+                          {/* Description */}
+                          <p className="text-gray-400 text-sm font-mono leading-relaxed">
+                            {step.description}
+                          </p>
+                          
+                          {/* Active Indicator */}
+                          {isActive && (
+                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <Badge variant="outline" className="w-8 h-8 rounded-full border-white/20 text-white font-mono">
-                      {step.number}
-                    </Badge>
-                    <CardTitle className="text-white font-mono">{step.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-gray-400 text-center font-mono">
-                      {step.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Live Stats Section */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold font-mono mb-4">
-              REAL-TIME <span className="text-red-400">INTELLIGENCE</span>
-            </h2>
-            <p className="text-gray-400 font-mono">Live data from The Eye's neural network</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-black/40 border-red-500/20 hover:border-red-500/50 transition-all duration-300 group">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <FileText className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-white mb-2 font-mono">
-                  {liveStats.reportsProcessed.toLocaleString()}
-                </div>
-                <div className="text-gray-400 font-mono">Reports Processed</div>
-                <div className="flex items-center justify-center mt-2 text-green-400">
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  <span className="text-sm font-mono">Live</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/40 border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 group">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Users className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-white mb-2 font-mono">
-                  {liveStats.activeUsers.toLocaleString()}
-                </div>
-                <div className="text-gray-400 font-mono">Active Users</div>
-                <div className="flex items-center justify-center mt-2 text-green-400">
-                  <Activity className="w-4 h-4 mr-1" />
-                  <span className="text-sm font-mono">Online</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/40 border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 group">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Timer className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-white mb-2 font-mono">
-                  {liveStats.avgProcessingTime}s
-                </div>
-                <div className="text-gray-400 font-mono">Avg Processing Time</div>
-                <div className="flex items-center justify-center mt-2 text-green-400">
-                  <Zap className="w-4 h-4 mr-1" />
-                  <span className="text-sm font-mono">Lightning Fast</span>
-                </div>
-              </CardContent>
-            </Card>
+                  );
+                })}
+              </div>
+              
+              {/* Progress Indicator */}
+              <div className="mt-8 flex justify-center space-x-2">
+                {workflowSteps.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === activeStep ? 'bg-red-500 scale-150' : 'bg-white/20'
+                    }`}
+                  ></div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -440,41 +402,6 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Testimonials Section */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold font-mono mb-4">
-              TRUSTED BY <span className="text-red-400">INDUSTRY LEADERS</span>
-            </h2>
-            <p className="text-gray-400 font-mono">See what our clients say about The Eye of Sauron</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-black/40 border-white/10 hover:border-red-500/30 transition-all duration-300 group">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold font-mono">{testimonial.name}</div>
-                      <div className="text-gray-400 text-sm font-mono">{testimonial.role}</div>
-                      <div className="text-red-400 text-sm font-mono">{testimonial.company}</div>
-                    </div>
-                  </div>
-                  <div className="flex mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-gray-300 italic font-mono text-sm">"{testimonial.quote}"</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
         {/* Final CTA Section */}
         <div className="text-center py-16 border-t border-white/10">
           <div className="mb-8">
@@ -503,18 +430,12 @@ const Index = () => {
                 </Link>
               </>
             ) : (
-              <>
-                <Link to="/auth">
-                  <Button size="lg" className="bg-red-600 hover:bg-red-700 px-8 py-4 text-lg font-mono">
-                    <Rocket className="w-5 h-5 mr-2" />
-                    Get Started Now
-                  </Button>
-                </Link>
-                <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg font-mono">
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Schedule Demo
+              <Link to="/auth">
+                <Button size="lg" className="bg-red-600 hover:bg-red-700 px-8 py-4 text-lg font-mono">
+                  <Rocket className="w-5 h-5 mr-2" />
+                  Get Started Now
                 </Button>
-              </>
+              </Link>
             )}
           </div>
 
