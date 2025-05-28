@@ -142,9 +142,12 @@ const Dashboard = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'validated': return 'bg-green-500/20 text-green-400';
+      case 'review': return 'bg-yellow-500/20 text-yellow-400';
+      case 'flagged': return 'bg-red-500/20 text-red-400';
+      case 'pending': return 'bg-gray-500/20 text-gray-400';
       case 'completed': return 'bg-green-500/20 text-green-400';
       case 'in_progress': return 'bg-blue-500/20 text-blue-400';
-      case 'pending': return 'bg-yellow-500/20 text-yellow-400';
       case 'failed': return 'bg-red-500/20 text-red-400';
       default: return 'bg-gray-500/20 text-gray-400';
     }
@@ -159,6 +162,14 @@ const Dashboard = () => {
 
   const formatStatus = (status: string) => {
     return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // Helper function to get the actual status from analysis results
+  const getReportStatus = (report: Report & { analysis_results: AnalysisResult[] }) => {
+    if (report.analysis_results && report.analysis_results.length > 0) {
+      return report.analysis_results[0].status || 'pending';
+    }
+    return report.status || 'pending';
   };
 
   // Calculate success rate as percentage based on 1000-point scale
@@ -384,58 +395,65 @@ const Dashboard = () => {
                       </div>
                     ) : reports && reports.length > 0 ? (
                       <div className="space-y-4">
-                        {reports.map((report) => (
-                          <Card key={report.id} className="bg-black/20 border-white/10 hover:border-white/30 transition-all duration-300 group">
-                            <CardContent className="p-6">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center space-x-4">
-                                  <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl">
-                                    <FileText className="w-5 h-5 text-blue-400" />
+                        {reports.map((report) => {
+                          const reportStatus = getReportStatus(report);
+                          const aiScore = report.analysis_results?.[0]?.score;
+                          
+                          return (
+                            <Card key={report.id} className="bg-black/20 border-white/10 hover:border-white/30 transition-all duration-300 group">
+                              <CardContent className="p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center space-x-4">
+                                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl">
+                                      <FileText className="w-5 h-5 text-blue-400" />
+                                    </div>
+                                    <div>
+                                      <h3 className="text-white font-semibold text-lg">{report.title || report.name}</h3>
+                                      <p className="text-gray-400 text-sm">
+                                        Category: {report.category || report.project} • Created {report.created_at && format(new Date(report.created_at), 'MMM dd, yyyy')}
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h3 className="text-white font-semibold text-lg">{report.title || report.name}</h3>
-                                    <p className="text-gray-400 text-sm">
-                                      Category: {report.category || report.project} • Created {report.created_at && format(new Date(report.created_at), 'MMM dd, yyyy')}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                  <Badge className={`${getPriorityColor(report.priority || 'low')}`}>
-                                    {report.priority || 'low'}
-                                  </Badge>
-                                  <Badge className={`${getStatusColor(report.status || 'pending')}`}>
-                                    {formatStatus(report.status || 'pending')}
-                                  </Badge>
-                                </div>
-                              </div>
-                              
-                              <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-2">
-                                {report.description || report.report}
-                              </p>
-                              
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4 text-xs text-gray-400">
-                                  <div className="flex items-center space-x-1">
-                                    <Clock className="w-3 h-3" />
-                                    <span>Processing: 2.3s</span>
-                                  </div>
-                                  <div className="flex items-center space-x-1">
-                                    <Brain className="w-3 h-3" />
-                                    <span>AI Score: {report.analysis_results[0]?.score || 'N/A'}/1000</span>
+                                  <div className="flex items-center space-x-3">
+                                    <Badge className={`${getPriorityColor(report.priority || 'low')}`}>
+                                      {report.priority || 'low'}
+                                    </Badge>
+                                    <Badge className={`${getStatusColor(reportStatus)}`}>
+                                      {formatStatus(reportStatus)}
+                                    </Badge>
                                   </div>
                                 </div>
-                                <Button 
-                                  onClick={() => setSelectedReport(report)}
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
-                                >
-                                  View Details
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                                
+                                <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-2">
+                                  {report.description || report.report}
+                                </p>
+                                
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-4 text-sm">
+                                    <div className="flex items-center space-x-1 text-white/90">
+                                      <Clock className="w-4 h-4 text-blue-400" />
+                                      <span className="font-medium">Processing: 2.3s</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                      <Brain className="w-4 h-4 text-purple-400" />
+                                      <span className={`font-medium ${aiScore ? getScoreColor(aiScore) : 'text-gray-400'}`}>
+                                        AI Score: {aiScore ? `${aiScore}/1000` : 'N/A'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <Button 
+                                    onClick={() => setSelectedReport(report)}
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                                  >
+                                    View Details
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="text-center py-12">
