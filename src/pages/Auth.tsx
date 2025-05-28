@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, ArrowLeft, LogIn, Loader2, KeyRound } from "lucide-react";
+import { Eye, ArrowLeft, LogIn, Loader2, KeyRound, UserPlus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,10 +13,12 @@ import { useEffect } from "react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
+    confirmPassword: ""
   });
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -32,7 +34,31 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (isRegister) {
+        // Registration
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Passwords don't match");
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 6) {
+          toast.error("Password must be at least 6 characters");
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (error) throw error;
+        toast.success("Registration successful! Please check your email to verify your account.");
+        setIsLogin(true);
+        setIsRegister(false);
+      } else if (isLogin) {
+        // Login
         const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password,
@@ -42,7 +68,7 @@ const Auth = () => {
         toast.success("Logged in successfully!");
         navigate('/dashboard');
       } else {
-        // Forgot password functionality
+        // Forgot password
         const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
           redirectTo: `${window.location.origin}/auth`,
         });
@@ -53,7 +79,13 @@ const Auth = () => {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      toast.error(error.message || "Authentication failed");
+      if (error.message.includes('User already registered')) {
+        toast.error("This email is already registered. Please sign in instead.");
+      } else if (error.message.includes('Invalid login credentials')) {
+        toast.error("Invalid email or password. Please check your credentials.");
+      } else {
+        toast.error(error.message || "Authentication failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -61,6 +93,36 @@ const Auth = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const switchToRegister = () => {
+    setIsLogin(false);
+    setIsRegister(true);
+    setFormData({ email: "", password: "", confirmPassword: "" });
+  };
+
+  const switchToLogin = () => {
+    setIsLogin(true);
+    setIsRegister(false);
+    setFormData({ email: "", password: "", confirmPassword: "" });
+  };
+
+  const switchToForgotPassword = () => {
+    setIsLogin(false);
+    setIsRegister(false);
+    setFormData({ email: "", password: "", confirmPassword: "" });
+  };
+
+  const getTitle = () => {
+    if (isRegister) return 'Create Account';
+    if (isLogin) return 'Sign In';
+    return 'Reset Password';
+  };
+
+  const getDescription = () => {
+    if (isRegister) return 'Join the SAURON system';
+    if (isLogin) return 'Access the SAURON system';
+    return 'Enter your email to reset your password';
   };
 
   return (
@@ -83,17 +145,17 @@ const Auth = () => {
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-white mb-4 tracking-tight font-mono">
-              {isLogin ? 'Sign In' : 'Reset Password'}
+              {getTitle()}
             </h1>
             <p className="text-neutral-400">
-              {isLogin ? 'Access the SAURON system' : 'Enter your email to reset your password'}
+              {getDescription()}
             </p>
           </div>
 
           <Card className="bg-neutral-900 border-neutral-800">
             <CardHeader>
               <CardTitle className="text-white font-mono">
-                {isLogin ? 'Login' : 'Forgot Password'}
+                {isRegister ? 'Register' : isLogin ? 'Login' : 'Forgot Password'}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -111,7 +173,7 @@ const Auth = () => {
                   />
                 </div>
 
-                {isLogin && (
+                {(isLogin || isRegister) && (
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-neutral-300 font-mono">Password</Label>
                     <Input
@@ -127,6 +189,22 @@ const Auth = () => {
                   </div>
                 )}
 
+                {isRegister && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-neutral-300 font-mono">Confirm Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                      placeholder="Confirm your password"
+                      className="bg-black border-neutral-700 text-white placeholder:text-neutral-500 focus:border-red-500"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   disabled={loading}
@@ -135,24 +213,53 @@ const Auth = () => {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {isLogin ? 'Signing In...' : 'Sending Reset Email...'}
+                      {isRegister ? 'Creating Account...' : isLogin ? 'Signing In...' : 'Sending Reset Email...'}
                     </>
                   ) : (
                     <>
-                      {isLogin ? <LogIn className="w-4 h-4 mr-2" /> : <KeyRound className="w-4 h-4 mr-2" />}
-                      {isLogin ? 'Sign In' : 'Send Reset Email'}
+                      {isRegister ? <UserPlus className="w-4 h-4 mr-2" /> : isLogin ? <LogIn className="w-4 h-4 mr-2" /> : <KeyRound className="w-4 h-4 mr-2" />}
+                      {isRegister ? 'Create Account' : isLogin ? 'Sign In' : 'Send Reset Email'}
                     </>
                   )}
                 </Button>
 
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => setIsLogin(!isLogin)}
-                    className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
-                  >
-                    {isLogin ? "Forgot your password?" : "Back to sign in"}
-                  </button>
+                <div className="text-center space-y-2">
+                  {isLogin && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={switchToRegister}
+                        className="text-neutral-400 hover:text-white transition-colors font-mono text-sm block w-full"
+                      >
+                        Don't have an account? Register here
+                      </button>
+                      <button
+                        type="button"
+                        onClick={switchToForgotPassword}
+                        className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
+                      >
+                        Forgot your password?
+                      </button>
+                    </>
+                  )}
+                  {isRegister && (
+                    <button
+                      type="button"
+                      onClick={switchToLogin}
+                      className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
+                    >
+                      Already have an account? Sign in here
+                    </button>
+                  )}
+                  {!isLogin && !isRegister && (
+                    <button
+                      type="button"
+                      onClick={switchToLogin}
+                      className="text-neutral-400 hover:text-white transition-colors font-mono text-sm"
+                    >
+                      Back to sign in
+                    </button>
+                  )}
                 </div>
               </form>
             </CardContent>

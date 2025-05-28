@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target, TrendingUp, Globe, Clock, CheckCircle } from "lucide-react";
@@ -5,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -46,9 +48,11 @@ const Index = () => {
     try {
       await signOut();
       setShowSignOutDialog(false);
+      toast.success("Signed out successfully!");
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
+      toast.error("Error signing out. Please try again.");
     }
   };
 
@@ -101,9 +105,9 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Floating Sign Out Button (only show if user is logged in) */}
-      {user && (
-        <div className="fixed top-6 right-6 z-50">
+      {/* Authentication Buttons - Top Right Corner */}
+      <div className="fixed top-6 right-6 z-50 flex gap-3">
+        {user ? (
           <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
             <DialogTrigger asChild>
               <Button 
@@ -137,8 +141,26 @@ const Index = () => {
               </div>
             </DialogContent>
           </Dialog>
-        </div>
-      )}
+        ) : (
+          <>
+            <Link to="/auth">
+              <Button 
+                variant="outline" 
+                className="border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 hover:scale-105 transition-all duration-300 backdrop-blur-sm bg-black/80 shadow-lg"
+              >
+                Sign In
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button 
+                className="bg-red-600 hover:bg-red-700 text-white hover:scale-105 transition-all duration-300 backdrop-blur-sm shadow-lg"
+              >
+                Register
+              </Button>
+            </Link>
+          </>
+        )}
+      </div>
 
       {/* Hero Section */}
       <div className="px-6 md:px-8 py-24 relative z-10">
@@ -182,13 +204,23 @@ const Index = () => {
                 <Sparkles className="w-4 h-4 ml-2 relative z-10 group-hover:animate-spin" />
               </Button>
             </Link>
-            <Link to="/auth">
-              <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 transition-all duration-300 hover:scale-110 font-mono group relative overflow-hidden">
-                <Shield className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-                <span>Access Dashboard</span>
-                <Eye className="w-4 h-4 ml-2 group-hover:animate-pulse" />
-              </Button>
-            </Link>
+            {user ? (
+              <Link to="/dashboard">
+                <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 transition-all duration-300 hover:scale-110 font-mono group relative overflow-hidden">
+                  <Shield className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                  <span>Access Dashboard</span>
+                  <Eye className="w-4 h-4 ml-2 group-hover:animate-pulse" />
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button size="lg" variant="outline" className="px-8 py-4 text-lg border-red-600/50 text-red-400 hover:bg-red-900/30 hover:text-red-300 hover:border-red-400 transition-all duration-300 hover:scale-110 font-mono group relative overflow-hidden">
+                  <Shield className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                  <span>Get Started</span>
+                  <Eye className="w-4 h-4 ml-2 group-hover:animate-pulse" />
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Enhanced Feature Cards - Black with white text */}
