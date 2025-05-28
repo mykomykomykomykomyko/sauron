@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean | null
+          role: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          role?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          role?: string
+        }
+        Relationships: []
+      }
       analysis_results: {
         Row: {
           created_at: string
@@ -43,6 +76,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "analysis_results_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_analysis_results_report_id"
             columns: ["report_id"]
             isOneToOne: false
             referencedRelation: "reports"
@@ -85,6 +125,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          company_name: string | null
           created_at: string
           email: string
           full_name: string
@@ -92,6 +133,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_name?: string | null
           created_at?: string
           email: string
           full_name: string
@@ -99,6 +141,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_name?: string | null
           created_at?: string
           email?: string
           full_name?: string
@@ -109,32 +152,47 @@ export type Database = {
       }
       reports: {
         Row: {
+          category: string | null
           created_at: string
+          description: string | null
           email: string
           id: string
           name: string
+          priority: string | null
           project: string
           report: string
+          status: string | null
+          title: string | null
           user_id: string | null
           week: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
+          description?: string | null
           email: string
           id?: string
           name: string
+          priority?: string | null
           project: string
           report: string
+          status?: string | null
+          title?: string | null
           user_id?: string | null
           week: string
         }
         Update: {
+          category?: string | null
           created_at?: string
+          description?: string | null
           email?: string
           id?: string
           name?: string
+          priority?: string | null
           project?: string
           report?: string
+          status?: string | null
+          title?: string | null
           user_id?: string | null
           week?: string
         }

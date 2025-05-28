@@ -28,6 +28,17 @@ export interface AnalysisResult {
   created_at?: string;
 }
 
+export interface Account {
+  id?: string;
+  email: string;
+  full_name: string;
+  company_name?: string;
+  role: string;
+  created_by?: string;
+  created_at?: string;
+  is_active?: boolean;
+}
+
 export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>) => {
   const { data, error } = await supabase
     .from('reports')
@@ -181,17 +192,99 @@ export const triggerAIAnalysis = async (reportId: string) => {
   return data;
 };
 
-// Export the service object
-export const supabaseService = {
-  submitReport,
-  createReport,
-  getReports,
-  saveAnalysisResult,
-  updateAnalysisStatus,
-  getReportsWithAnalysis,
-  getRecentReports,
-  exportReportsAsCSV,
-  getUserNotifications,
-  markNotificationAsRead,
-  triggerAIAnalysis
+// Get dashboard statistics
+export const getDashboardStats = async () => {
+  const reports = await getReportsWithAnalysis();
+  const totalReports = reports.length;
+  const reportsWithAnalysis = reports.filter(r => r.analysis_results.length > 0);
+  const analysisRate = totalReports > 0 ? (reportsWithAnalysis.length / totalReports) * 100 : 0;
+  const avgScore = reportsWithAnalysis.length > 0 
+    ? reportsWithAnalysis.reduce((sum, r) => sum + (r.analysis_results[0]?.score || 0), 0) / reportsWithAnalysis.length 
+    : 0;
+  
+  return {
+    totalReports,
+    analysisRate: analysisRate.toFixed(1),
+    avgProcessingTime: "2.3s", // This would be calculated from actual data
+    successRate: avgScore.toFixed(1)
+  };
+};
+
+// Create account (admin only)
+export const createAccount = async (accountData: Omit<Account, 'id' | 'created_at'>) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  const accountToInsert = {
+    ...accountData,
+    created_by: user?.id
+  };
+
+  const { data, error } = await supabase
+    .from('accounts')
+    .insert([accountToInsert])
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data as Account;
+};
+
+// Get all accounts (admin only)
+export const getAccounts = async (): Promise<Account[]> => {
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data as Account[];
+};
+
+// Filter reports
+export const filterReports = async (filters: { name?: string; sortBy?: 'date' | 'alphabetical'; sortOrder?: 'asc' | 'desc' }) => {
+  let query = supabase
+    .from('reports')
+    .select(`
+      *,
+      analysis_results (*)
+    `);
+    
+  if (filters.name) {
+    query = query.ilike('name', `%${filters.name}%`);
+  }
+  
+  if (filters.sortBy === 'date') {
+    query = query.order('created_at', { ascending: filters.sortOrder === 'asc' });
+  } else if (filters.sortBy === 'alphabetical') {
+    query = query.order('name', { ascending: filters.sortOrder === 'asc' });
+  } else {
+    query = query.order('created_at', { ascending: false });
+  }
+  
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as (Report & { analysis_results: AnalysisResult[] })[];
+};
+
+export const downloadCSV = async () => {
+  const csvContent = await exportReportsAsCSV();
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `reports_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+// Send schedule report email
+export const scheduleReportEmail = async (userEmail: string) => {
+  const subject = "Report Submission Reminder - The Eye of Sauron";
+  const body = `Please submit your progress report in The Eye of Sauron system.%0D%0A%0D%0AClick here to submit: ${window.location.origin}/submit`;
+  
+  window.location.href = `mailto:${userEmail}?subject=${subject}&body=${body}`;
 };
