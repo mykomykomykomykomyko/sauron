@@ -10,6 +10,11 @@ export interface Report {
   report: string;
   user_id?: string;
   created_at?: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  priority?: string;
+  status?: string;
 }
 
 export interface AnalysisResult {
@@ -32,6 +37,43 @@ export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>
     
   if (error) throw error;
   return data as Report;
+};
+
+export const createReport = async (reportData: { title: string; description: string; category: string; priority: string }) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  const reportToInsert = {
+    name: user?.user_metadata?.full_name || user?.email || 'Unknown',
+    email: user?.email || 'unknown@example.com',
+    project: reportData.category,
+    week: new Date().toISOString().split('T')[0],
+    report: reportData.description,
+    user_id: user?.id,
+    title: reportData.title,
+    description: reportData.description,
+    category: reportData.category,
+    priority: reportData.priority,
+    status: 'pending'
+  };
+
+  const { data, error } = await supabase
+    .from('reports')
+    .insert([reportToInsert])
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data as Report;
+};
+
+export const getReports = async (): Promise<Report[]> => {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data as Report[];
 };
 
 export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id' | 'created_at'>) => {
@@ -137,4 +179,19 @@ export const triggerAIAnalysis = async (reportId: string) => {
   
   if (error) throw error;
   return data;
+};
+
+// Export the service object
+export const supabaseService = {
+  submitReport,
+  createReport,
+  getReports,
+  saveAnalysisResult,
+  updateAnalysisStatus,
+  getReportsWithAnalysis,
+  getRecentReports,
+  exportReportsAsCSV,
+  getUserNotifications,
+  markNotificationAsRead,
+  triggerAIAnalysis
 };

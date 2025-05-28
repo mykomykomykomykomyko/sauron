@@ -8,6 +8,8 @@ interface AuthContextType {
   session: Session | null;
   userRole: string | null;
   loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -37,6 +39,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!error && data) {
       setUserRole(data.role);
     }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+  };
+
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+    if (error) throw error;
   };
 
   useEffect(() => {
@@ -79,6 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     userRole,
     loading,
+    signIn,
+    signUp,
     signOut,
   };
 

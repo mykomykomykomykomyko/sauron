@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +27,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { supabaseService } from "@/services/supabaseService";
+import { supabaseService, Report } from "@/services/supabaseService";
 import { format } from "date-fns";
 
 const Dashboard = () => {
@@ -318,18 +317,18 @@ const Dashboard = () => {
                                   <FileText className="w-4 h-4 text-blue-400" />
                                 </div>
                                 <div>
-                                  <div className="text-white font-medium text-sm">{report.title}</div>
+                                  <div className="text-white font-medium text-sm">{report.title || report.name}</div>
                                   <div className="text-gray-400 text-xs">
-                                    {format(new Date(report.created_at), 'MMM dd, yyyy HH:mm')}
+                                    {report.created_at && format(new Date(report.created_at), 'MMM dd, yyyy HH:mm')}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <Badge className={`text-xs ${getPriorityColor(report.priority)}`}>
-                                  {report.priority}
+                                <Badge className={`text-xs ${getPriorityColor(report.priority || 'low')}`}>
+                                  {report.priority || 'low'}
                                 </Badge>
-                                <Badge className={`text-xs ${getStatusColor(report.status)}`}>
-                                  {formatStatus(report.status)}
+                                <Badge className={`text-xs ${getStatusColor(report.status || 'pending')}`}>
+                                  {formatStatus(report.status || 'pending')}
                                 </Badge>
                               </div>
                             </div>
@@ -423,24 +422,24 @@ const Dashboard = () => {
                                     <FileText className="w-5 h-5 text-blue-400" />
                                   </div>
                                   <div>
-                                    <h3 className="text-white font-semibold text-lg">{report.title}</h3>
+                                    <h3 className="text-white font-semibold text-lg">{report.title || report.name}</h3>
                                     <p className="text-gray-400 text-sm">
-                                      Category: {report.category} • Created {format(new Date(report.created_at), 'MMM dd, yyyy')}
+                                      Category: {report.category || report.project} • Created {report.created_at && format(new Date(report.created_at), 'MMM dd, yyyy')}
                                     </p>
                                   </div>
                                 </div>
                                 <div className="flex items-center space-x-3">
-                                  <Badge className={`${getPriorityColor(report.priority)}`}>
-                                    {report.priority}
+                                  <Badge className={`${getPriorityColor(report.priority || 'low')}`}>
+                                    {report.priority || 'low'}
                                   </Badge>
-                                  <Badge className={`${getStatusColor(report.status)}`}>
-                                    {formatStatus(report.status)}
+                                  <Badge className={`${getStatusColor(report.status || 'pending')}`}>
+                                    {formatStatus(report.status || 'pending')}
                                   </Badge>
                                 </div>
                               </div>
                               
                               <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-2">
-                                {report.description}
+                                {report.description || report.report}
                               </p>
                               
                               <div className="flex items-center justify-between">
