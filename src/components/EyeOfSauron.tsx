@@ -10,7 +10,7 @@ const EyeOfSauron = ({ mousePosition }: EyeOfSauronProps) => {
   const calculatePupilPosition = () => {
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2 + 200;
-    const maxDistance = 18;
+    const maxDistance = 12;
     
     const deltaX = mousePosition.x - centerX;
     const deltaY = mousePosition.y - centerY;
@@ -18,8 +18,8 @@ const EyeOfSauron = ({ mousePosition }: EyeOfSauronProps) => {
     
     if (distance === 0) return { x: 0, y: 0 };
     
-    const normalizedX = (deltaX / distance) * Math.min(distance / 40, maxDistance);
-    const normalizedY = (deltaY / distance) * Math.min(distance / 40, maxDistance);
+    const normalizedX = (deltaX / distance) * Math.min(distance / 50, maxDistance);
+    const normalizedY = (deltaY / distance) * Math.min(distance / 50, maxDistance);
     
     return { x: normalizedX, y: normalizedY };
   };
@@ -28,91 +28,120 @@ const EyeOfSauron = ({ mousePosition }: EyeOfSauronProps) => {
 
   return (
     <div className="relative mb-12">
-      <div className="w-48 h-48 mx-auto relative cursor-pointer group">
-        {/* Outer Flame Ring - Multiple layers for depth */}
-        <div className="absolute -inset-6 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-red-600 animate-pulse opacity-80">
-          <div className="absolute inset-1 rounded-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 blur-sm"></div>
+      <div className="w-64 h-64 mx-auto relative cursor-pointer group">
+        {/* Outer Ring of Fire - Multiple rotating layers */}
+        <div className="absolute -inset-12 opacity-80">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-red-600 animate-pulse blur-lg"></div>
+          <div className="absolute inset-2 rounded-full bg-gradient-to-r from-yellow-500 via-orange-400 to-red-500 animate-pulse blur-md"></div>
+          <div className="absolute inset-4 rounded-full bg-gradient-to-r from-orange-400 via-red-400 to-orange-500 animate-pulse blur-sm"></div>
         </div>
         
-        {/* Main Eye Structure */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-700 via-orange-600 to-red-700 shadow-2xl shadow-red-500/50">
-          {/* Eye Socket with depth */}
-          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-black via-gray-900 to-black border-4 border-red-500/70 shadow-inner">
-            {/* Sclera (white part) with veining */}
-            <div className="absolute inset-3 rounded-full bg-gradient-to-br from-red-100 via-yellow-50 to-red-200 overflow-hidden">
-              {/* Blood vessel patterns */}
-              <div className="absolute inset-0 opacity-60">
-                <div className="absolute top-2 left-4 w-8 h-0.5 bg-red-400 transform rotate-12 blur-sm"></div>
-                <div className="absolute top-6 right-3 w-6 h-0.5 bg-red-300 transform -rotate-45 blur-sm"></div>
-                <div className="absolute bottom-4 left-6 w-10 h-0.5 bg-red-400 transform rotate-45 blur-sm"></div>
-                <div className="absolute bottom-3 right-5 w-7 h-0.5 bg-red-300 transform -rotate-12 blur-sm"></div>
+        {/* Main Eye Structure - Molten Lava Base */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-800 via-orange-600 to-red-900 shadow-2xl shadow-red-500/80 overflow-hidden">
+          {/* Lava texture layers */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-red-600 to-black opacity-90"></div>
+          <div className="absolute inset-0 bg-gradient-to-tl from-yellow-400 via-orange-500 to-red-700 opacity-70 animate-pulse"></div>
+          
+          {/* Molten patterns - creating lava-like texture */}
+          <div className="absolute inset-0 opacity-60">
+            {/* Irregular molten veins */}
+            <div className="absolute top-4 left-8 w-16 h-1 bg-yellow-300 transform rotate-12 blur-sm animate-pulse"></div>
+            <div className="absolute top-12 right-6 w-12 h-1 bg-orange-300 transform -rotate-45 blur-sm animate-pulse"></div>
+            <div className="absolute bottom-8 left-12 w-20 h-1 bg-yellow-400 transform rotate-45 blur-sm animate-pulse"></div>
+            <div className="absolute bottom-6 right-10 w-14 h-1 bg-orange-400 transform -rotate-12 blur-sm animate-pulse"></div>
+            <div className="absolute top-16 left-16 w-8 h-1 bg-yellow-200 transform rotate-75 blur-sm animate-pulse"></div>
+            <div className="absolute bottom-16 right-16 w-10 h-1 bg-orange-200 transform -rotate-30 blur-sm animate-pulse"></div>
+          </div>
+          
+          {/* Inner molten core */}
+          <div className="absolute inset-8 rounded-full bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 overflow-hidden shadow-inner">
+            {/* Lava bubbling effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-orange-400 to-yellow-300 opacity-80 animate-pulse"></div>
+            
+            {/* Radial molten cracks from center */}
+            {Array.from({ length: 16 }, (_, i) => (
+              <div
+                key={i}
+                className="absolute top-1/2 left-1/2 w-1 h-full bg-gradient-to-t from-yellow-200 via-orange-300 to-red-400 opacity-60 blur-sm"
+                style={{
+                  transform: `translate(-50%, -50%) rotate(${i * 22.5}deg)`,
+                  transformOrigin: '50% 50%'
+                }}
+              />
+            ))}
+            
+            {/* Central Eye - The actual pupil area */}
+            <div className="absolute inset-6 rounded-full bg-gradient-to-br from-orange-400 via-red-500 to-black overflow-hidden">
+              {/* Inner flame patterns */}
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-300 via-orange-400 to-red-600 opacity-90"></div>
+              
+              {/* The Vertical Slit Pupil - The iconic feature */}
+              <div 
+                className="absolute w-2 h-16 bg-black top-1/2 left-1/2 transition-transform duration-150 ease-out shadow-lg"
+                style={{
+                  transform: `translate(-50%, -50%) translate(${pupilPosition.x}px, ${pupilPosition.y}px)`,
+                  boxShadow: '0 0 20px rgba(255, 100, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.9)'
+                }}
+              >
+                {/* Slit depth with molten edges */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500 via-orange-400 to-red-500 blur-sm opacity-80"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-black via-red-900 to-black"></div>
+                
+                {/* Inner darkness of the slit */}
+                <div className="absolute inset-0.5 bg-black"></div>
+                
+                {/* Molten glow at edges of slit */}
+                <div className="absolute -top-1 -bottom-1 left-0 right-0 bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-60 blur-sm"></div>
               </div>
               
-              {/* Iris - Multi-layered for realism */}
-              <div className="absolute inset-6 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-red-700 overflow-hidden shadow-lg">
-                {/* Iris texture patterns */}
-                <div className="absolute inset-0">
-                  {/* Radial lines from center */}
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <div
-                      key={i}
-                      className="absolute top-1/2 left-1/2 w-0.5 h-full bg-gradient-to-t from-red-400 via-orange-300 to-red-500 opacity-40"
-                      style={{
-                        transform: `translate(-50%, -50%) rotate(${i * 30}deg)`,
-                        transformOrigin: '50% 50%'
-                      }}
-                    />
-                  ))}
-                  
-                  {/* Concentric circles for texture */}
-                  <div className="absolute inset-2 rounded-full border border-red-400/30"></div>
-                  <div className="absolute inset-4 rounded-full border border-orange-300/40"></div>
-                  <div className="absolute inset-6 rounded-full border border-red-500/30"></div>
-                </div>
-                
-                {/* Pupil that follows cursor with realistic movement */}
-                <div 
-                  className="absolute w-10 h-10 bg-black rounded-full top-1/2 left-1/2 transition-transform duration-150 ease-out shadow-lg"
-                  style={{
-                    transform: `translate(-50%, -50%) translate(${pupilPosition.x}px, ${pupilPosition.y}px)`,
-                  }}
-                >
-                  {/* Inner pupil depth */}
-                  <div className="absolute inset-0.5 bg-gradient-to-br from-red-900 to-black rounded-full"></div>
-                  <div className="absolute inset-1 bg-black rounded-full">
-                    {/* Pupil reflection */}
-                    <div className="absolute top-1 left-1 w-2 h-2 bg-red-400 rounded-full opacity-60 blur-sm"></div>
-                  </div>
-                </div>
-                
-                {/* Iris highlight */}
-                <div className="absolute top-2 left-3 w-3 h-3 bg-yellow-200 rounded-full opacity-30 blur-sm"></div>
-              </div>
+              {/* Molten highlights around the pupil */}
+              <div className="absolute top-2 left-4 w-4 h-4 bg-yellow-300 rounded-full opacity-40 blur-md animate-pulse"></div>
+              <div className="absolute bottom-3 right-3 w-3 h-3 bg-orange-300 rounded-full opacity-30 blur-md animate-pulse"></div>
             </div>
           </div>
         </div>
         
-        {/* Enhanced Flame Effects */}
-        <div className="absolute -inset-8 opacity-70">
-          {/* Cardinal direction flames */}
-          <div className="absolute top-0 left-1/2 w-3 h-12 bg-gradient-to-t from-orange-500 via-yellow-400 to-transparent transform -translate-x-1/2 animate-pulse blur-sm"></div>
-          <div className="absolute bottom-0 left-1/2 w-3 h-12 bg-gradient-to-b from-orange-500 via-yellow-400 to-transparent transform -translate-x-1/2 animate-pulse blur-sm"></div>
-          <div className="absolute top-1/2 left-0 w-12 h-3 bg-gradient-to-l from-orange-500 via-yellow-400 to-transparent transform -translate-y-1/2 animate-pulse blur-sm"></div>
-          <div className="absolute top-1/2 right-0 w-12 h-3 bg-gradient-to-r from-orange-500 via-yellow-400 to-transparent transform -translate-y-1/2 animate-pulse blur-sm"></div>
+        {/* Enhanced Flame Effects - More chaotic and authentic */}
+        <div className="absolute -inset-16 opacity-80">
+          {/* Major flame tongues */}
+          <div className="absolute top-0 left-1/2 w-4 h-20 bg-gradient-to-t from-orange-500 via-yellow-400 to-transparent transform -translate-x-1/2 animate-pulse blur-sm"></div>
+          <div className="absolute bottom-0 left-1/2 w-4 h-20 bg-gradient-to-b from-orange-500 via-yellow-400 to-transparent transform -translate-x-1/2 animate-pulse blur-sm"></div>
+          <div className="absolute top-1/2 left-0 w-20 h-4 bg-gradient-to-l from-orange-500 via-yellow-400 to-transparent transform -translate-y-1/2 animate-pulse blur-sm"></div>
+          <div className="absolute top-1/2 right-0 w-20 h-4 bg-gradient-to-r from-orange-500 via-yellow-400 to-transparent transform -translate-y-1/2 animate-pulse blur-sm"></div>
           
-          {/* Diagonal flames */}
-          <div className="absolute top-2 left-2 w-8 h-2 bg-gradient-to-tl from-red-500 via-orange-400 to-transparent transform rotate-45 animate-pulse opacity-60"></div>
-          <div className="absolute top-2 right-2 w-8 h-2 bg-gradient-to-tr from-red-500 via-orange-400 to-transparent transform -rotate-45 animate-pulse opacity-60"></div>
-          <div className="absolute bottom-2 left-2 w-8 h-2 bg-gradient-to-bl from-red-500 via-orange-400 to-transparent transform -rotate-45 animate-pulse opacity-60"></div>
-          <div className="absolute bottom-2 right-2 w-8 h-2 bg-gradient-to-br from-red-500 via-orange-400 to-transparent transform rotate-45 animate-pulse opacity-60"></div>
+          {/* Chaotic diagonal flames */}
+          <div className="absolute top-4 left-4 w-12 h-3 bg-gradient-to-tl from-red-500 via-orange-400 to-transparent transform rotate-45 animate-pulse opacity-70"></div>
+          <div className="absolute top-4 right-4 w-12 h-3 bg-gradient-to-tr from-red-500 via-orange-400 to-transparent transform -rotate-45 animate-pulse opacity-70"></div>
+          <div className="absolute bottom-4 left-4 w-12 h-3 bg-gradient-to-bl from-red-500 via-orange-400 to-transparent transform -rotate-45 animate-pulse opacity-70"></div>
+          <div className="absolute bottom-4 right-4 w-12 h-3 bg-gradient-to-br from-red-500 via-orange-400 to-transparent transform rotate-45 animate-pulse opacity-70"></div>
+          
+          {/* Additional smaller flames for chaos */}
+          <div className="absolute top-8 left-12 w-6 h-2 bg-gradient-to-l from-yellow-400 to-transparent transform rotate-30 animate-pulse opacity-60"></div>
+          <div className="absolute bottom-8 right-12 w-6 h-2 bg-gradient-to-r from-yellow-400 to-transparent transform -rotate-30 animate-pulse opacity-60"></div>
         </div>
         
-        {/* Rotating ring of fire - Enhanced */}
-        <div className="absolute -inset-12 animate-spin" style={{ animationDuration: '25s' }}>
+        {/* Rotating ring of fire - Enhanced with more flames */}
+        <div className="absolute -inset-20 animate-spin" style={{ animationDuration: '30s' }}>
+          {Array.from({ length: 12 }, (_, i) => (
+            <div
+              key={i}
+              className="absolute w-3 h-8 bg-gradient-to-t from-red-500 via-orange-400 to-yellow-300 opacity-40 blur-sm"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: `translate(-50%, -50%) rotate(${i * 30}deg) translateY(-4rem)`,
+                transformOrigin: '50% 4rem'
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Counter-rotating inner ring */}
+        <div className="absolute -inset-16 animate-spin" style={{ animationDuration: '20s', animationDirection: 'reverse' }}>
           {Array.from({ length: 8 }, (_, i) => (
             <div
               key={i}
-              className="absolute w-2 h-6 bg-gradient-to-t from-red-500 via-orange-400 to-yellow-300 opacity-50 blur-sm"
+              className="absolute w-2 h-6 bg-gradient-to-t from-orange-600 via-yellow-400 to-transparent opacity-50 blur-sm"
               style={{
                 top: '50%',
                 left: '50%',
@@ -123,8 +152,9 @@ const EyeOfSauron = ({ mousePosition }: EyeOfSauronProps) => {
           ))}
         </div>
         
-        {/* Outer glow effect */}
-        <div className="absolute -inset-16 bg-gradient-radial from-red-500/20 via-orange-500/10 to-transparent rounded-full animate-pulse"></div>
+        {/* Intense outer glow effect */}
+        <div className="absolute -inset-24 bg-gradient-radial from-red-500/30 via-orange-500/15 to-transparent rounded-full animate-pulse"></div>
+        <div className="absolute -inset-20 bg-gradient-radial from-yellow-400/20 via-red-500/10 to-transparent rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
       </div>
     </div>
   );
