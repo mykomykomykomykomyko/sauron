@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Shield, Send, Sparkles, ArrowRight, Brain, Target } from "lucide-react";
+import { Eye, Shield, Send, Sparkles, ArrowRight, Brain, Target, FileText, Code, Wrench, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -232,16 +232,16 @@ WORK PERIOD: ${workPeriod}
     { value: "last-year", label: "Last Year" },
   ];
 
-  const isStepComplete = (stepNumber: number) => {
+  const isStepComplete = (stepNumber: number): boolean => {
     switch (stepNumber) {
       case 1:
-        return title && category && priority && workPeriod && timeSpent;
+        return !!(title && category && priority && workPeriod && timeSpent);
       case 2:
-        return technicalImplementation && technologyStack && challengesSolved;
+        return !!(technicalImplementation && technologyStack && challengesSolved);
       case 3:
-        return completedFeatures && deploymentDetails && measureableProgress;
+        return !!(completedFeatures && deploymentDetails && measureableProgress);
       case 4:
-        return nextSteps && timeline && goals;
+        return !!(nextSteps && timeline && goals);
       default:
         return false;
     }
