@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,6 +116,26 @@ const Index = () => {
     }
   ];
 
+  // Calculate pupil position based on mouse position
+  const calculatePupilPosition = () => {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2 + 200; // Approximate position of the eye
+    const maxDistance = 15; // Maximum distance the pupil can move
+    
+    const deltaX = mousePosition.x - centerX;
+    const deltaY = mousePosition.y - centerY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    if (distance === 0) return { x: 0, y: 0 };
+    
+    const normalizedX = (deltaX / distance) * Math.min(distance / 50, maxDistance);
+    const normalizedY = (deltaY / distance) * Math.min(distance / 50, maxDistance);
+    
+    return { x: normalizedX, y: normalizedY };
+  };
+
+  const pupilPosition = calculatePupilPosition();
+
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
       {/* Background Effects */}
@@ -213,23 +232,54 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Interactive Eye */}
+          {/* Interactive Eye of Sauron */}
           <div className="relative mb-12">
-            <div 
-              className="w-32 h-32 mx-auto bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center relative overflow-hidden cursor-pointer group"
-              style={{
-                transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`,
-              }}
-            >
-              <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center relative">
-                <div 
-                  className="w-4 h-4 bg-red-400 rounded-full transition-transform duration-300 group-hover:scale-150"
-                  style={{
-                    transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
-                  }}
-                />
+            <div className="w-40 h-40 mx-auto relative cursor-pointer group">
+              {/* Outer Eye Ring */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-red-600 animate-pulse">
+                <div className="absolute inset-1 rounded-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500">
+                  {/* Eye Socket */}
+                  <div className="absolute inset-2 rounded-full bg-black border-2 border-red-400/50">
+                    {/* Iris */}
+                    <div className="absolute inset-4 rounded-full bg-gradient-to-r from-red-500 to-orange-400 overflow-hidden">
+                      {/* Pupil that follows cursor */}
+                      <div 
+                        className="absolute w-8 h-8 bg-black rounded-full top-1/2 left-1/2 transition-transform duration-100 ease-out"
+                        style={{
+                          transform: `translate(-50%, -50%) translate(${pupilPosition.x}px, ${pupilPosition.y}px)`,
+                        }}
+                      >
+                        {/* Inner glow */}
+                        <div className="absolute inset-0.5 bg-red-600 rounded-full animate-pulse"></div>
+                        <div className="absolute inset-1 bg-red-400 rounded-full"></div>
+                      </div>
+                      
+                      {/* Iris texture lines */}
+                      <div className="absolute inset-0 opacity-30">
+                        <div className="absolute top-0 left-1/2 w-0.5 h-full bg-red-300 transform -translate-x-1/2"></div>
+                        <div className="absolute top-1/2 left-0 w-full h-0.5 bg-red-300 transform -translate-y-1/2"></div>
+                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-transparent via-red-300/20 to-transparent"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+              
+              {/* Flaming effect */}
+              <div className="absolute -inset-4 opacity-60">
+                <div className="absolute top-0 left-1/2 w-2 h-8 bg-gradient-to-t from-orange-500 to-transparent transform -translate-x-1/2 animate-pulse"></div>
+                <div className="absolute bottom-0 left-1/2 w-2 h-8 bg-gradient-to-b from-orange-500 to-transparent transform -translate-x-1/2 animate-pulse"></div>
+                <div className="absolute top-1/2 left-0 w-8 h-2 bg-gradient-to-l from-orange-500 to-transparent transform -translate-y-1/2 animate-pulse"></div>
+                <div className="absolute top-1/2 right-0 w-8 h-2 bg-gradient-to-r from-orange-500 to-transparent transform -translate-y-1/2 animate-pulse"></div>
+              </div>
+              
+              {/* Rotating ring of fire */}
+              <div className="absolute -inset-8 animate-spin" style={{ animationDuration: '20s' }}>
+                <div className="absolute top-0 left-1/2 w-1 h-4 bg-red-400 transform -translate-x-1/2 opacity-70"></div>
+                <div className="absolute top-2 right-2 w-1 h-3 bg-orange-400 transform opacity-50"></div>
+                <div className="absolute bottom-2 left-2 w-1 h-3 bg-red-500 transform opacity-60"></div>
+                <div className="absolute bottom-0 right-1/2 w-1 h-4 bg-yellow-400 transform translate-x-1/2 opacity-40"></div>
+              </div>
             </div>
           </div>
 
