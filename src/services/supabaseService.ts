@@ -39,18 +39,34 @@ export interface Account {
 }
 
 export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('Current user in submitReport:', user);
+  
+  const reportToInsert = {
+    ...reportData,
+    user_id: user?.id
+  };
+  
+  console.log('Inserting report:', reportToInsert);
+  
   const { data, error } = await supabase
     .from('reports')
-    .insert([reportData])
+    .insert([reportToInsert])
     .select()
     .single();
     
-  if (error) throw error;
+  if (error) {
+    console.error('Error inserting report:', error);
+    throw error;
+  }
+  
+  console.log('Report inserted successfully:', data);
   return data as Report;
 };
 
 export const createReport = async (reportData: { title: string; description: string; category: string; priority: string }) => {
   const { data: { user } } = await supabase.auth.getUser();
+  console.log('Current user in createReport:', user);
   
   const reportToInsert = {
     name: user?.user_metadata?.full_name || user?.email || 'Unknown',
@@ -66,21 +82,34 @@ export const createReport = async (reportData: { title: string; description: str
     status: 'pending'
   };
 
+  console.log('Creating report with data:', reportToInsert);
+
   const { data, error } = await supabase
     .from('reports')
     .insert([reportToInsert])
     .select()
     .single();
     
-  if (error) throw error;
+  if (error) {
+    console.error('Error creating report:', error);
+    throw error;
+  }
+  
+  console.log('Report created successfully:', data);
   return data as Report;
 };
 
 export const getReports = async (): Promise<Report[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('Current user in getReports:', user);
+  
   const { data, error } = await supabase
     .from('reports')
     .select('*')
     .order('created_at', { ascending: false });
+    
+  console.log('Raw reports data:', data);
+  console.log('Reports query error:', error);
     
   if (error) throw error;
   return data as Report[];
@@ -110,6 +139,10 @@ export const updateAnalysisStatus = async (reportId: string, status: 'validated'
 };
 
 export const getReportsWithAnalysis = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('Current user in getReportsWithAnalysis:', user);
+  console.log('User ID:', user?.id);
+  
   const { data, error } = await supabase
     .from('reports')
     .select(`
@@ -118,11 +151,22 @@ export const getReportsWithAnalysis = async () => {
     `)
     .order('created_at', { ascending: false });
     
+  console.log('Reports with analysis - raw data:', data);
+  console.log('Reports with analysis - error:', error);
+  console.log('Number of reports found:', data?.length || 0);
+  
+  if (data && data.length > 0) {
+    console.log('Sample report user_ids:', data.slice(0, 3).map(r => ({ id: r.id, user_id: r.user_id, email: r.email })));
+  }
+    
   if (error) throw error;
   return data as (Report & { analysis_results: AnalysisResult[] })[];
 };
 
 export const getRecentReports = async (limit = 10) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('Current user in getRecentReports:', user);
+  
   const { data, error } = await supabase
     .from('reports')
     .select(`
@@ -131,6 +175,9 @@ export const getRecentReports = async (limit = 10) => {
     `)
     .order('created_at', { ascending: false })
     .limit(limit);
+    
+  console.log('Recent reports data:', data);
+  console.log('Recent reports error:', error);
     
   if (error) throw error;
   return data as (Report & { analysis_results: AnalysisResult[] })[];

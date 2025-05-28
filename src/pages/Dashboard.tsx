@@ -52,6 +52,10 @@ const Dashboard = () => {
       return;
     }
     
+    console.log('Dashboard - Current user:', user);
+    console.log('Dashboard - User ID:', user.id);
+    console.log('Dashboard - User email:', user.email);
+    
     setIsVisible(true);
     
     const handleMouseMove = (e: MouseEvent) => {
@@ -67,9 +71,21 @@ const Dashboard = () => {
 
   const { data: reports = [], isLoading, refetch } = useQuery({
     queryKey: ['reportsWithAnalysis', filters],
-    queryFn: () => Object.keys(filters).length > 0 ? filterReports(filters) : getReportsWithAnalysis(),
+    queryFn: () => {
+      console.log('Dashboard - Fetching reports with filters:', filters);
+      return Object.keys(filters).length > 0 ? filterReports(filters) : getReportsWithAnalysis();
+    },
     enabled: !!user,
   });
+
+  // Add effect to log reports data
+  useEffect(() => {
+    console.log('Dashboard - Reports data updated:', reports);
+    console.log('Dashboard - Number of reports:', reports.length);
+    if (reports.length > 0) {
+      console.log('Dashboard - Sample reports:', reports.slice(0, 2));
+    }
+  }, [reports]);
 
   const { data: dashboardStats } = useQuery({
     queryKey: ['dashboardStats'],
@@ -240,7 +256,7 @@ const Dashboard = () => {
       <div className="px-4 sm:px-6 md:px-8 py-8 sm:py-12 relative z-10">
         <div className="max-w-7xl mx-auto">
           
-          {/* Welcome Section */}
+          {/* Welcome Section with Debug Info */}
           <div className={`mb-8 sm:mb-12 transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0'}`}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -250,6 +266,10 @@ const Dashboard = () => {
                 <p className="text-gray-300 text-lg">
                   Welcome back, {user?.user_metadata?.full_name || user?.email}. Your oversight dashboard is ready.
                 </p>
+                {/* Debug info */}
+                <div className="mt-2 text-xs text-gray-500">
+                  Debug: User ID: {user?.id} | Reports found: {reports.length} | Loading: {isLoading ? 'Yes' : 'No'}
+                </div>
               </div>
               <div className="mt-4 sm:mt-0 flex items-center space-x-3">
                 <div className="flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-full px-4 py-2">
@@ -373,6 +393,9 @@ const Dashboard = () => {
                         <div className="text-center py-8">
                           <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
                           <p className="text-gray-400">No reports found. Create your first report to get started.</p>
+                          <div className="text-xs text-gray-500 mt-2">
+                            If you've created reports but don't see them here, check the browser console for debugging info.
+                          </div>
                         </div>
                       )}
                     </CardContent>
