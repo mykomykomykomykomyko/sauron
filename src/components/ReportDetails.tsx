@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileText, Brain, Clock, User, Building, Calendar, Target, Zap, CheckCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Report, AnalysisResult, triggerAIAnalysis } from "@/services/supabaseService";
@@ -18,149 +17,90 @@ interface ReportDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Simple markdown-to-JSX renderer for analysis content
-const renderAnalysisContent = (content: string) => {
-  if (!content) return null;
+// Helper function to render markdown-like text as JSX
+const renderMarkdownText = (text: string) => {
+  if (!text) return null;
 
-  const lines = content.split('\n');
+  // Split by lines and process each line
+  const lines = text.split('\n');
   const elements: JSX.Element[] = [];
-  let currentTableRows: string[][] = [];
-  let tableHeaders: string[] = [];
-  let inTable = false;
-  let tableKey = 0;
+  let currentIndex = 0;
 
-  const finishTable = () => {
-    if (currentTableRows.length > 0 && tableHeaders.length > 0) {
+  lines.forEach((line, index) => {
+    const key = `line-${index}`;
+    
+    // Headers
+    if (line.startsWith('# ')) {
+      elements.push(<h1 key={key} className="text-2xl font-bold text-white mt-6 mb-3">{line.substring(2)}</h1>);
+    } else if (line.startsWith('## ')) {
+      elements.push(<h2 key={key} className="text-xl font-bold text-blue-400 mt-5 mb-2">{line.substring(3)}</h2>);
+    } else if (line.startsWith('### ')) {
+      elements.push(<h3 key={key} className="text-lg font-bold text-purple-400 mt-4 mb-2">{line.substring(4)}</h3>);
+    }
+    // Table headers
+    else if (line.includes('|') && line.includes('Category')) {
       elements.push(
-        <div key={`table-${tableKey++}`} className="my-4 overflow-x-auto">
-          <table className="w-full border border-gray-600 text-sm">
+        <div key={key} className="overflow-x-auto mt-3 mb-3">
+          <table className="w-full border-collapse border border-gray-600">
             <thead>
-              <tr className="bg-gray-800 border-b border-gray-600">
-                {tableHeaders.map((header, index) => (
-                  <th key={index} className="border-r border-gray-600 px-3 py-2 text-left text-gray-200 font-medium">
-                    {header.replace(/\*\*/g, '')}
+              <tr className="bg-gray-800">
+                {line.split('|').filter(cell => cell.trim()).map((cell, cellIndex) => (
+                  <th key={cellIndex} className="border border-gray-600 px-3 py-2 text-left text-gray-300 font-semibold">
+                    {cell.trim()}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody>
-              {currentTableRows.map((row, rowIndex) => (
-                <tr key={rowIndex} className="border-b border-gray-700">
-                  {row.map((cell, cellIndex) => (
-                    <td key={cellIndex} className="border-r border-gray-600 px-3 py-2 text-gray-300">
-                      {cell.replace(/\*\*/g, '')}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
           </table>
         </div>
       );
     }
-    currentTableRows = [];
-    tableHeaders = [];
-    inTable = false;
-  };
-
-  lines.forEach((line, index) => {
-    const trimmedLine = line.trim();
-    const key = `line-${index}`;
-    
-    if (!trimmedLine) {
-      if (inTable) finishTable();
-      elements.push(<div key={key} className="h-2"></div>);
+    // Table separator line (ignore)
+    else if (line.includes('|') && line.includes('---')) {
       return;
     }
-
-    // Table detection
-    if (trimmedLine.includes('|') && (trimmedLine.includes('Metric') || trimmedLine.includes('Score') || trimmedLine.includes('Category'))) {
-      if (inTable) finishTable();
-      inTable = true;
-      tableHeaders = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
-      return;
-    }
-    
-    // Table separator line
-    if (trimmedLine.includes('|') && trimmedLine.includes('---')) {
-      return;
-    }
-    
     // Table rows
-    if (inTable && trimmedLine.includes('|')) {
-      const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
-      if (cells.length > 0) {
-        currentTableRows.push(cells);
+    else if (line.includes('|') && !line.includes('Category')) {
+      const cells = line.split('|').filter(cell => cell.trim());
+      if (cells.length > 1) {
+        elements.push(
+          <div key={key} className="overflow-x-auto -mt-3 mb-3">
+            <table className="w-full border-collapse border border-gray-600">
+              <tbody>
+                <tr>
+                  {cells.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
+                      {cell.trim()}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
       }
-      return;
     }
-
-    // Finish table if we're no longer in one
-    if (inTable) {
-      finishTable();
-    }
-
-    // Process text formatting
-    const processText = (text: string) => {
-      // Remove problematic markdown and clean up
-      let cleanText = text
-        .replace(/\*{3,}/g, '') // Remove excessive asterisks
-        .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold formatting
-        .replace(/\*([^*]+)\*/g, '$1') // Remove italic formatting
-        .trim();
-
-      return cleanText;
-    };
-
-    // Headers
-    if (trimmedLine.startsWith('# ')) {
-      elements.push(
-        <h1 key={key} className="text-xl font-bold text-blue-400 mt-6 mb-4 border-b border-gray-700 pb-2">
-          {processText(trimmedLine.substring(2))}
-        </h1>
+    // Bold text
+    else if (line.includes('**')) {
+      const parts = line.split('**');
+      const processed = parts.map((part, partIndex) => 
+        partIndex % 2 === 1 ? <strong key={partIndex} className="text-yellow-400 font-bold">{part}</strong> : part
       );
-    } else if (trimmedLine.startsWith('## ')) {
-      elements.push(
-        <h2 key={key} className="text-lg font-semibold text-blue-300 mt-5 mb-3">
-          {processText(trimmedLine.substring(3))}
-        </h2>
-      );
-    } else if (trimmedLine.startsWith('### ')) {
-      elements.push(
-        <h3 key={key} className="text-base font-semibold text-purple-300 mt-4 mb-2">
-          {processText(trimmedLine.substring(4))}
-        </h3>
-      );
+      elements.push(<p key={key} className="text-gray-300 mb-2">{processed}</p>);
     }
     // List items
-    else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
-      elements.push(
-        <div key={key} className="flex items-start space-x-2 mb-2 ml-4">
-          <span className="text-blue-400 mt-1 text-xs">•</span>
-          <span className="text-gray-300 text-sm flex-1">
-            {processText(trimmedLine.substring(2))}
-          </span>
-        </div>
-      );
-    }
-    // Horizontal rules
-    else if (trimmedLine === '---') {
-      elements.push(<hr key={key} className="border-gray-600 my-4" />);
+    else if (line.startsWith('- ')) {
+      elements.push(<li key={key} className="text-gray-300 ml-4 mb-1 list-disc">{line.substring(2)}</li>);
     }
     // Regular paragraphs
-    else if (trimmedLine) {
-      elements.push(
-        <p key={key} className="text-gray-300 text-sm mb-3 leading-relaxed">
-          {processText(trimmedLine)}
-        </p>
-      );
+    else if (line.trim()) {
+      elements.push(<p key={key} className="text-gray-300 mb-2">{line}</p>);
+    }
+    // Empty lines
+    else {
+      elements.push(<br key={key} />);
     }
   });
-
-  // Finish any remaining table
-  if (inTable) {
-    finishTable();
-  }
 
   return <div className="space-y-1">{elements}</div>;
 };
@@ -172,6 +112,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
   const analysisMutation = useMutation({
     mutationFn: triggerAIAnalysis,
     onSuccess: () => {
+      // Invalidate and refetch both reports and the specific report data
       queryClient.invalidateQueries({ queryKey: ['reports'] });
       queryClient.invalidateQueries({ queryKey: ['report', report.id] });
       toast.success("AI analysis completed successfully");
@@ -211,26 +152,16 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
 
   const analysis = report.analysis_results?.[0];
 
-  // Extract content from detailed_feedback
-  const getDetailedFeedback = () => {
-    if (!analysis?.detailed_feedback) return '';
-    
-    if (typeof analysis.detailed_feedback === 'string') {
-      return analysis.detailed_feedback;
+  // Extract the feedback content from the detailed_feedback
+  const getFeedbackContent = (detailedFeedback: any) => {
+    if (typeof detailedFeedback === 'string') {
+      return detailedFeedback;
     }
-    
-    if (typeof analysis.detailed_feedback === 'object') {
-      // Try different possible field names
-      return analysis.detailed_feedback.feedback || 
-             analysis.detailed_feedback.detailedFeedback || 
-             analysis.detailed_feedback.detailed_feedback || 
-             JSON.stringify(analysis.detailed_feedback, null, 2);
+    if (detailedFeedback && typeof detailedFeedback === 'object') {
+      return detailedFeedback.feedback || JSON.stringify(detailedFeedback, null, 2);
     }
-    
-    return '';
+    return 'No detailed feedback available';
   };
-
-  const detailedFeedbackContent = getDetailedFeedback();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -316,7 +247,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-black/20 rounded-lg">
                       <div className="text-2xl font-bold text-green-400 font-mono">
-                        {analysis.score}/1000
+                        {analysis.score}%
                       </div>
                       <div className="text-sm text-gray-400">Quality Score</div>
                     </div>
@@ -339,17 +270,17 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   {analysis.summary && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Summary</h4>
-                      <div className="bg-black/20 p-4 rounded-lg">
-                        {renderAnalysisContent(analysis.summary)}
-                      </div>
+                      <p className="text-gray-300 leading-relaxed bg-black/20 p-4 rounded-lg">
+                        {analysis.summary}
+                      </p>
                     </div>
                   )}
                   
-                  {detailedFeedbackContent && (
+                  {analysis.detailed_feedback && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Detailed Feedback</h4>
-                      <div className="bg-black/20 p-4 rounded-lg max-h-96 overflow-y-auto">
-                        {renderAnalysisContent(detailedFeedbackContent)}
+                      <div className="bg-black/20 p-4 rounded-lg">
+                        {renderMarkdownText(getFeedbackContent(analysis.detailed_feedback))}
                       </div>
                     </div>
                   )}
