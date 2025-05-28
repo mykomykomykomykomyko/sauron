@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +30,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getReportsWithAnalysis, getDashboardStats, downloadCSV, filterReports, Report, AnalysisResult } from "@/services/supabaseService";
 import { format } from "date-fns";
 import { FilterDialog } from "@/components/FilterDialog";
-import { AccountManagement } from "@/components/AccountManagement";
+import { SimpleAccountDialog } from "@/components/SimpleAccountDialog";
 import { ReportDetails } from "@/components/ReportDetails";
 import { toast } from "sonner";
 
@@ -93,6 +92,10 @@ const Dashboard = () => {
       await scheduleReportEmail(user.email);
       toast.success("Email client opened with report reminder");
     }
+  };
+
+  const handleApplyFilters = (newFilters: { name?: string; sortBy?: 'date' | 'alphabetical'; sortOrder?: 'asc' | 'desc' }) => {
+    setFilters(newFilters);
   };
 
   const particles = Array.from({ length: 15 }, (_, i) => ({
@@ -663,10 +666,10 @@ const Dashboard = () => {
       <FilterDialog 
         open={showFilterDialog} 
         onOpenChange={setShowFilterDialog}
-        onFiltersChange={setFilters}
+        onApplyFilters={handleApplyFilters}
       />
       
-      <AccountManagement 
+      <SimpleAccountDialog 
         open={showAccountDialog} 
         onOpenChange={setShowAccountDialog}
       />
