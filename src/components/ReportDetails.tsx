@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Brain, Clock, User, Building, Calendar, Target, Zap, CheckCircle, AlertCircle } from "lucide-react";
+import { FileText, Brain, Clock, User, Building, Calendar, Target, Zap, CheckCircle, AlertCircle, Flag, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { Report, AnalysisResult, triggerAIAnalysis } from "@/services/supabaseService";
 import { toast } from "sonner";
@@ -24,7 +24,6 @@ const renderMarkdownText = (text: string) => {
   // Split by lines and process each line
   const lines = text.split('\n');
   const elements: JSX.Element[] = [];
-  let currentIndex = 0;
 
   lines.forEach((line, index) => {
     const key = `line-${index}`;
@@ -103,6 +102,23 @@ const renderMarkdownText = (text: string) => {
   });
 
   return <div className="space-y-1">{elements}</div>;
+};
+
+// Helper function to get flag explanations
+const getFlagExplanations = (flags: number) => {
+  const explanations = [];
+  
+  if (flags >= 3) {
+    explanations.push("Critical deficiencies detected - report requires major improvements");
+  }
+  if (flags >= 2) {
+    explanations.push("Multiple professional standards not met");
+  }
+  if (flags >= 1) {
+    explanations.push("Quality issues identified that need attention");
+  }
+  
+  return explanations;
 };
 
 export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps) => {
@@ -247,13 +263,14 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-black/20 rounded-lg">
                       <div className="text-2xl font-bold text-green-400 font-mono">
-                        {analysis.score}%
+                        {analysis.score}/1000
                       </div>
                       <div className="text-sm text-gray-400">Quality Score</div>
                     </div>
                     <div className="text-center p-4 bg-black/20 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-400 font-mono">
-                        {analysis.flags}
+                      <div className="text-2xl font-bold text-red-400 font-mono flex items-center justify-center space-x-2">
+                        <Flag className="w-6 h-6" />
+                        <span>{analysis.flags}</span>
                       </div>
                       <div className="text-sm text-gray-400">Flags Raised</div>
                     </div>
@@ -266,6 +283,24 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                       <div className="text-sm text-gray-400 capitalize">{analysis.status}</div>
                     </div>
                   </div>
+
+                  {/* Flags Explanation Section */}
+                  {analysis.flags > 0 && (
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <AlertTriangle className="w-5 h-5 text-red-400" />
+                        <h4 className="text-red-400 font-mono font-bold">Quality Flags Detected</h4>
+                      </div>
+                      <div className="space-y-2">
+                        {getFlagExplanations(analysis.flags).map((explanation, index) => (
+                          <div key={index} className="flex items-start space-x-2">
+                            <Flag className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                            <span className="text-red-300 text-sm">{explanation}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   {analysis.summary && (
                     <div>
