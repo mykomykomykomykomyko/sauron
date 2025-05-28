@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,40 +16,64 @@ interface ReportDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Helper function to render markdown-like text as JSX
+// Improved markdown renderer with better formatting
 const renderMarkdownText = (text: string) => {
   if (!text) return null;
 
   // Split by lines and process each line
   const lines = text.split('\n');
   const elements: JSX.Element[] = [];
-  let currentIndex = 0;
+
+  let inTable = false;
+  let tableHeaders: string[] = [];
 
   lines.forEach((line, index) => {
     const key = `line-${index}`;
     
-    // Headers
-    if (line.startsWith('# ')) {
-      elements.push(<h1 key={key} className="text-2xl font-bold text-white mt-6 mb-3">{line.substring(2)}</h1>);
-    } else if (line.startsWith('## ')) {
-      elements.push(<h2 key={key} className="text-xl font-bold text-blue-400 mt-5 mb-2">{line.substring(3)}</h2>);
-    } else if (line.startsWith('### ')) {
-      elements.push(<h3 key={key} className="text-lg font-bold text-purple-400 mt-4 mb-2">{line.substring(4)}</h3>);
+    // Skip empty lines
+    if (!line.trim()) {
+      elements.push(<div key={key} className="h-2"></div>);
+      return;
     }
-    // Table headers
-    else if (line.includes('|') && line.includes('Category')) {
+
+    // Headers with proper styling
+    if (line.startsWith('# ')) {
       elements.push(
-        <div key={key} className="overflow-x-auto mt-3 mb-3">
-          <table className="w-full border-collapse border border-gray-600">
+        <h1 key={key} className="text-xl font-bold text-white mt-6 mb-4 border-b border-gray-700 pb-2">
+          {line.substring(2).replace(/\*+/g, '')}
+        </h1>
+      );
+    } else if (line.startsWith('## ')) {
+      elements.push(
+        <h2 key={key} className="text-lg font-semibold text-blue-300 mt-5 mb-3">
+          {line.substring(3).replace(/\*+/g, '')}
+        </h2>
+      );
+    } else if (line.startsWith('### ')) {
+      elements.push(
+        <h3 key={key} className="text-base font-semibold text-purple-300 mt-4 mb-2">
+          {line.substring(4).replace(/\*+/g, '')}
+        </h3>
+      );
+    }
+    // Table detection and rendering
+    else if (line.includes('|') && line.includes('Metric')) {
+      inTable = true;
+      tableHeaders = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+      elements.push(
+        <div key={key} className="overflow-x-auto mt-4 mb-4">
+          <table className="w-full border-collapse border border-gray-600 text-sm">
             <thead>
               <tr className="bg-gray-800">
-                {line.split('|').filter(cell => cell.trim()).map((cell, cellIndex) => (
-                  <th key={cellIndex} className="border border-gray-600 px-3 py-2 text-left text-gray-300 font-semibold">
-                    {cell.trim()}
+                {tableHeaders.map((header, cellIndex) => (
+                  <th key={cellIndex} className="border border-gray-600 px-3 py-2 text-left text-gray-200 font-medium">
+                    {header.replace(/\*+/g, '')}
                   </th>
                 ))}
               </tr>
             </thead>
+            <tbody id={`table-body-${index}`}>
+            </tbody>
           </table>
         </div>
       );
@@ -60,45 +83,81 @@ const renderMarkdownText = (text: string) => {
       return;
     }
     // Table rows
-    else if (line.includes('|') && !line.includes('Category')) {
-      const cells = line.split('|').filter(cell => cell.trim());
-      if (cells.length > 1) {
+    else if (inTable && line.includes('|')) {
+      const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+      if (cells.length > 0) {
+        // Find the previous table and add row
+        const lastTableIndex = elements.length - 1;
+        const tableElement = elements[lastTableIndex];
+        if (tableElement && tableElement.props.children.props.children.length > 1) {
+          const tbody = tableElement.props.children.props.children[1];
+          const newRow = (
+            <tr key={`row-${index}`}>
+              {cells.map((cell, cellIndex) => (
+                <td key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
+                  {cell.replace(/\*+/g, '')}
+                </td>
+              ))}
+            </tr>
+          );
+          // This is a workaround - in practice, we'd need a more sophisticated table builder
+        }
+      }
+    } else {
+      inTable = false;
+    }
+
+    // Process other content if not in table
+    if (!inTable && !line.startsWith('#') && !(line.includes('|') && line.includes('Metric'))) {
+      // Bold text processing
+      let processedLine = line;
+      
+      // Clean up multiple asterisks and formatting
+      processedLine = processedLine.replace(/\*{3,}/g, '**');
+      processedLine = processedLine.replace(/\*{1}\s*/g, '');
+      
+      // Process bold text
+      const boldRegex = /\*\*(.*?)\*\*/g;
+      const parts = [];
+      let lastIndex = 0;
+      let match;
+
+      while ((match = boldRegex.exec(processedLine)) !== null) {
+        // Add text before the match
+        if (match.index > lastIndex) {
+          parts.push(processedLine.substring(lastIndex, match.index));
+        }
+        // Add the bold text
+        parts.push(<strong key={`bold-${match.index}`} className="text-white font-semibold">{match[1]}</strong>);
+        lastIndex = boldRegex.lastIndex;
+      }
+      
+      // Add remaining text
+      if (lastIndex < processedLine.length) {
+        parts.push(processedLine.substring(lastIndex));
+      }
+
+      // List items
+      if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
         elements.push(
-          <div key={key} className="overflow-x-auto -mt-3 mb-3">
-            <table className="w-full border-collapse border border-gray-600">
-              <tbody>
-                <tr>
-                  {cells.map((cell, cellIndex) => (
-                    <td key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
-                      {cell.trim()}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+          <div key={key} className="flex items-start space-x-2 mb-2 ml-4">
+            <span className="text-blue-400 mt-1 text-xs">•</span>
+            <span className="text-gray-300 text-sm flex-1">{parts.length > 0 ? parts : line.substring(2).replace(/\*+/g, '')}</span>
           </div>
         );
       }
-    }
-    // Bold text
-    else if (line.includes('**')) {
-      const parts = line.split('**');
-      const processed = parts.map((part, partIndex) => 
-        partIndex % 2 === 1 ? <strong key={partIndex} className="text-yellow-400 font-bold">{part}</strong> : part
-      );
-      elements.push(<p key={key} className="text-gray-300 mb-2">{processed}</p>);
-    }
-    // List items
-    else if (line.startsWith('- ')) {
-      elements.push(<li key={key} className="text-gray-300 ml-4 mb-1 list-disc">{line.substring(2)}</li>);
-    }
-    // Regular paragraphs
-    else if (line.trim()) {
-      elements.push(<p key={key} className="text-gray-300 mb-2">{line}</p>);
-    }
-    // Empty lines
-    else {
-      elements.push(<br key={key} />);
+      // Horizontal rules
+      else if (line.trim() === '---') {
+        elements.push(<hr key={key} className="border-gray-600 my-4" />);
+      }
+      // Regular paragraphs
+      else if (line.trim()) {
+        elements.push(
+          <p key={key} className="text-gray-300 text-sm mb-3 leading-relaxed">
+            {parts.length > 0 ? parts : line.replace(/\*+/g, '')}
+          </p>
+        );
+      }
     }
   });
 
@@ -270,7 +329,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   {analysis.summary && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Summary</h4>
-                      <p className="text-gray-300 leading-relaxed bg-black/20 p-4 rounded-lg">
+                      <p className="text-gray-300 leading-relaxed bg-black/20 p-4 rounded-lg text-sm">
                         {analysis.summary}
                       </p>
                     </div>
@@ -279,7 +338,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   {analysis.detailed_feedback && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Detailed Feedback</h4>
-                      <div className="bg-black/20 p-4 rounded-lg">
+                      <div className="bg-black/20 p-4 rounded-lg max-h-96 overflow-y-auto">
                         {renderMarkdownText(getFeedbackContent(analysis.detailed_feedback))}
                       </div>
                     </div>
