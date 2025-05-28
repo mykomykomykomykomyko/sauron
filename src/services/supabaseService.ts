@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Report {
@@ -173,11 +172,12 @@ export const getReportsWithAnalysis = async () => {
   console.log('User role:', userRole?.role);
   console.log('Role query error:', roleError);
   
+  // Use the specific foreign key relationship to avoid ambiguity
   let query = supabase
     .from('reports')
     .select(`
       *,
-      analysis_results (*)
+      analysis_results!analysis_results_report_id_fkey (*)
     `);
   
   // If user is not an admin, filter by user_id
@@ -226,11 +226,12 @@ export const getRecentReports = async (limit = 10) => {
   console.log('User role in getRecentReports:', userRole?.role);
   console.log('Role query error in getRecentReports:', roleError);
   
+  // Use the specific foreign key relationship to avoid ambiguity
   let query = supabase
     .from('reports')
     .select(`
       *,
-      analysis_results (*)
+      analysis_results!analysis_results_report_id_fkey (*)
     `);
   
   // If user is not an admin, filter by user_id
@@ -368,11 +369,12 @@ export const filterReports = async (filters: { name?: string; sortBy?: 'date' | 
   console.log('User role in filterReports:', userRole?.role);
   console.log('Role query error in filterReports:', roleError);
   
+  // Use the specific foreign key relationship to avoid ambiguity
   let query = supabase
     .from('reports')
     .select(`
       *,
-      analysis_results (*)
+      analysis_results!analysis_results_report_id_fkey (*)
     `);
     
   // If user is not an admin, filter by user_id
