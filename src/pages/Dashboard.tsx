@@ -110,11 +110,7 @@ const Dashboard = () => {
   };
 
   const handleScheduleReport = async () => {
-    if (user?.email) {
-      const { scheduleReportEmail } = await import("@/services/supabaseService");
-      await scheduleReportEmail(user.email);
-      toast.success("Email client opened with report reminder");
-    }
+    toast.info("Use the Schedule Report button in Quick Actions for full functionality");
   };
 
   const handleApplyFilters = (newFilters: { name?: string; sortBy?: 'date' | 'alphabetical'; sortOrder?: 'asc' | 'desc' }) => {
@@ -342,7 +338,6 @@ const Dashboard = () => {
                   <QuickActions 
                     onExport={handleExport}
                     onShowFilterDialog={() => setShowFilterDialog(true)}
-                    onScheduleReport={handleScheduleReport}
                   />
                 </div>
               </TabsContent>
