@@ -27,17 +27,17 @@ export const UserProfile = ({ user, open, onOpenChange }: UserProfileProps) => {
     : 0;
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-400';
-    if (score >= 60) return 'text-yellow-400';
-    if (score >= 40) return 'text-orange-400';
+    if (score >= 800) return 'text-green-400';
+    if (score >= 600) return 'text-yellow-400';
+    if (score >= 400) return 'text-orange-400';
     return 'text-red-400';
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 90) return { label: 'Excellent', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
-    if (score >= 80) return { label: 'Very Good', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
-    if (score >= 70) return { label: 'Good', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
-    if (score >= 60) return { label: 'Average', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
+    if (score >= 900) return { label: 'Excellent', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+    if (score >= 800) return { label: 'Very Good', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
+    if (score >= 700) return { label: 'Good', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
+    if (score >= 600) return { label: 'Average', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
     return { label: 'Needs Improvement', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
   };
 
@@ -72,7 +72,7 @@ export const UserProfile = ({ user, open, onOpenChange }: UserProfileProps) => {
                 </div>
                 <div className="text-center">
                   <div className={`text-3xl font-bold font-mono mb-1 ${getScoreColor(avgScore)}`}>
-                    {avgScore.toFixed(1)}%
+                    {Math.round(avgScore)}/1000
                   </div>
                   <Badge className={scoreBadge.color}>
                     {scoreBadge.label}
@@ -108,7 +108,7 @@ export const UserProfile = ({ user, open, onOpenChange }: UserProfileProps) => {
               <CardContent className="p-4 text-center">
                 <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-2" />
                 <div className={`text-2xl font-bold font-mono ${getScoreColor(avgScore)}`}>
-                  {avgScore.toFixed(0)}%
+                  {Math.round(avgScore)}
                 </div>
                 <div className="text-sm text-gray-400">Avg Score</div>
               </CardContent>
@@ -139,7 +139,7 @@ export const UserProfile = ({ user, open, onOpenChange }: UserProfileProps) => {
                       <div className="flex items-center space-x-2">
                         {report.analysis_results[0] && (
                           <Badge className={`text-xs ${getScoreColor(report.analysis_results[0].score)} bg-white/10`}>
-                            {report.analysis_results[0].score}%
+                            {report.analysis_results[0].score}/1000
                           </Badge>
                         )}
                       </div>

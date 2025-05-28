@@ -151,15 +151,33 @@ const Dashboard = () => {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-400';
-    if (score >= 60) return 'text-yellow-400';
-    if (score >= 40) return 'text-orange-400';
+    if (score >= 800) return 'text-green-400';
+    if (score >= 600) return 'text-yellow-400';
+    if (score >= 400) return 'text-orange-400';
     return 'text-red-400';
   };
 
   const formatStatus = (status: string) => {
     return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
+
+  // Calculate success rate as percentage based on 1000-point scale
+  const calculateSuccessRate = (stats: any) => {
+    if (!stats || !reports.length) return 0;
+    
+    const reportsWithAnalysis = reports.filter(r => r.analysis_results && r.analysis_results.length > 0);
+    if (reportsWithAnalysis.length === 0) return 0;
+    
+    const totalScore = reportsWithAnalysis.reduce((sum, report) => {
+      return sum + (report.analysis_results[0]?.score || 0);
+    }, 0);
+    
+    const averageScore = totalScore / reportsWithAnalysis.length;
+    // Convert score out of 1000 to percentage
+    return (averageScore / 1000) * 100;
+  };
+
+  const successRate = calculateSuccessRate(dashboardStats);
 
   const stats = dashboardStats ? [
     { 
@@ -185,7 +203,7 @@ const Dashboard = () => {
     },
     { 
       label: "Success Rate", 
-      value: `${dashboardStats.successRate}%`, 
+      value: `${successRate.toFixed(1)}%`, 
       icon: Target, 
       color: "from-red-400 to-orange-400",
       change: "+2.1%"
@@ -403,7 +421,7 @@ const Dashboard = () => {
                                   </div>
                                   <div className="flex items-center space-x-1">
                                     <Brain className="w-3 h-3" />
-                                    <span>AI Score: {report.analysis_results[0]?.score || 'N/A'}%</span>
+                                    <span>AI Score: {report.analysis_results[0]?.score || 'N/A'}/1000</span>
                                   </div>
                                 </div>
                                 <Button 
@@ -450,19 +468,19 @@ const Dashboard = () => {
                       <div className="space-y-6">
                         <div className="text-center">
                           <div className="text-4xl font-bold text-green-400 font-mono mb-2">
-                            {dashboardStats?.successRate || '0'}%
+                            {successRate.toFixed(1)}%
                           </div>
                           <div className="text-gray-300">Overall Success Rate</div>
                         </div>
                         <div className="space-y-3">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Report Quality</span>
-                            <span className="text-white">{dashboardStats?.successRate || '0'}%</span>
+                            <span className="text-white">{successRate.toFixed(1)}%</span>
                           </div>
                           <div className="w-full bg-white/10 rounded-full h-2">
                             <div 
                               className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" 
-                              style={{width: `${dashboardStats?.successRate || 0}%`}}
+                              style={{width: `${Math.min(successRate, 100)}%`}}
                             ></div>
                           </div>
                         </div>

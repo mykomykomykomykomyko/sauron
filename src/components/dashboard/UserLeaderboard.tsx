@@ -82,9 +82,9 @@ export const UserLeaderboard = ({ usersWithReports, isLoading, onUserClick, getS
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className={`text-lg font-bold font-mono ${getScoreColor(user.avgScore)}`}>
-                      {user.avgScore.toFixed(1)}%
+                      {Math.round(user.avgScore)}/1000
                     </div>
-                    {user.avgScore >= 90 && <Award className="w-4 h-4 text-yellow-400" />}
+                    {user.avgScore >= 900 && <Award className="w-4 h-4 text-yellow-400" />}
                   </div>
                 </div>
               ))}
