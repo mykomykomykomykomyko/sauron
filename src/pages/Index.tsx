@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target, TrendingUp, Globe, Clock, CheckCircle, ArrowRight, Brain, Network, Cpu, Database, BarChart3, MessageSquare, Lock, Workflow, Star, Award, ChevronRight, PlayCircle } from "lucide-react";
+import { Eye, FileText, Shield, Users, Bell, Sparkles, Zap, Target, TrendingUp, Globe, Clock, CheckCircle, ArrowRight, Brain, Network, Cpu, Database, BarChart3, MessageSquare, Lock, Workflow, PlayCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -109,30 +109,6 @@ const Index = () => {
       icon: Shield,
       color: "from-green-500 to-emerald-500",
       features: ["Executive dashboards", "Detailed analytics", "Export capabilities", "Team oversight"]
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Project Manager",
-      company: "TechCorp",
-      content: "The Eye of Sauron has revolutionized how we track contractor progress. The AI insights are incredibly accurate.",
-      rating: 5
-    },
-    {
-      name: "Marcus Rodriguez",
-      role: "Operations Director",
-      company: "BuildTech",
-      content: "We've saved 80% of our time on report validation. The automated analysis catches issues we would have missed.",
-      rating: 5
-    },
-    {
-      name: "Emily Watson",
-      role: "Team Lead",
-      company: "DataFlow",
-      content: "The real-time insights help us make better decisions faster. Our project success rate has increased significantly.",
-      rating: 5
     }
   ];
 
@@ -407,25 +383,6 @@ const Index = () => {
               </Card>
             ))}
           </div>
-
-          {/* Enhanced Stats Section */}
-          <div className={`mt-16 sm:mt-24 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 transition-all duration-1000 delay-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-            {[
-              { label: "Reports Analyzed", value: "10K+", color: "from-blue-400 to-cyan-400" },
-              { label: "AI Accuracy", value: "99.7%", color: "from-green-400 to-emerald-400" },
-              { label: "Time Saved", value: "80%", color: "from-purple-400 to-pink-400" },
-              { label: "Active Users", value: "500+", color: "from-red-400 to-orange-400" }
-            ].map((stat, index) => (
-              <div key={index} className="text-center group cursor-pointer">
-                <div className={`text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent font-mono group-hover:scale-110 transition-transform duration-300`}>
-                  {stat.value}
-                </div>
-                <div className="text-sm sm:text-base text-gray-400 mt-2 group-hover:text-gray-300 transition-colors duration-300">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -446,107 +403,106 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Interactive Workflow Visualization */}
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Workflow Steps */}
-            <div className="space-y-6">
-              {workflowSteps.map((step, index) => (
-                <div 
-                  key={index}
-                  className={`group cursor-pointer transition-all duration-500 ${
-                    currentStep === index ? 'scale-105' : 'hover:scale-102'
-                  }`}
-                  onClick={() => setCurrentStep(index)}
-                >
-                  <Card className={`bg-black/40 border-white/20 backdrop-blur-xl transition-all duration-500 ${
-                    currentStep === index 
-                      ? 'border-white/60 shadow-2xl shadow-red-500/20' 
-                      : 'hover:border-white/40'
-                  }`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <div className={`p-3 rounded-xl bg-gradient-to-br ${step.color} relative overflow-hidden`}>
-                          <step.icon className="w-6 h-6 text-white relative z-10" />
-                          {currentStep === index && (
-                            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <span className="text-sm font-mono text-gray-400">STEP {index + 1}</span>
-                            {currentStep === index && (
-                              <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
-                            )}
-                          </div>
-                          <h3 className="text-xl font-bold text-white mb-2 font-mono">{step.title}</h3>
-                          <p className="text-gray-300 mb-4 leading-relaxed">{step.description}</p>
-                          <div className="grid grid-cols-2 gap-2">
-                            {step.features.map((feature, featureIndex) => (
-                              <div key={featureIndex} className="flex items-center space-x-2">
-                                <CheckCircle className="w-4 h-4 text-green-400" />
-                                <span className="text-sm text-gray-400">{feature}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <ChevronRight className={`w-5 h-5 text-gray-400 transition-all duration-300 ${
-                          currentStep === index ? 'text-white rotate-90' : 'group-hover:translate-x-1'
-                        }`} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
-            </div>
+          {/* Cohere-inspired Workflow Visualization */}
+          <div className="max-w-5xl mx-auto">
+            <div className="relative bg-gradient-to-br from-purple-900/10 via-black/50 to-red-900/10 rounded-3xl border border-white/10 backdrop-blur-xl p-8 overflow-hidden">
+              {/* Background pattern */}
+              <div className="absolute inset-0 opacity-5">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
+              </div>
 
-            {/* Visual Representation */}
-            <div className="relative">
-              <div className="aspect-square max-w-md mx-auto relative">
-                {/* Central Hub */}
-                <div className="absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center border-4 border-white/20 backdrop-blur-xl">
-                  <Eye className="w-12 h-12 text-white animate-pulse" />
-                </div>
-
-                {/* Workflow Nodes */}
-                {workflowSteps.map((step, index) => {
-                  const angle = (index * 90) - 45; // Position around circle
-                  const radius = 140;
-                  const x = Math.cos((angle * Math.PI) / 180) * radius;
-                  const y = Math.sin((angle * Math.PI) / 180) * radius;
+              {/* Workflow steps arranged in a flow */}
+              <div className="relative">
+                {/* Connection lines */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
+                  <defs>
+                    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#ef4444" stopOpacity="0.6" />
+                      <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.6" />
+                    </linearGradient>
+                  </defs>
                   
-                  return (
-                    <div
-                      key={index}
-                      className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
-                      style={{
-                        left: `calc(50% + ${x}px)`,
-                        top: `calc(50% + ${y}px)`,
-                        transform: `translate(-50%, -50%) scale(${currentStep === index ? 1.2 : 1})`,
-                      }}
-                    >
-                      <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center border-2 transition-all duration-500 ${
-                        currentStep === index ? 'border-white shadow-2xl' : 'border-white/20'
+                  {/* Flowing connection path */}
+                  <path
+                    d="M 120 100 Q 200 50, 280 100 Q 360 150, 440 100 Q 520 50, 600 100"
+                    stroke="url(#flowGradient)"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeDasharray="8,4"
+                    className="animate-pulse"
+                  />
+                  
+                  {/* Animated dots */}
+                  <circle r="3" fill="#ef4444" className="opacity-80">
+                    <animateMotion dur="4s" repeatCount="indefinite">
+                      <mpath href="#flowPath" />
+                    </animateMotion>
+                  </circle>
+                  
+                  <path id="flowPath" d="M 120 100 Q 200 50, 280 100 Q 360 150, 440 100 Q 520 50, 600 100" opacity="0" />
+                </svg>
+
+                {/* Workflow nodes */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 relative" style={{ zIndex: 2 }}>
+                  {workflowSteps.map((step, index) => (
+                    <div key={index} className="flex flex-col items-center text-center group">
+                      {/* Step node */}
+                      <div className={`relative mb-4 transition-all duration-500 ${
+                        currentStep === index ? 'scale-110' : 'hover:scale-105'
                       }`}>
-                        <step.icon className="w-8 h-8 text-white" />
+                        <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center border-2 transition-all duration-500 ${
+                          currentStep === index 
+                            ? 'border-white shadow-2xl shadow-red-500/30' 
+                            : 'border-white/20 hover:border-white/40'
+                        } relative overflow-hidden`}>
+                          {/* Animated background for active step */}
+                          {currentStep === index && (
+                            <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+                          )}
+                          
+                          <step.icon className="w-10 h-10 text-white relative z-10" />
+                          
+                          {/* Glow effect */}
+                          <div className={`absolute -inset-2 bg-gradient-to-br ${step.color} rounded-2xl blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-500`}></div>
+                        </div>
+                        
+                        {/* Step number */}
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-black border border-white/20 rounded-full flex items-center justify-center text-xs font-bold">
+                          {index + 1}
+                        </div>
                       </div>
                       
-                      {/* Connection Line */}
-                      <div 
-                        className={`absolute top-1/2 left-1/2 w-20 h-0.5 bg-gradient-to-r origin-left transition-all duration-500 ${
-                          currentStep === index 
-                            ? 'from-white to-red-400 opacity-100' 
-                            : 'from-white/20 to-white/10 opacity-50'
-                        }`}
-                        style={{
-                          transform: `translate(-50%, -50%) rotate(${angle + 135}deg)`,
-                        }}
-                      />
+                      {/* Step info */}
+                      <h3 className="text-lg font-bold text-white mb-2 font-mono group-hover:text-red-200 transition-colors">
+                        {step.title}
+                      </h3>
+                      <p className="text-sm text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
+                        {step.description}
+                      </p>
+                      
+                      {/* Features list */}
+                      <div className="mt-4 space-y-1 hidden lg:block">
+                        {step.features.slice(0, 2).map((feature, featureIndex) => (
+                          <div key={featureIndex} className="flex items-center space-x-2 text-xs text-gray-500">
+                            <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                            <span>{feature}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
 
-                {/* Progress Indicator */}
-                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {/* Progress indicator */}
+                <div className="flex justify-center mt-8 space-x-2">
                   {workflowSteps.map((_, index) => (
                     <div
                       key={index}
@@ -624,47 +580,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Testimonials */}
-      <div className="px-4 sm:px-6 md:px-8 py-24 sm:py-32 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-6xl font-bold font-mono mb-6 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
-              TRUSTED BY LEADERS
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              See what industry professionals are saying about The Eye of Sauron
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-black/40 border-white/20 hover:border-white/40 transition-all duration-500 group backdrop-blur-xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-300 mb-6 leading-relaxed italic">"{testimonial.content}"</p>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">
-                        {testimonial.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold">{testimonial.name}</div>
-                      <div className="text-gray-400 text-sm">{testimonial.role}</div>
-                      <div className="text-gray-500 text-sm">{testimonial.company}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Final CTA Section */}
       <div className="px-4 sm:px-6 md:px-8 py-24 sm:py-32 relative z-10 bg-gradient-to-t from-black via-red-900/10 to-transparent">
         <div className="max-w-4xl mx-auto text-center">
@@ -678,7 +593,7 @@ const Index = () => {
             START YOUR OVERSIGHT
           </h2>
           <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-            Join hundreds of organizations already using The Eye of Sauron to revolutionize their project management
+            Experience the power of AI-driven project management and intelligent oversight.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -690,24 +605,16 @@ const Index = () => {
                 <ArrowRight className="w-5 h-5 ml-3 relative z-10 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="px-12 py-6 text-xl border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50 transition-all duration-500 hover:scale-110 font-mono backdrop-blur-xl">
-              <MessageSquare className="w-6 h-6 mr-3" />
-              Contact Sales
-            </Button>
           </div>
           
-          <div className="mt-12 grid grid-cols-3 gap-8 text-center opacity-60">
-            <div>
-              <Award className="w-8 h-8 mx-auto mb-2 text-yellow-400" />
-              <div className="text-sm text-gray-400">Award Winning</div>
-            </div>
+          <div className="mt-12 grid grid-cols-2 gap-8 text-center opacity-60">
             <div>
               <Globe className="w-8 h-8 mx-auto mb-2 text-blue-400" />
               <div className="text-sm text-gray-400">Global Scale</div>
             </div>
             <div>
               <Clock className="w-8 h-8 mx-auto mb-2 text-green-400" />
-              <div className="text-sm text-gray-400">24/7 Support</div>
+              <div className="text-sm text-gray-400">AI 24/7 Support</div>
             </div>
           </div>
         </div>
