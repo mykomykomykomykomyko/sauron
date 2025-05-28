@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,15 +28,23 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { supabaseService, Report } from "@/services/supabaseService";
+import { getReportsWithAnalysis, getDashboardStats, downloadCSV, filterReports, Report, AnalysisResult } from "@/services/supabaseService";
 import { format } from "date-fns";
+import { FilterDialog } from "@/components/FilterDialog";
+import { AccountManagement } from "@/components/AccountManagement";
+import { ReportDetails } from "@/components/ReportDetails";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
+  const [showAccountDialog, setShowAccountDialog] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<(Report & { analysis_results: AnalysisResult[] }) | null>(null);
+  const [filters, setFilters] = useState<{ name?: string; sortBy?: 'date' | 'alphabetical'; sortOrder?: 'asc' | 'desc' }>({});
 
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,11 +66,34 @@ const Dashboard = () => {
     };
   }, [user, navigate]);
 
-  const { data: reports, isLoading, refetch } = useQuery({
-    queryKey: ['reports'],
-    queryFn: supabaseService.getReports,
+  const { data: reports = [], isLoading, refetch } = useQuery({
+    queryKey: ['reportsWithAnalysis', filters],
+    queryFn: () => Object.keys(filters).length > 0 ? filterReports(filters) : getReportsWithAnalysis(),
     enabled: !!user,
   });
+
+  const { data: dashboardStats } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: getDashboardStats,
+    enabled: !!user,
+  });
+
+  const handleExport = async () => {
+    try {
+      await downloadCSV();
+      toast.success("Reports exported successfully!");
+    } catch (error) {
+      toast.error("Failed to export reports");
+    }
+  };
+
+  const handleScheduleReport = async () => {
+    if (user?.email) {
+      const { scheduleReportEmail } = await import("@/services/supabaseService");
+      await scheduleReportEmail(user.email);
+      toast.success("Email client opened with report reminder");
+    }
+  };
 
   const particles = Array.from({ length: 15 }, (_, i) => ({
     id: i,
@@ -96,31 +128,31 @@ const Dashboard = () => {
     return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const stats = reports ? [
+  const stats = dashboardStats ? [
     { 
       label: "Total Reports", 
-      value: reports.length.toString(), 
+      value: dashboardStats.totalReports.toString(), 
       icon: FileText, 
       color: "from-blue-400 to-cyan-400",
       change: "+12%"
     },
     { 
       label: "AI Analysis Rate", 
-      value: "99.7%", 
+      value: `${dashboardStats.analysisRate}%`, 
       icon: Brain, 
       color: "from-purple-400 to-pink-400",
       change: "+0.3%"
     },
     { 
       label: "Avg Processing Time", 
-      value: "2.3s", 
+      value: dashboardStats.avgProcessingTime, 
       icon: Zap, 
       color: "from-green-400 to-emerald-400",
       change: "-15%"
     },
     { 
       label: "Success Rate", 
-      value: "98.5%", 
+      value: `${dashboardStats.successRate}%`, 
       icon: Target, 
       color: "from-red-400 to-orange-400",
       change: "+2.1%"
@@ -358,15 +390,27 @@ const Dashboard = () => {
                           Submit New Report
                         </Button>
                       </Link>
-                      <Button variant="outline" className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono">
+                      <Button 
+                        onClick={handleExport}
+                        variant="outline" 
+                        className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                      >
                         <Download className="w-4 h-4 mr-2" />
                         Export Data
                       </Button>
-                      <Button variant="outline" className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono">
+                      <Button 
+                        onClick={() => setShowFilterDialog(true)}
+                        variant="outline" 
+                        className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                      >
                         <Filter className="w-4 h-4 mr-2" />
                         Advanced Filters
                       </Button>
-                      <Button variant="outline" className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono">
+                      <Button 
+                        onClick={handleScheduleReport}
+                        variant="outline" 
+                        className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                      >
                         <Calendar className="w-4 h-4 mr-2" />
                         Schedule Report
                       </Button>
@@ -390,11 +434,21 @@ const Dashboard = () => {
                         </CardDescription>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" className="border-white/20 text-white/90 hover:bg-white/10 font-mono">
+                        <Button 
+                          onClick={() => setShowFilterDialog(true)}
+                          variant="outline" 
+                          size="sm" 
+                          className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                        >
                           <Filter className="w-4 h-4 mr-2" />
                           Filter
                         </Button>
-                        <Button variant="outline" size="sm" className="border-white/20 text-white/90 hover:bg-white/10 font-mono">
+                        <Button 
+                          onClick={handleExport}
+                          variant="outline" 
+                          size="sm" 
+                          className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Export
                         </Button>
@@ -450,10 +504,15 @@ const Dashboard = () => {
                                   </div>
                                   <div className="flex items-center space-x-1">
                                     <Brain className="w-3 h-3" />
-                                    <span>AI Score: 98.5%</span>
+                                    <span>AI Score: {report.analysis_results[0]?.score || 'N/A'}%</span>
                                   </div>
                                 </div>
-                                <Button variant="outline" size="sm" className="border-white/20 text-white/90 hover:bg-white/10 font-mono">
+                                <Button 
+                                  onClick={() => setSelectedReport(report)}
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                                >
                                   View Details
                                 </Button>
                               </div>
@@ -491,25 +550,33 @@ const Dashboard = () => {
                     <CardContent>
                       <div className="space-y-6">
                         <div className="text-center">
-                          <div className="text-4xl font-bold text-green-400 font-mono mb-2">98.5%</div>
+                          <div className="text-4xl font-bold text-green-400 font-mono mb-2">
+                            {dashboardStats?.successRate || '0'}%
+                          </div>
                           <div className="text-gray-300">Overall Success Rate</div>
                         </div>
                         <div className="space-y-3">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Report Quality</span>
-                            <span className="text-white">95%</span>
+                            <span className="text-white">{dashboardStats?.successRate || '0'}%</span>
                           </div>
                           <div className="w-full bg-white/10 rounded-full h-2">
-                            <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" style={{width: '95%'}}></div>
+                            <div 
+                              className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" 
+                              style={{width: `${dashboardStats?.successRate || 0}%`}}
+                            ></div>
                           </div>
                         </div>
                         <div className="space-y-3">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-400">AI Validation Rate</span>
-                            <span className="text-white">99.7%</span>
+                            <span className="text-white">{dashboardStats?.analysisRate || '0'}%</span>
                           </div>
                           <div className="w-full bg-white/10 rounded-full h-2">
-                            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full" style={{width: '99.7%'}}></div>
+                            <div 
+                              className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full" 
+                              style={{width: `${dashboardStats?.analysisRate || 0}%`}}
+                            ></div>
                           </div>
                         </div>
                       </div>
@@ -526,14 +593,15 @@ const Dashboard = () => {
                     <CardContent>
                       <div className="space-y-4">
                         {['Development', 'Testing', 'Design', 'Deployment'].map((category, index) => {
-                          const percentage = [45, 25, 20, 10][index];
+                          const categoryReports = reports.filter(r => r.category === category.toLowerCase());
+                          const percentage = reports.length > 0 ? (categoryReports.length / reports.length) * 100 : 0;
                           const colors = ['from-blue-500 to-cyan-500', 'from-green-500 to-emerald-500', 'from-purple-500 to-pink-500', 'from-red-500 to-orange-500'];
                           
                           return (
                             <div key={category} className="space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span className="text-gray-300">{category}</span>
-                                <span className="text-white">{percentage}%</span>
+                                <span className="text-white">{percentage.toFixed(1)}%</span>
                               </div>
                               <div className="w-full bg-white/10 rounded-full h-2">
                                 <div 
@@ -563,11 +631,26 @@ const Dashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-12">
-                      <Shield className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                      <h3 className="text-xl text-white font-mono mb-2">Settings Panel</h3>
-                      <p className="text-gray-400">Account management features coming soon</p>
-                    </div>
+                    {userRole === 'admin' ? (
+                      <div className="space-y-4">
+                        <Button 
+                          onClick={() => setShowAccountDialog(true)}
+                          className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono"
+                        >
+                          <Users className="w-4 h-4 mr-2" />
+                          Manage Accounts
+                        </Button>
+                        <p className="text-gray-400 text-sm">
+                          Create and manage user accounts for your organization
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Shield className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                        <h3 className="text-xl text-white font-mono mb-2">Settings Panel</h3>
+                        <p className="text-gray-400">Account management features available for admins</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -575,6 +658,26 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Dialogs */}
+      <FilterDialog 
+        open={showFilterDialog} 
+        onOpenChange={setShowFilterDialog}
+        onFiltersChange={setFilters}
+      />
+      
+      <AccountManagement 
+        open={showAccountDialog} 
+        onOpenChange={setShowAccountDialog}
+      />
+      
+      {selectedReport && (
+        <ReportDetails 
+          report={selectedReport}
+          open={!!selectedReport}
+          onOpenChange={() => setSelectedReport(null)}
+        />
+      )}
 
       {/* Custom styles */}
       <style>{`

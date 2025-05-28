@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { FileText, Upload, Send, Eye, Brain, CheckCircle, AlertCircle, Sparkles,
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { supabaseService } from "@/services/supabaseService";
+import { createReport } from "@/services/supabaseService";
 
 const Submit = () => {
   const [title, setTitle] = useState("");
@@ -56,7 +55,7 @@ const Submit = () => {
         priority,
       };
 
-      await supabaseService.createReport(reportData);
+      await createReport(reportData);
       toast.success("Report submitted successfully! AI analysis in progress...");
       
       // Reset form
