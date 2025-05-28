@@ -1,55 +1,128 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, Shield, Lock, Mail, User, ArrowRight, Brain, Network, Sparkles, CheckCircle } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Eye, EyeOff, Mail, Lock, UserPlus } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isVisible, setIsVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
-
-  const { signIn, signUp } = useAuth();
+  const [isInviteFlow, setIsInviteFlow] = useState(false);
+  const [searchParams] = useSearchParams();
+  
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    setIsVisible(true);
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
+    // Redirect if already logged in
+    if (user) {
+      navigate('/dashboard');
+      return;
+    }
 
-    window.addEventListener('mousemove', handleMouseMove);
+    // Check for invitation or magic link tokens in URL
+    const token = searchParams.get('token');
+    const tokenHash = searchParams.get('token_hash');
+    const type = searchParams.get('type');
+    const inviteToken = searchParams.get('invite_token');
+
+    if (token || tokenHash || inviteToken) {
+      handleTokenVerification();
+    }
+  }, [user, searchParams, navigate]);
+
+  const handleTokenVerification = async () => {
+    const token = searchParams.get('token');
+    const tokenHash = searchParams.get('token_hash');
+    const type = searchParams.get('type');
     
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
+    setLoading(true);
+    
+    try {
+      if (type === 'invite') {
+        // Handle account invitation - user needs to set password
+        setIsInviteFlow(true);
+        setActiveTab("setup");
+        toast.info("Please set your password to complete account setup");
+      } else if (type === 'magiclink' || type === 'email') {
+        // Handle magic link login
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash || token || '',
+          type: 'email'
+        });
+        
+        if (error) throw error;
+        
+        toast.success("Successfully signed in!");
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Token verification error:', error);
+      toast.error(error.message || "Invalid or expired link");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordSetup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password,
+        data: { full_name: fullName }
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Password set successfully! You can now sign in.");
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Password setup error:', error);
+      toast.error(error.message || "Failed to set password");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    setLoading(true);
+    
     try {
       await signIn(email, password);
-      toast.success("Welcome back to The Eye of Sauron!");
-      navigate("/dashboard");
+      toast.success("Successfully signed in!");
+      navigate('/dashboard');
     } catch (error: any) {
-      console.error("Sign in error:", error);
-      toast.error(error.message || "Failed to sign in. Please check your credentials.");
+      console.error('Sign in error:', error);
+      toast.error(error.message || "Failed to sign in");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -57,336 +130,281 @@ const Auth = () => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
+      toast.error("Passwords do not match");
       return;
     }
-
-    setIsLoading(true);
-
+    
+    setLoading(true);
+    
     try {
       await signUp(email, password, fullName);
-      toast.success("Account created successfully! Check your email to verify your account.");
+      toast.success("Account created! Please check your email to verify your account.");
       setActiveTab("signin");
     } catch (error: any) {
-      console.error("Sign up error:", error);
-      toast.error(error.message || "Failed to create account. Please try again.");
+      console.error('Sign up error:', error);
+      toast.error(error.message || "Failed to create account");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    delay: Math.random() * 5,
-    duration: Math.random() * 15 + 10,
-  }));
-
-  const features = [
-    {
-      icon: Brain,
-      title: "AI-Powered Analysis",
-      description: "Advanced machine learning validates every report"
-    },
-    {
-      icon: Shield,
-      title: "Enterprise Security",
-      description: "Bank-grade encryption protects your data"
-    },
-    {
-      icon: Network,
-      title: "Real-time Insights",
-      description: "Get instant feedback and performance metrics"
-    }
-  ];
+  if (loading && (searchParams.get('token') || searchParams.get('token_hash'))) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center">
+        <Card className="w-full max-w-md bg-black/40 border-white/20 backdrop-blur-xl">
+          <CardContent className="p-8">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+              <p className="text-white">Verifying your access...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative flex items-center justify-center">
-      {/* Background Effects */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-black to-red-900/30"></div>
-      <div className="fixed inset-0 bg-gradient-to-tr from-blue-900/10 via-transparent to-orange-900/10"></div>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-black to-transparent"></div>
-
-      {/* Animated mesh gradient */}
-      <div className="fixed inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{animationDelay: '4s'}}></div>
-      </div>
-
-      {/* Dynamic cursor glow */}
-      <div 
-        className="fixed w-96 h-96 bg-gradient-radial from-red-500/15 via-purple-500/8 to-transparent rounded-full blur-3xl pointer-events-none z-0 transition-all duration-500 hidden md:block"
-        style={{
-          left: mousePosition.x - 192,
-          top: mousePosition.y - 192,
-        }}
-      />
-
-      {/* Floating particles */}
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className="absolute rounded-full pointer-events-none animate-pulse"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            background: `linear-gradient(45deg, #ef4444, #8b5cf6, #06b6d4)`,
-            animationDelay: `${particle.delay}s`,
-            animationDuration: `${particle.duration}s`,
-            opacity: 0.4,
-          }}
-        />
-      ))}
-
-      {/* Back to Home */}
-      <Link 
-        to="/" 
-        className="fixed top-6 left-6 z-50 flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 group"
-      >
-        <div className="w-10 h-10 bg-gradient-to-br from-red-500/20 to-purple-500/20 rounded-xl border border-white/20 flex items-center justify-center backdrop-blur-xl group-hover:scale-110 transition-all duration-300">
-          <Eye className="w-5 h-5" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 font-mono">
+            The Eye of Sauron
+          </h1>
+          <p className="text-gray-300">
+            {isInviteFlow ? "Complete your account setup" : "Welcome back"}
+          </p>
         </div>
-        <span className="font-mono text-sm hidden sm:inline">Back to Home</span>
-      </Link>
 
-      {/* Main Content */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <Card className="bg-black/40 border-white/20 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-white font-mono text-center">
+              {isInviteFlow ? "Set Your Password" : "Authentication"}
+            </CardTitle>
+            <CardDescription className="text-gray-300 text-center">
+              {isInviteFlow 
+                ? "Set your password to complete account setup" 
+                : "Sign in to your account or create a new one"
+              }
+            </CardDescription>
+          </CardHeader>
           
-          {/* Left Side - Branding */}
-          <div className={`text-center lg:text-left transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'}`}>
-            <div className="flex items-center justify-center lg:justify-start space-x-3 mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-red-500 via-purple-600 to-red-700 rounded-2xl flex items-center justify-center border border-white/20 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-                <Eye className="w-8 h-8 text-white relative z-10" />
-              </div>
-              <div className="flex flex-col">
-                <h1 className="text-3xl font-bold text-white tracking-tight font-mono">
-                  THE EYE OF SAURON
-                </h1>
-                <div className="flex items-center space-x-2 mt-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-400 font-mono">AI-POWERED OVERSIGHT</span>
+          <CardContent>
+            {isInviteFlow ? (
+              <form onSubmit={handlePasswordSetup} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-white font-mono">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
+                  />
                 </div>
-              </div>
-            </div>
-
-            <h2 className="text-4xl sm:text-5xl font-bold font-mono mb-6 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
-              SECURE ACCESS
-            </h2>
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Join the next generation of intelligent project oversight. Your reports, analyzed and validated by advanced AI.
-            </p>
-
-            {/* Features List */}
-            <div className="space-y-4 mb-8">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-start space-x-4 group">
-                  <div className="p-2 bg-gradient-to-br from-white/10 to-white/5 rounded-lg border border-white/20 group-hover:scale-110 transition-all duration-300">
-                    <feature.icon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-white font-mono text-sm">{feature.title}</h4>
-                    <p className="text-gray-400 text-sm">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Trust Indicators */}
-            <div className="flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-400">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                <span>Enterprise Grade</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                <span>SOC 2 Compliant</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                <span>99.9% Uptime</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Auth Forms */}
-          <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'}`}>
-            <Card className="bg-black/40 border-white/20 backdrop-blur-xl shadow-2xl">
-              <CardHeader className="text-center pb-6">
-                <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-500/20 to-purple-500/20 border border-white/20 rounded-full px-4 py-2 backdrop-blur-xl mb-4">
-                  <Sparkles className="w-4 h-4 text-red-400" />
-                  <span className="text-sm font-mono text-white/90">SECURE LOGIN</span>
-                  <Lock className="w-4 h-4 text-purple-400" />
-                </div>
-                <CardTitle className="text-2xl font-mono text-white">
-                  Access Your Dashboard
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  Enter your credentials to continue your oversight journey
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-black/20 border border-white/20">
-                    <TabsTrigger 
-                      value="signin" 
-                      className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-white font-mono">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                      onClick={() => setShowPassword(!showPassword)}
                     >
-                      Sign In
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="signup"
-                      className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
-                    >
-                      Sign Up
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="signin" className="space-y-4 mt-6">
-                    <form onSubmit={handleSignIn} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signin-email" className="text-white font-mono flex items-center space-x-2">
-                          <Mail className="w-4 h-4" />
-                          <span>Email</span>
-                        </Label>
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-white font-mono">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
+                  />
+                </div>
+                
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-mono"
+                >
+                  {loading ? "Setting up..." : "Complete Setup"}
+                </Button>
+              </form>
+            ) : (
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-black/20">
+                  <TabsTrigger value="signin" className="text-white data-[state=active]:bg-white/20">
+                    Sign In
+                  </TabsTrigger>
+                  <TabsTrigger value="signup" className="text-white data-[state=active]:bg-white/20">
+                    Sign Up
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email" className="text-white font-mono">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-email"
                           type="email"
-                          placeholder="your@email.com"
+                          placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 pl-10"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signin-password" className="text-white font-mono flex items-center space-x-2">
-                          <Lock className="w-4 h-4" />
-                          <span>Password</span>
-                        </Label>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password" className="text-white font-mono">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signin-password"
-                          type="password"
-                          placeholder="••••••••"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 pl-10 pr-10"
                         />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
                       </div>
-                      <Button 
-                        type="submit" 
-                        disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                        <Shield className="w-4 h-4 mr-2 relative z-10" />
-                        <span className="relative z-10">{isLoading ? "Authenticating..." : "Sign In"}</span>
-                        <ArrowRight className="w-4 h-4 ml-2 relative z-10 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </form>
-                  </TabsContent>
-                  
-                  <TabsContent value="signup" className="space-y-4 mt-6">
-                    <form onSubmit={handleSignUp} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-name" className="text-white font-mono flex items-center space-x-2">
-                          <User className="w-4 h-4" />
-                          <span>Full Name</span>
-                        </Label>
+                    </div>
+                    
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono"
+                    >
+                      {loading ? "Signing in..." : "Sign In"}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name" className="text-white font-mono">Full Name</Label>
+                      <div className="relative">
+                        <UserPlus className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-name"
-                          type="text"
-                          placeholder="John Doe"
+                          placeholder="Enter your full name"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           required
-                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 pl-10"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-email" className="text-white font-mono flex items-center space-x-2">
-                          <Mail className="w-4 h-4" />
-                          <span>Email</span>
-                        </Label>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email" className="text-white font-mono">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-email"
                           type="email"
-                          placeholder="your@email.com"
+                          placeholder="Enter your email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 pl-10"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-password" className="text-white font-mono flex items-center space-x-2">
-                          <Lock className="w-4 h-4" />
-                          <span>Password</span>
-                        </Label>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password" className="text-white font-mono">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           id="signup-password"
-                          type="password"
-                          placeholder="••••••••"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Create a password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 pl-10 pr-10"
                         />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="confirm-password" className="text-white font-mono flex items-center space-x-2">
-                          <Lock className="w-4 h-4" />
-                          <span>Confirm Password</span>
-                        </Label>
-                        <Input
-                          id="confirm-password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          required
-                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
-                        />
-                      </div>
-                      <Button 
-                        type="submit" 
-                        disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                        <User className="w-4 h-4 mr-2 relative z-10" />
-                        <span className="relative z-10">{isLoading ? "Creating Account..." : "Create Account"}</span>
-                        <ArrowRight className="w-4 h-4 ml-2 relative z-10 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </form>
-                  </TabsContent>
-                </Tabs>
-
-                {/* Additional Info */}
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-400">
-                    By continuing, you agree to our Terms of Service and Privacy Policy
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-confirm" className="text-white font-mono">Confirm Password</Label>
+                      <Input
+                        id="signup-confirm"
+                        type="password"
+                        placeholder="Confirm your password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
+                      />
+                    </div>
+                    
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-mono"
+                    >
+                      {loading ? "Creating account..." : "Sign Up"}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            )}
+            
+            {!isInviteFlow && (
+              <div className="mt-6 text-center">
+                <p className="text-gray-400 text-sm">
+                  Need help? Contact your administrator for account access.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-
-      {/* Custom styles */}
-      <style>{`
-        .bg-gradient-radial {
-          background: radial-gradient(var(--tw-gradient-stops));
-        }
-      `}</style>
     </div>
   );
 };
