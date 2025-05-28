@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,43 +18,51 @@ interface ReportDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Improved markdown renderer with proper table support
+// Clean markdown renderer that properly handles all formatting
 const renderMarkdownText = (text: string) => {
   if (!text) return null;
 
-  const lines = text.split('\n');
+  // Clean up problematic formatting first
+  let cleanText = text
+    .replace(/\*{3,}/g, '') // Remove excessive asterisks
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Convert **bold** to HTML
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>') // Convert *italic* to HTML
+    .trim();
+
+  const lines = cleanText.split('\n');
   const elements: JSX.Element[] = [];
   let currentTableRows: string[][] = [];
   let tableHeaders: string[] = [];
   let inTable = false;
   let tableKey = 0;
 
-  const processTextFormatting = (text: string) => {
-    // Clean up excessive asterisks first
-    let processedText = text.replace(/\*{3,}/g, '**');
-    
-    // Process bold text
+  const processHtmlText = (text: string) => {
+    // Process HTML tags and return JSX elements
     const parts = [];
-    const boldRegex = /\*\*(.*?)\*\*/g;
+    const htmlRegex = /<(strong|em)>([^<]+)<\/(strong|em)>/g;
     let lastIndex = 0;
     let match;
 
-    while ((match = boldRegex.exec(processedText)) !== null) {
+    while ((match = htmlRegex.exec(text)) !== null) {
       // Add text before the match
       if (match.index > lastIndex) {
-        parts.push(processedText.substring(lastIndex, match.index));
+        parts.push(text.substring(lastIndex, match.index));
       }
-      // Add the bold text
-      parts.push(<strong key={`bold-${match.index}`} className="text-white font-semibold">{match[1]}</strong>);
-      lastIndex = boldRegex.lastIndex;
+      // Add the formatted text
+      if (match[1] === 'strong') {
+        parts.push(<strong key={`strong-${match.index}`} className="text-white font-semibold">{match[2]}</strong>);
+      } else if (match[1] === 'em') {
+        parts.push(<em key={`em-${match.index}`} className="text-blue-300 italic">{match[2]}</em>);
+      }
+      lastIndex = htmlRegex.lastIndex;
     }
     
     // Add remaining text
-    if (lastIndex < processedText.length) {
-      parts.push(processedText.substring(lastIndex));
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
     }
 
-    return parts.length > 0 ? parts : processedText.replace(/\*+/g, '');
+    return parts.length > 0 ? parts : text;
   };
 
   const finishTable = () => {
@@ -65,7 +74,7 @@ const renderMarkdownText = (text: string) => {
               <TableRow className="border-b border-gray-600">
                 {tableHeaders.map((header, index) => (
                   <TableHead key={index} className="border border-gray-600 px-3 py-2 text-left text-gray-200 font-medium bg-gray-800">
-                    {processTextFormatting(header)}
+                    {processHtmlText(header)}
                   </TableHead>
                 ))}
               </TableRow>
@@ -75,7 +84,7 @@ const renderMarkdownText = (text: string) => {
                 <TableRow key={rowIndex} className="border-b border-gray-600">
                   {row.map((cell, cellIndex) => (
                     <TableCell key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
-                      {processTextFormatting(cell)}
+                      {processHtmlText(cell)}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -101,8 +110,8 @@ const renderMarkdownText = (text: string) => {
       return;
     }
 
-    // Table detection
-    if (trimmedLine.includes('|') && trimmedLine.includes('Metric')) {
+    // Table detection - look for pipes and common table headers
+    if (trimmedLine.includes('|') && (trimmedLine.includes('Metric') || trimmedLine.includes('Score') || trimmedLine.includes('Category'))) {
       if (inTable) finishTable();
       inTable = true;
       tableHeaders = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
@@ -132,19 +141,19 @@ const renderMarkdownText = (text: string) => {
     if (trimmedLine.startsWith('# ')) {
       elements.push(
         <h1 key={key} className="text-xl font-bold text-white mt-6 mb-4 border-b border-gray-700 pb-2">
-          {processTextFormatting(trimmedLine.substring(2))}
+          {processHtmlText(trimmedLine.substring(2))}
         </h1>
       );
     } else if (trimmedLine.startsWith('## ')) {
       elements.push(
         <h2 key={key} className="text-lg font-semibold text-blue-300 mt-5 mb-3">
-          {processTextFormatting(trimmedLine.substring(3))}
+          {processHtmlText(trimmedLine.substring(3))}
         </h2>
       );
     } else if (trimmedLine.startsWith('### ')) {
       elements.push(
         <h3 key={key} className="text-base font-semibold text-purple-300 mt-4 mb-2">
-          {processTextFormatting(trimmedLine.substring(4))}
+          {processHtmlText(trimmedLine.substring(4))}
         </h3>
       );
     }
@@ -154,7 +163,7 @@ const renderMarkdownText = (text: string) => {
         <div key={key} className="flex items-start space-x-2 mb-2 ml-4">
           <span className="text-blue-400 mt-1 text-xs">•</span>
           <span className="text-gray-300 text-sm flex-1">
-            {processTextFormatting(trimmedLine.substring(2))}
+            {processHtmlText(trimmedLine.substring(2))}
           </span>
         </div>
       );
@@ -167,7 +176,7 @@ const renderMarkdownText = (text: string) => {
     else if (trimmedLine) {
       elements.push(
         <p key={key} className="text-gray-300 text-sm mb-3 leading-relaxed">
-          {processTextFormatting(trimmedLine)}
+          {processHtmlText(trimmedLine)}
         </p>
       );
     }
@@ -234,7 +243,8 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
       return detailedFeedback;
     }
     if (detailedFeedback && typeof detailedFeedback === 'object') {
-      return detailedFeedback.feedback || JSON.stringify(detailedFeedback, null, 2);
+      // Try to get the feedback field first, fallback to full object
+      return detailedFeedback.feedback || detailedFeedback.detailedFeedback || JSON.stringify(detailedFeedback, null, 2);
     }
     return 'No detailed feedback available';
   };
@@ -346,9 +356,9 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   {analysis.summary && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Summary</h4>
-                      <p className="text-gray-300 leading-relaxed bg-black/20 p-4 rounded-lg text-sm">
-                        {analysis.summary}
-                      </p>
+                      <div className="bg-black/20 p-4 rounded-lg">
+                        {renderMarkdownText(analysis.summary)}
+                      </div>
                     </div>
                   )}
                   
