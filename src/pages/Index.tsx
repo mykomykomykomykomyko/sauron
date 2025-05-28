@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import QuickReportForm from "@/components/QuickReportForm";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -162,7 +163,7 @@ const Index = () => {
         )}
       </div>
 
-      {/* Hero Section */}
+      {/* Main Content */}
       <div className="px-6 md:px-8 py-24 relative z-10">
         <div className="max-w-6xl mx-auto text-center">
           {/* Animated background glow */}
@@ -194,6 +195,13 @@ const Index = () => {
           <p className={`text-xl md:text-2xl text-gray-300 mb-12 leading-relaxed max-w-4xl mx-auto transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
             The all-seeing <span className="text-red-400 font-semibold">AI-powered</span> progress report management system. Submit, track, and analyze team progress with intelligent oversight and real-time insights.
           </p>
+
+          {/* Quick Report Form for Logged-in Users */}
+          {user && (
+            <div className={`transition-all duration-1000 delay-400 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+              <QuickReportForm />
+            </div>
+          )}
           
           <div className={`flex flex-col sm:flex-row gap-6 justify-center mb-20 transition-all duration-1000 delay-600 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
             <Link to="/submit">
