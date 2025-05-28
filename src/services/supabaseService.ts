@@ -43,9 +43,13 @@ export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>
   const { data: { user } } = await supabase.auth.getUser();
   console.log('Current user in submitReport:', user);
   
+  if (!user) {
+    throw new Error('User must be authenticated to submit reports');
+  }
+  
   const reportToInsert = {
     ...reportData,
-    user_id: user?.id
+    user_id: user.id
   };
   
   console.log('Inserting report:', reportToInsert);
@@ -69,13 +73,17 @@ export const createReport = async (reportData: { title: string; description: str
   const { data: { user } } = await supabase.auth.getUser();
   console.log('Current user in createReport:', user);
   
+  if (!user) {
+    throw new Error('User must be authenticated to create reports');
+  }
+  
   const reportToInsert = {
     name: user?.user_metadata?.full_name || user?.email || 'Unknown',
     email: user?.email || 'unknown@example.com',
     project: reportData.category,
     week: new Date().toISOString().split('T')[0],
     report: reportData.description,
-    user_id: user?.id,
+    user_id: user.id,
     title: reportData.title,
     description: reportData.description,
     category: reportData.category,
@@ -156,13 +164,14 @@ export const getReportsWithAnalysis = async () => {
   }
   
   // Check user role to determine if they should see all reports or just their own
-  const { data: userRole } = await supabase
+  const { data: userRole, error: roleError } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', user.id)
     .single();
     
   console.log('User role:', userRole?.role);
+  console.log('Role query error:', roleError);
   
   let query = supabase
     .from('reports')
@@ -173,7 +182,10 @@ export const getReportsWithAnalysis = async () => {
   
   // If user is not an admin, filter by user_id
   if (userRole?.role !== 'admin') {
+    console.log('Filtering reports by user_id:', user.id);
     query = query.eq('user_id', user.id);
+  } else {
+    console.log('Admin user - showing all reports');
   }
   
   query = query.order('created_at', { ascending: false });
@@ -188,7 +200,10 @@ export const getReportsWithAnalysis = async () => {
     console.log('Sample report user_ids:', data.slice(0, 3).map(r => ({ id: r.id, user_id: r.user_id, email: r.email })));
   }
     
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching reports with analysis:', error);
+    throw error;
+  }
   return data as (Report & { analysis_results: AnalysisResult[] })[];
 };
 
@@ -202,13 +217,14 @@ export const getRecentReports = async (limit = 10) => {
   }
   
   // Check user role to determine if they should see all reports or just their own
-  const { data: userRole } = await supabase
+  const { data: userRole, error: roleError } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', user.id)
     .single();
     
   console.log('User role in getRecentReports:', userRole?.role);
+  console.log('Role query error in getRecentReports:', roleError);
   
   let query = supabase
     .from('reports')
@@ -219,7 +235,10 @@ export const getRecentReports = async (limit = 10) => {
   
   // If user is not an admin, filter by user_id
   if (userRole?.role !== 'admin') {
+    console.log('Filtering recent reports by user_id:', user.id);
     query = query.eq('user_id', user.id);
+  } else {
+    console.log('Admin user - showing all recent reports');
   }
   
   query = query.order('created_at', { ascending: false }).limit(limit);
@@ -229,7 +248,10 @@ export const getRecentReports = async (limit = 10) => {
   console.log('Recent reports data:', data);
   console.log('Recent reports error:', error);
     
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching recent reports:', error);
+    throw error;
+  }
   return data as (Report & { analysis_results: AnalysisResult[] })[];
 };
 
@@ -337,11 +359,14 @@ export const filterReports = async (filters: { name?: string; sortBy?: 'date' | 
   }
   
   // Check user role to determine if they should see all reports or just their own
-  const { data: userRole } = await supabase
+  const { data: userRole, error: roleError } = await supabase
     .from('user_roles')
     .select('role')
     .eq('user_id', user.id)
     .single();
+  
+  console.log('User role in filterReports:', userRole?.role);
+  console.log('Role query error in filterReports:', roleError);
   
   let query = supabase
     .from('reports')
@@ -352,7 +377,10 @@ export const filterReports = async (filters: { name?: string; sortBy?: 'date' | 
     
   // If user is not an admin, filter by user_id
   if (userRole?.role !== 'admin') {
+    console.log('Filtering filtered reports by user_id:', user.id);
     query = query.eq('user_id', user.id);
+  } else {
+    console.log('Admin user - showing all filtered reports');
   }
     
   if (filters.name) {
@@ -368,7 +396,10 @@ export const filterReports = async (filters: { name?: string; sortBy?: 'date' | 
   }
   
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) {
+    console.error('Error in filterReports:', error);
+    throw error;
+  }
   return data as (Report & { analysis_results: AnalysisResult[] })[];
 };
 
