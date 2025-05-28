@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileText, Brain, Clock, User, Building, Calendar, Target, Zap, CheckCircle, AlertCircle, Flag, AlertTriangle, Edit, Save, X } from "lucide-react";
 import { format } from "date-fns";
 import { Report, AnalysisResult, triggerAIAnalysis, updateAnalysisStatus } from "@/services/supabaseService";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 
