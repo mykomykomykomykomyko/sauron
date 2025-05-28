@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,18 +103,26 @@ const renderMarkdownText = (text: string) => {
   return <div className="space-y-1">{elements}</div>;
 };
 
-// Helper function to get flag explanations
+// Helper function to get flag explanations - one for each flag
 const getFlagExplanations = (flags: number) => {
   const explanations = [];
   
-  if (flags >= 3) {
-    explanations.push("Critical deficiencies detected - report requires major improvements");
+  const flagTypes = [
+    "Insufficient technical detail or clarity",
+    "Missing deliverable indicators or completion markers", 
+    "Inadequate professional documentation standards",
+    "Poor structure or organization",
+    "Lack of measurable outcomes or metrics"
+  ];
+  
+  // Return exactly the number of flags raised
+  for (let i = 0; i < Math.min(flags, flagTypes.length); i++) {
+    explanations.push(flagTypes[i]);
   }
-  if (flags >= 2) {
-    explanations.push("Multiple professional standards not met");
-  }
-  if (flags >= 1) {
-    explanations.push("Quality issues identified that need attention");
+  
+  // If more flags than predefined types, add generic ones
+  for (let i = flagTypes.length; i < flags; i++) {
+    explanations.push(`Additional quality issue #${i + 1} identified`);
   }
   
   return explanations;
@@ -289,7 +296,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                     <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                       <div className="flex items-center space-x-2 mb-3">
                         <AlertTriangle className="w-5 h-5 text-red-400" />
-                        <h4 className="text-red-400 font-mono font-bold">Quality Flags Detected</h4>
+                        <h4 className="text-red-400 font-mono font-bold">Quality Flags Detected ({analysis.flags})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFlagExplanations(analysis.flags).map((explanation, index) => (

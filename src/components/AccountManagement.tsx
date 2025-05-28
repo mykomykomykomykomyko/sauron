@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Mail, Building, User, Shield } from "lucide-react";
+import { UserPlus, Mail, Building, User, Shield, Zap } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createAccount, getAccounts, Account } from "@/services/supabaseService";
+import { sendMagicLink } from "@/services/magicLinkService";
+import { MagicLinkAccountDialog } from "./MagicLinkAccountDialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -50,6 +51,16 @@ export const AccountManagement = () => {
     },
   });
 
+  const sendMagicLinkMutation = useMutation({
+    mutationFn: sendMagicLink,
+    onSuccess: () => {
+      toast.success("Magic link sent successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to send magic link");
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createAccountMutation.mutate({
@@ -57,6 +68,13 @@ export const AccountManagement = () => {
       full_name: fullName,
       company_name: companyName || undefined,
       role,
+    });
+  };
+
+  const handleSendMagicLink = (userEmail: string) => {
+    sendMagicLinkMutation.mutate({
+      email: userEmail,
+      redirectTo: `${window.location.origin}/dashboard`
     });
   };
 
@@ -78,94 +96,97 @@ export const AccountManagement = () => {
               <span>Account Management</span>
             </CardTitle>
             <CardDescription className="text-gray-300">
-              Create and manage user accounts
+              Create and manage user accounts with magic link authentication
             </CardDescription>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Create Account
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-black/90 border-white/20 text-white">
-              <DialogHeader>
-                <DialogTitle className="font-mono">Create New Account</DialogTitle>
-                <DialogDescription className="text-gray-300">
-                  Create a new user account. The user will receive an email to set up their password.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white font-mono">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="user@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
-                  />
-                </div>
+          <div className="flex space-x-2">
+            <MagicLinkAccountDialog />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Create Account
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-black/90 border-white/20 text-white">
+                <DialogHeader>
+                  <DialogTitle className="font-mono">Create New Account</DialogTitle>
+                  <DialogDescription className="text-gray-300">
+                    Create a new user account. The user will receive an email to set up their password.
+                  </DialogDescription>
+                </DialogHeader>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-white font-mono">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    placeholder="John Doe"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="companyName" className="text-white font-mono">Company Name (Optional)</Label>
-                  <Input
-                    id="companyName"
-                    placeholder="Acme Corporation"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="role" className="text-white font-mono">Role</Label>
-                  <Select value={role} onValueChange={setRole}>
-                    <SelectTrigger className="bg-black/20 border-white/20 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black/90 border-white/20">
-                      <SelectItem value="contractor" className="text-white hover:bg-white/10">Contractor</SelectItem>
-                      <SelectItem value="admin" className="text-white hover:bg-white/10">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setOpen(false)}
-                    className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createAccountMutation.isPending}
-                    className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono"
-                  >
-                    {createAccountMutation.isPending ? "Creating..." : "Create Account"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-white font-mono">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="user@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName" className="text-white font-mono">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      placeholder="John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName" className="text-white font-mono">Company Name (Optional)</Label>
+                    <Input
+                      id="companyName"
+                      placeholder="Acme Corporation"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      className="bg-black/20 border-white/20 text-white placeholder:text-gray-400"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="role" className="text-white font-mono">Role</Label>
+                    <Select value={role} onValueChange={setRole}>
+                      <SelectTrigger className="bg-black/20 border-white/20 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/90 border-white/20">
+                        <SelectItem value="contractor" className="text-white hover:bg-white/10">Contractor</SelectItem>
+                        <SelectItem value="admin" className="text-white hover:bg-white/10">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setOpen(false)}
+                      className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createAccountMutation.isPending}
+                      className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono"
+                    >
+                      {createAccountMutation.isPending ? "Creating..." : "Create Account"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
       
@@ -204,7 +225,16 @@ export const AccountManagement = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
+                  <Button
+                    onClick={() => handleSendMagicLink(account.email)}
+                    disabled={sendMagicLinkMutation.isPending}
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-mono text-xs"
+                  >
+                    <Zap className="w-3 h-3 mr-1" />
+                    Send Magic Link
+                  </Button>
                   <Badge className={`text-xs ${getRoleColor(account.role)}`}>
                     {account.role}
                   </Badge>
