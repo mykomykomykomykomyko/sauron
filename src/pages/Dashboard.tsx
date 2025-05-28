@@ -1,41 +1,29 @@
-
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Eye, 
   FileText, 
   TrendingUp, 
-  Users, 
   Shield, 
   Brain, 
   BarChart3, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
-  Activity,
-  Target,
   Zap,
-  Filter,
-  Download,
-  RefreshCw,
-  Plus,
-  Calendar,
-  Star,
-  Award,
-  User
+  Target,
+  Plus
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { getReportsWithAnalysis, getDashboardStats, downloadCSV, filterReports, getUsersWithReports, Report, AnalysisResult } from "@/services/supabaseService";
-import { format } from "date-fns";
 import { FilterDialog } from "@/components/FilterDialog";
 import { SimpleAccountDialog } from "@/components/SimpleAccountDialog";
 import { ReportDetails } from "@/components/ReportDetails";
 import { UserProfile } from "@/components/UserProfile";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { UserLeaderboard } from "@/components/dashboard/UserLeaderboard";
+import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { toast } from "sonner";
 
 const Dashboard = () => {
@@ -238,89 +226,22 @@ const Dashboard = () => {
       ))}
 
       {/* Header */}
-      <nav className="flex items-center justify-between p-4 sm:p-6 md:p-8 border-b border-white/10 backdrop-blur-xl bg-black/30 relative z-10">
-        <Link to="/" className="flex items-center space-x-3 group">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 via-purple-600 to-red-700 rounded-2xl flex items-center justify-center border border-white/20 group-hover:scale-110 transition-all duration-500 relative overflow-hidden">
-            <Eye className="w-5 h-5 sm:w-7 sm:h-7 text-white relative z-10" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl sm:text-2xl font-bold text-white tracking-tight font-mono">
-              THE EYE OF SAURON
-            </span>
-            <span className="text-xs text-gray-400 font-mono hidden sm:block">OVERSIGHT DASHBOARD</span>
-          </div>
-        </Link>
-
-        <div className="flex items-center space-x-3">
-          <Button 
-            onClick={() => refetch()} 
-            variant="outline" 
-            size="sm" 
-            className="border-white/20 text-white/90 hover:bg-white/10 font-mono"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
-          <Link to="/submit">
-            <Button size="sm" className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">New Report</span>
-            </Button>
-          </Link>
-        </div>
-      </nav>
+      <DashboardHeader onRefresh={() => refetch()} />
 
       {/* Main Content */}
       <div className="px-4 sm:px-6 md:px-8 py-8 sm:py-12 relative z-10">
         <div className="max-w-7xl mx-auto">
           
           {/* Welcome Section with Debug Info */}
-          <div className={`mb-8 sm:mb-12 transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0'}`}>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-3xl sm:text-5xl font-bold font-mono mb-2 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
-                  MISSION CONTROL
-                </h1>
-                <p className="text-gray-300 text-lg">
-                  Welcome back, {user?.user_metadata?.full_name || user?.email}. Your oversight dashboard is ready.
-                </p>
-                {/* Debug info */}
-                <div className="mt-2 text-xs text-gray-500">
-                  Debug: User ID: {user?.id} | Reports found: {reports.length} | Loading: {isLoading ? 'Yes' : 'No'}
-                </div>
-              </div>
-              <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-                <div className="flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-full px-4 py-2">
-                  <Activity className="w-4 h-4 text-green-400" />
-                  <span className="text-sm font-mono text-green-400">SYSTEM ONLINE</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <WelcomeSection 
+            user={user}
+            reports={reports}
+            isLoading={isLoading}
+            isVisible={isVisible}
+          />
 
           {/* Stats Grid */}
-          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-            {stats.map((stat, index) => (
-              <Card key={index} className="bg-black/40 border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 group backdrop-blur-xl">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`p-2 sm:p-3 rounded-xl bg-gradient-to-br ${stat.color.replace('to-', 'to-').replace('from-', 'from-').replace('-400', '-500/20').replace('-400', '-500/20')} group-hover:scale-110 transition-transform duration-300`}>
-                      <stat.icon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                    </div>
-                    <div className="text-xs text-green-400 font-mono">
-                      {stat.change}
-                    </div>
-                  </div>
-                  <div className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent font-mono mb-1`}>
-                    {stat.value}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-400 font-mono">
-                    {stat.label}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <DashboardStats stats={stats} isVisible={isVisible} />
 
           {/* Main Dashboard Tabs */}
           <div className={`transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
@@ -360,167 +281,32 @@ const Dashboard = () => {
               <TabsContent value="overview" className="space-y-6">
                 <div className="grid lg:grid-cols-3 gap-6">
                   
-                  {/* Recent Activity */}
-                  <Card className="lg:col-span-2 bg-black/40 border-white/20 backdrop-blur-xl">
-                    <CardHeader>
-                      <CardTitle className="text-white font-mono flex items-center space-x-2">
-                        <Activity className="w-5 h-5 text-red-400" />
-                        <span>{userRole === 'admin' ? 'Contractor Leaderboard' : 'Recent Activity'}</span>
-                      </CardTitle>
-                      <CardDescription className="text-gray-300">
-                        {userRole === 'admin' ? 'Top performing contractors by average score' : 'Latest reports and AI analysis results'}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {isLoading ? (
-                        <div className="space-y-4">
-                          {[...Array(3)].map((_, i) => (
-                            <div key={i} className="animate-pulse">
-                              <div className="h-4 bg-white/10 rounded w-3/4 mb-2"></div>
-                              <div className="h-3 bg-white/5 rounded w-1/2"></div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : userRole === 'admin' ? (
-                        // Admin view - User leaderboard
-                        usersWithReports && usersWithReports.length > 0 ? (
-                          <div className="space-y-4">
-                            {usersWithReports
-                              .map(user => {
-                                const reportsWithAnalysis = user.reports.filter((r: any) => r.analysis_results.length > 0);
-                                const avgScore = reportsWithAnalysis.length > 0 
-                                  ? reportsWithAnalysis.reduce((sum: number, r: any) => sum + (r.analysis_results[0]?.score || 0), 0) / reportsWithAnalysis.length 
-                                  : 0;
-                                return { ...user, avgScore };
-                              })
-                              .sort((a, b) => b.avgScore - a.avgScore)
-                              .slice(0, 10)
-                              .map((user, index) => (
-                                <div 
-                                  key={user.id} 
-                                  className="flex items-center justify-between p-4 bg-black/20 rounded-lg border border-white/10 hover:border-white/20 transition-colors group cursor-pointer"
-                                  onClick={() => setSelectedUser(user)}
-                                >
-                                  <div className="flex items-center space-x-4">
-                                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full">
-                                      <span className="text-blue-400 font-bold text-sm">#{index + 1}</span>
-                                    </div>
-                                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg">
-                                      <User className="w-4 h-4 text-purple-400" />
-                                    </div>
-                                    <div>
-                                      <div className="text-white font-medium text-sm">{user.full_name}</div>
-                                      <div className="text-gray-400 text-xs">
-                                        {user.reports.length} reports • {user.reports.filter((r: any) => r.analysis_results.length > 0).length} analyzed
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <div className={`text-lg font-bold font-mono ${getScoreColor(user.avgScore)}`}>
-                                      {user.avgScore.toFixed(1)}%
-                                    </div>
-                                    {user.avgScore >= 90 && <Award className="w-4 h-4 text-yellow-400" />}
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8">
-                            <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                            <p className="text-gray-400">No contractors found</p>
-                          </div>
-                        )
-                      ) : (
-                        // Contractor view - Recent activity with scores and clickable reports
-                        reports && reports.length > 0 ? (
-                          <div className="space-y-4">
-                            {reports.slice(0, 5).map((report) => (
-                              <div 
-                                key={report.id} 
-                                className="flex items-center justify-between p-4 bg-black/20 rounded-lg border border-white/10 hover:border-white/20 transition-colors group cursor-pointer"
-                                onClick={() => setSelectedReport(report)}
-                              >
-                                <div className="flex items-center space-x-4">
-                                  <div className="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg">
-                                    <FileText className="w-4 h-4 text-blue-400" />
-                                  </div>
-                                  <div>
-                                    <div className="text-white font-medium text-sm">{report.title || report.name}</div>
-                                    <div className="text-gray-400 text-xs">
-                                      {report.created_at && format(new Date(report.created_at), 'MMM dd, yyyy HH:mm')}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  {report.analysis_results[0] && (
-                                    <Badge className={`text-xs ${getScoreColor(report.analysis_results[0].score)} bg-white/10`}>
-                                      AI: {report.analysis_results[0].score}%
-                                    </Badge>
-                                  )}
-                                  <Badge className={`text-xs ${getPriorityColor(report.priority || 'low')}`}>
-                                    {report.priority || 'low'}
-                                  </Badge>
-                                  <Badge className={`text-xs ${getStatusColor(report.status || 'pending')}`}>
-                                    {formatStatus(report.status || 'pending')}
-                                  </Badge>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8">
-                            <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                            <p className="text-gray-400">No reports found. Create your first report to get started.</p>
-                            <div className="text-xs text-gray-500 mt-2">
-                              If you've created reports but don't see them here, check the browser console for debugging info.
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </CardContent>
-                  </Card>
+                  {/* Recent Activity / User Leaderboard */}
+                  {userRole === 'admin' ? (
+                    <UserLeaderboard 
+                      usersWithReports={usersWithReports}
+                      isLoading={isLoading}
+                      onUserClick={setSelectedUser}
+                      getScoreColor={getScoreColor}
+                    />
+                  ) : (
+                    <RecentActivity 
+                      reports={reports}
+                      isLoading={isLoading}
+                      onReportClick={setSelectedReport}
+                      getScoreColor={getScoreColor}
+                      getPriorityColor={getPriorityColor}
+                      getStatusColor={getStatusColor}
+                      formatStatus={formatStatus}
+                    />
+                  )}
 
                   {/* Quick Actions */}
-                  <Card className="bg-black/40 border-white/20 backdrop-blur-xl">
-                    <CardHeader>
-                      <CardTitle className="text-white font-mono flex items-center space-x-2">
-                        <Zap className="w-5 h-5 text-yellow-400" />
-                        <span>Quick Actions</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Link to="/submit" className="block">
-                        <Button className="w-full justify-start bg-gradient-to-r from-red-600/20 to-purple-600/20 border border-red-500/30 text-white hover:from-red-600/30 hover:to-purple-600/30 font-mono">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Submit New Report
-                        </Button>
-                      </Link>
-                      <Button 
-                        onClick={handleExport}
-                        variant="outline" 
-                        className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Export Data
-                      </Button>
-                      <Button 
-                        onClick={() => setShowFilterDialog(true)}
-                        variant="outline" 
-                        className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono"
-                      >
-                        <Filter className="w-4 h-4 mr-2" />
-                        Advanced Filters
-                      </Button>
-                      <Button 
-                        onClick={handleScheduleReport}
-                        variant="outline" 
-                        className="w-full justify-start border-white/20 text-white/90 hover:bg-white/10 font-mono"
-                      >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Schedule Report
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  <QuickActions 
+                    onExport={handleExport}
+                    onShowFilterDialog={() => setShowFilterDialog(true)}
+                    onScheduleReport={handleScheduleReport}
+                  />
                 </div>
               </TabsContent>
 
