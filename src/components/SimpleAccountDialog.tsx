@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users, Plus } from "lucide-react";
+import { Users, Plus, Mail, Key } from "lucide-react";
 import { createAccount } from "@/services/supabaseService";
 import { toast } from "sonner";
 
@@ -36,7 +36,10 @@ export const SimpleAccountDialog = ({ open, onOpenChange }: SimpleAccountDialogP
         role
       });
       
-      toast.success("Account created successfully! User will need to set their password.");
+      toast.success("Account created successfully!");
+      toast.info("Next steps: The user will receive an email to set their password and can then sign in to access the system.", {
+        duration: 8000,
+      });
       
       // Reset form
       setEmail("");
@@ -61,7 +64,7 @@ export const SimpleAccountDialog = ({ open, onOpenChange }: SimpleAccountDialogP
             <span>Create New Account</span>
           </DialogTitle>
           <DialogDescription className="text-gray-300">
-            Create a new user account for your organization
+            Create a new user account for your organization. The user will receive an email to set up their password.
           </DialogDescription>
         </DialogHeader>
         
@@ -111,6 +114,22 @@ export const SimpleAccountDialog = ({ open, onOpenChange }: SimpleAccountDialogP
                 <SelectItem value="admin" className="text-white hover:bg-white/10">Admin</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Next Steps Information */}
+          <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mt-6">
+            <div className="flex items-start space-x-3">
+              <Mail className="w-5 h-5 text-blue-400 mt-0.5" />
+              <div>
+                <h4 className="text-blue-300 font-mono font-semibold mb-2">After Account Creation</h4>
+                <ul className="text-gray-300 text-sm space-y-1">
+                  <li>• User will receive an email invitation</li>
+                  <li>• They must click the link to set their password</li>
+                  <li>• Once activated, they can sign in and access the system</li>
+                  <li>• {role === 'admin' ? 'Admin users can manage accounts and view all reports' : 'Contractor users can submit reports and view analytics'}</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 

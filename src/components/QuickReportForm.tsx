@@ -32,9 +32,9 @@ const QuickReportForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Convert period to a date format
       const periodMap: { [key: string]: string } = {
         today: new Date().toISOString().split('T')[0],
+        "this-week": new Date().toISOString().split('T')[0],
         "last-week": new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         "last-two-weeks": new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         "last-month": new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -66,6 +66,7 @@ const QuickReportForm = () => {
 
   const periodOptions = [
     { value: "today", label: "Today" },
+    { value: "this-week", label: "This Week" },
     { value: "last-week", label: "Last Week" },
     { value: "last-two-weeks", label: "Last Two Weeks" },
     { value: "last-month", label: "Last Month" },
