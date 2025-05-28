@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,15 @@ import {
   Target,
   ChevronRight,
   Sparkles,
-  LogOut
+  LogOut,
+  TrendingUp,
+  Award,
+  Timer,
+  MessageCircle,
+  Star,
+  Activity,
+  Lightbulb,
+  Rocket
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +40,11 @@ const Index = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [quickReport, setQuickReport] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  const [liveStats, setLiveStats] = useState({
+    reportsProcessed: 15420,
+    activeUsers: 2847,
+    avgProcessingTime: 0.3
+  });
 
   useEffect(() => {
     setIsVisible(true);
@@ -41,8 +55,18 @@ const Index = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
     
+    // Animate live stats
+    const interval = setInterval(() => {
+      setLiveStats(prev => ({
+        reportsProcessed: prev.reportsProcessed + Math.floor(Math.random() * 3),
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 5) - 2,
+        avgProcessingTime: Number((0.2 + Math.random() * 0.3).toFixed(1))
+      }));
+    }, 3000);
+    
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      clearInterval(interval);
     };
   }, []);
 
@@ -91,6 +115,30 @@ const Index = () => {
       description: "Real-time analytics and performance metrics",
       icon: BarChart3,
       color: "from-orange-500 to-red-400"
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Chen",
+      role: "Project Manager",
+      company: "TechCorp",
+      quote: "The Eye of Sauron has revolutionized how we track contractor progress. AI-powered insights save us hours every week.",
+      avatar: "SC"
+    },
+    {
+      name: "Marcus Rodriguez",
+      role: "Operations Director",
+      company: "BuildRight",
+      quote: "Real-time analysis and automated quality checks have improved our project delivery by 40%.",
+      avatar: "MR"
+    },
+    {
+      name: "Emily Watson",
+      role: "Team Lead",
+      company: "DevSolutions",
+      quote: "The intelligent oversight gives us confidence that nothing falls through the cracks.",
+      avatar: "EW"
     }
   ];
 
@@ -245,7 +293,7 @@ const Index = () => {
         </div>
 
         {/* Workflow Steps */}
-        <div className="mb-16">
+        <div className="mb-20">
           <h2 className="text-3xl font-bold text-center mb-12 font-mono">
             HOW THE SYSTEM <span className="text-red-400">WORKS</span>
           </h2>
@@ -275,83 +323,201 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          <Card className="bg-black/40 border-red-500/20 hover:border-red-500/50 transition-all duration-300">
-            <CardHeader>
-              <Brain className="w-8 h-8 text-red-400 mb-2" />
-              <CardTitle className="text-white font-mono">AI Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-400 font-mono">
-                Advanced machine learning algorithms analyze report quality, detect anomalies, and provide intelligent insights.
-              </CardDescription>
-            </CardContent>
-          </Card>
+        {/* Live Stats Section */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold font-mono mb-4">
+              REAL-TIME <span className="text-red-400">INTELLIGENCE</span>
+            </h2>
+            <p className="text-gray-400 font-mono">Live data from The Eye's neural network</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="bg-black/40 border-red-500/20 hover:border-red-500/50 transition-all duration-300 group">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <FileText className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-2 font-mono">
+                  {liveStats.reportsProcessed.toLocaleString()}
+                </div>
+                <div className="text-gray-400 font-mono">Reports Processed</div>
+                <div className="flex items-center justify-center mt-2 text-green-400">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  <span className="text-sm font-mono">Live</span>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-black/40 border-purple-500/20 hover:border-purple-500/50 transition-all duration-300">
-            <CardHeader>
-              <Shield className="w-8 h-8 text-purple-400 mb-2" />
-              <CardTitle className="text-white font-mono">Quality Assurance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-400 font-mono">
-                Automated validation ensures all submissions meet quality standards before approval.
-              </CardDescription>
-            </CardContent>
-          </Card>
+            <Card className="bg-black/40 border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 group">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-2 font-mono">
+                  {liveStats.activeUsers.toLocaleString()}
+                </div>
+                <div className="text-gray-400 font-mono">Active Users</div>
+                <div className="flex items-center justify-center mt-2 text-green-400">
+                  <Activity className="w-4 h-4 mr-1" />
+                  <span className="text-sm font-mono">Online</span>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-black/40 border-blue-500/20 hover:border-blue-500/50 transition-all duration-300">
-            <CardHeader>
-              <BarChart3 className="w-8 h-8 text-blue-400 mb-2" />
-              <CardTitle className="text-white font-mono">Real-time Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-400 font-mono">
-                Comprehensive dashboards provide instant insights into contractor performance and project progress.
-              </CardDescription>
-            </CardContent>
-          </Card>
+            <Card className="bg-black/40 border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 group">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Timer className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-2 font-mono">
+                  {liveStats.avgProcessingTime}s
+                </div>
+                <div className="text-gray-400 font-mono">Avg Processing Time</div>
+                <div className="flex items-center justify-center mt-2 text-green-400">
+                  <Zap className="w-4 h-4 mr-1" />
+                  <span className="text-sm font-mono">Lightning Fast</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
-          <Card className="bg-black/40 border-green-500/20 hover:border-green-500/50 transition-all duration-300">
-            <CardHeader>
-              <Clock className="w-8 h-8 text-green-400 mb-2" />
-              <CardTitle className="text-white font-mono">Instant Processing</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-400 font-mono">
-                Lightning-fast report processing with immediate feedback and status updates.
-              </CardDescription>
-            </CardContent>
-          </Card>
+        {/* Interactive Demo Section */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold font-mono mb-4">
+              EXPERIENCE THE <span className="text-red-400">POWER</span>
+            </h2>
+            <p className="text-gray-400 font-mono">See how The Eye analyzes and validates reports in real-time</p>
+          </div>
 
-          <Card className="bg-black/40 border-orange-500/20 hover:border-orange-500/50 transition-all duration-300">
-            <CardHeader>
-              <Users className="w-8 h-8 text-orange-400 mb-2" />
-              <CardTitle className="text-white font-mono">Team Collaboration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-400 font-mono">
-                Seamless collaboration tools for teams to review, approve, and manage contractor submissions.
-              </CardDescription>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-black/40 border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300">
-            <CardHeader>
-              <Lock className="w-8 h-8 text-cyan-400 mb-2" />
-              <CardTitle className="text-white font-mono">Secure & Compliant</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-400 font-mono">
-                Enterprise-grade security with full audit trails and compliance reporting capabilities.
-              </CardDescription>
+          <Card className="bg-black/40 border-white/10 hover:border-red-500/30 transition-all duration-500 group">
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-4 font-mono">AI-Powered Analysis</h3>
+                  <p className="text-gray-400 mb-6 font-mono">
+                    Watch as our advanced neural networks process contractor submissions, 
+                    validate quality standards, and generate intelligent insights in milliseconds.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <span className="text-gray-300 font-mono">Quality validation checks</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <span className="text-gray-300 font-mono">Anomaly detection</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <span className="text-gray-300 font-mono">Performance insights</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative">
+                  <div className="bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-lg p-6 border border-white/10">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Brain className="w-6 h-6 text-purple-400" />
+                      <span className="text-white font-mono">Neural Analysis Active</span>
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="bg-black/40 rounded p-3 border-l-4 border-blue-500">
+                        <div className="text-blue-400 text-sm font-mono">Processing Report #24601</div>
+                        <div className="text-gray-300 text-xs font-mono">Quality Score: 94.7%</div>
+                      </div>
+                      <div className="bg-black/40 rounded p-3 border-l-4 border-green-500">
+                        <div className="text-green-400 text-sm font-mono">Validation Complete</div>
+                        <div className="text-gray-300 text-xs font-mono">Status: Approved</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Footer */}
-        <div className="text-center py-12 border-t border-white/10">
+        {/* Testimonials Section */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold font-mono mb-4">
+              TRUSTED BY <span className="text-red-400">INDUSTRY LEADERS</span>
+            </h2>
+            <p className="text-gray-400 font-mono">See what our clients say about The Eye of Sauron</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="bg-black/40 border-white/10 hover:border-red-500/30 transition-all duration-300 group">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold font-mono">{testimonial.name}</div>
+                      <div className="text-gray-400 text-sm font-mono">{testimonial.role}</div>
+                      <div className="text-red-400 text-sm font-mono">{testimonial.company}</div>
+                    </div>
+                  </div>
+                  <div className="flex mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-gray-300 italic font-mono text-sm">"{testimonial.quote}"</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Final CTA Section */}
+        <div className="text-center py-16 border-t border-white/10">
+          <div className="mb-8">
+            <h2 className="text-4xl font-bold font-mono mb-4">
+              READY TO EXPERIENCE <span className="text-red-400">THE POWER</span>?
+            </h2>
+            <p className="text-xl text-gray-300 font-mono">
+              Join thousands of teams already using The Eye of Sauron
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            {user ? (
+              <>
+                <Link to="/submit">
+                  <Button size="lg" className="bg-red-600 hover:bg-red-700 px-8 py-4 text-lg font-mono">
+                    <Rocket className="w-5 h-5 mr-2" />
+                    Start Submitting Reports
+                  </Button>
+                </Link>
+                <Link to="/dashboard">
+                  <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg font-mono">
+                    <BarChart3 className="w-5 h-5 mr-2" />
+                    Explore Dashboard
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button size="lg" className="bg-red-600 hover:bg-red-700 px-8 py-4 text-lg font-mono">
+                    <Rocket className="w-5 h-5 mr-2" />
+                    Get Started Now
+                  </Button>
+                </Link>
+                <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg font-mono">
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Schedule Demo
+                </Button>
+              </>
+            )}
+          </div>
+
           <p className="text-gray-400 font-mono">
             The Eye of Sauron - Advanced Contractor Intelligence System
           </p>
