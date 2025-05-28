@@ -3,7 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { useWelcomeScreen } from "@/hooks/useWelcomeScreen";
+import WelcomeScreen from "@/components/auth/WelcomeScreen";
 import Index from "./pages/Index";
 import Submit from "./pages/Submit";
 import Dashboard from "./pages/Dashboard";
@@ -12,11 +14,25 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <Toaster />
-    <Sonner />
-    <AuthProvider>
+/**
+ * Inner App component that has access to auth context
+ * Handles global welcome screen logic across all routes
+ */
+const AppContent = () => {
+  const { user } = useAuth();
+  const { showWelcome, handleWelcomeComplete } = useWelcomeScreen(user);
+
+  return (
+    <>
+      {/* Global Welcome Screen Overlay */}
+      {showWelcome && user && (
+        <WelcomeScreen 
+          user={user} 
+          onComplete={handleWelcomeComplete}
+        />
+      )}
+
+      {/* Main Application Routes */}
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -26,6 +42,20 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+    </>
+  );
+};
+
+/**
+ * Main App component with providers
+ * Provides query client and authentication context to the entire app
+ */
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <Toaster />
+    <Sonner />
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   </QueryClientProvider>
 );

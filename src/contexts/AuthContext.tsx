@@ -67,14 +67,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    console.log('Starting sign out process');
+    
+    // Clear welcome screen session storage first
+    sessionStorage.removeItem('welcome_shown_for_session');
+    sessionStorage.removeItem('last_welcome_user');
+    
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     
-    // Clear local state and session storage immediately
+    // Clear local state immediately
     setUser(null);
     setSession(null);
     setUserRole(null);
-    sessionStorage.removeItem('user_logged_in');
+    
+    console.log('Sign out completed');
   };
 
   useEffect(() => {
