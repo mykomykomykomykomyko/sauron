@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   FileText, 
   TrendingUp, 
@@ -8,7 +11,11 @@ import {
   BarChart3, 
   Zap,
   Target,
-  Plus
+  Plus,
+  Filter,
+  Download,
+  Clock,
+  Users
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,6 +32,7 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { UserLeaderboard } from "@/components/dashboard/UserLeaderboard";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 const Dashboard = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
