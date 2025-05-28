@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,17 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Upload, Send, Eye, Brain, CheckCircle, AlertCircle, Sparkles, Target, ArrowRight, Zap, Clock, Shield } from "lucide-react";
+import { FileText, Upload, Send, Eye, Brain, CheckCircle, AlertCircle, Sparkles, Target, ArrowRight, Zap, Clock, Shield, Code, Wrench, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { createReport } from "@/services/supabaseService";
+import { analyzeReport } from "@/services/aiAnalysis";
 
 const Submit = () => {
+  // Basic info
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState("");
+  
+  // Technical details
+  const [technicalImplementation, setTechnicalImplementation] = useState("");
+  const [challengesSolved, setChallengesSolved] = useState("");
+  const [technologyStack, setTechnologyStack] = useState("");
+  
+  // Deliverables
+  const [completedFeatures, setCompletedFeatures] = useState("");
+  const [deploymentDetails, setDeploymentDetails] = useState("");
+  const [measureableProgress, setMeasureableProgress] = useState("");
+  
+  // Planning
+  const [nextSteps, setNextSteps] = useState("");
+  const [timeline, setTimeline] = useState("");
+  const [goals, setGoals] = useState("");
+
+  // Additional context
+  const [workPeriod, setWorkPeriod] = useState("");
+  const [timeSpent, setTimeSpent] = useState("");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
@@ -48,21 +69,83 @@ const Submit = () => {
     setIsSubmitting(true);
 
     try {
-      const reportData = {
-        title,
-        description,
-        category,
-        priority,
+      // Construct comprehensive report description
+      const reportDescription = `
+PROJECT: ${title}
+
+TECHNICAL IMPLEMENTATION:
+${technicalImplementation}
+
+TECHNOLOGY STACK:
+${technologyStack}
+
+COMPLETED FEATURES & DELIVERABLES:
+${completedFeatures}
+
+DEPLOYMENT DETAILS:
+${deploymentDetails}
+
+CHALLENGES SOLVED:
+${challengesSolved}
+
+MEASURABLE PROGRESS:
+${measureableProgress}
+
+NEXT STEPS & PLANNING:
+${nextSteps}
+
+TIMELINE:
+${timeline}
+
+GOALS & OBJECTIVES:
+${goals}
+
+TIME SPENT: ${timeSpent}
+WORK PERIOD: ${workPeriod}
+      `.trim();
+
+      const periodMap: { [key: string]: string } = {
+        today: new Date().toISOString().split('T')[0],
+        "this-week": new Date().toISOString().split('T')[0],
+        "last-week": new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        "last-two-weeks": new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        "last-month": new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        "last-quarter": new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        "last-year": new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       };
 
-      await createReport(reportData);
-      toast.success("Report submitted successfully! AI analysis in progress...");
+      const reportData = {
+        name: user.user_metadata?.full_name || user.email || "Unknown User",
+        email: user.email || "",
+        project: category,
+        week: periodMap[workPeriod] || new Date().toISOString().split('T')[0],
+        report: reportDescription,
+        user_id: user.id,
+        title: title,
+        description: reportDescription,
+        category: category,
+        priority: priority,
+      };
+
+      await analyzeReport(reportData);
       
-      // Reset form
+      toast.success("Report submitted successfully! AI analysis complete.");
+      
+      // Reset all form fields
       setTitle("");
-      setDescription("");
       setCategory("");
       setPriority("");
+      setTechnicalImplementation("");
+      setChallengesSolved("");
+      setTechnologyStack("");
+      setCompletedFeatures("");
+      setDeploymentDetails("");
+      setMeasureableProgress("");
+      setNextSteps("");
+      setTimeline("");
+      setGoals("");
+      setWorkPeriod("");
+      setTimeSpent("");
       setCurrentStep(1);
       
       // Navigate to dashboard after a short delay
@@ -89,24 +172,31 @@ const Submit = () => {
   const steps = [
     {
       number: 1,
-      title: "Report Details",
-      description: "Provide basic information about your progress",
+      title: "Basic Information",
+      description: "Project title, category, and work period",
       icon: FileText,
-      fields: ["title", "category", "priority"]
+      fields: ["title", "category", "priority", "workPeriod", "timeSpent"]
     },
     {
       number: 2,
-      title: "Detailed Description",
-      description: "Describe your progress and any challenges",
-      icon: Brain,
-      fields: ["description"]
+      title: "Technical Implementation",
+      description: "Technical details, stack, and implementation approach",
+      icon: Code,
+      fields: ["technicalImplementation", "technologyStack", "challengesSolved"]
     },
     {
       number: 3,
-      title: "AI Analysis",
-      description: "Our AI will process and validate your report",
-      icon: Zap,
-      fields: []
+      title: "Deliverables & Progress",
+      description: "Completed features, deployment, and measurable outcomes",
+      icon: Wrench,
+      fields: ["completedFeatures", "deploymentDetails", "measureableProgress"]
+    },
+    {
+      number: 4,
+      title: "Planning & Next Steps",
+      description: "Future plans, timeline, and objectives",
+      icon: Calendar,
+      fields: ["nextSteps", "timeline", "goals"]
     }
   ];
 
@@ -126,12 +216,26 @@ const Submit = () => {
     { value: "critical", label: "Critical", color: "text-red-400" },
   ];
 
+  const workPeriods = [
+    { value: "today", label: "Today" },
+    { value: "this-week", label: "This Week" },
+    { value: "last-week", label: "Last Week" },
+    { value: "last-two-weeks", label: "Last Two Weeks" },
+    { value: "last-month", label: "Last Month" },
+    { value: "last-quarter", label: "Last Quarter" },
+    { value: "last-year", label: "Last Year" },
+  ];
+
   const isStepComplete = (stepNumber: number) => {
     switch (stepNumber) {
       case 1:
-        return title && category && priority;
+        return title && category && priority && workPeriod && timeSpent;
       case 2:
-        return description;
+        return technicalImplementation && technologyStack && challengesSolved;
+      case 3:
+        return completedFeatures && deploymentDetails && measureableProgress;
+      case 4:
+        return nextSteps && timeline && goals;
       default:
         return false;
     }
@@ -190,7 +294,7 @@ const Submit = () => {
             <span className="text-xl sm:text-2xl font-bold text-white tracking-tight font-mono">
               THE EYE OF SAURON
             </span>
-            <span className="text-xs text-gray-400 font-mono hidden sm:block">REPORT SUBMISSION</span>
+            <span className="text-xs text-gray-400 font-mono hidden sm:block">COMPREHENSIVE REPORT SUBMISSION</span>
           </div>
         </Link>
 
@@ -206,33 +310,33 @@ const Submit = () => {
 
       {/* Main Content */}
       <div className="px-4 sm:px-6 md:px-8 py-12 sm:py-16 relative z-10">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           
           {/* Header Section */}
           <div className={`text-center mb-12 transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0'}`}>
             <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-500/20 to-purple-500/20 border border-white/20 rounded-full px-6 py-3 backdrop-blur-xl mb-6">
-              <FileText className="w-5 h-5 text-red-400" />
-              <span className="text-sm font-mono text-white/90">PROGRESS REPORT SUBMISSION</span>
+              <Brain className="w-5 h-5 text-red-400" />
+              <span className="text-sm font-mono text-white/90">AI-OPTIMIZED REPORT SUBMISSION</span>
               <Target className="w-5 h-5 text-purple-400" />
             </div>
             
             <h1 className="text-4xl sm:text-6xl font-bold font-mono mb-6 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
-              SUBMIT REPORT
+              COMPREHENSIVE REPORT
             </h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Submit your progress report for AI-powered analysis and validation. Our advanced algorithms will process your submission in real-time.
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Submit a detailed progress report optimized for AI analysis. Our system evaluates technical content, deliverables, clarity, planning, and professionalism.
             </p>
           </div>
 
           {/* Progress Steps */}
           <div className={`mb-12 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-            <div className="flex items-center justify-center space-x-4 sm:space-x-8 mb-8">
+            <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-8 overflow-x-auto">
               {steps.map((step, index) => (
-                <div key={index} className="flex items-center">
-                  <div className={`flex items-center space-x-3 transition-all duration-500 ${
+                <div key={index} className="flex items-center flex-shrink-0">
+                  <div className={`flex items-center space-x-2 transition-all duration-500 ${
                     currentStep >= step.number ? 'scale-110' : 'scale-100 opacity-60'
                   }`}>
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
                       currentStep > step.number 
                         ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-400 shadow-lg shadow-green-500/30'
                         : currentStep === step.number
@@ -240,19 +344,14 @@ const Submit = () => {
                         : 'bg-black/40 border-white/20'
                     }`}>
                       {currentStep > step.number ? (
-                        <CheckCircle className="w-6 h-6 text-white" />
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       ) : (
-                        <step.icon className="w-6 h-6 text-white" />
+                        <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       )}
                     </div>
-                    <div className="hidden sm:block">
-                      <div className={`text-sm font-mono transition-colors duration-300 ${
+                    <div className="hidden md:block">
+                      <div className={`text-xs sm:text-sm font-mono transition-colors duration-300 ${
                         currentStep >= step.number ? 'text-white' : 'text-gray-500'
-                      }`}>
-                        Step {step.number}
-                      </div>
-                      <div className={`text-xs transition-colors duration-300 ${
-                        currentStep >= step.number ? 'text-gray-300' : 'text-gray-600'
                       }`}>
                         {step.title}
                       </div>
@@ -260,7 +359,7 @@ const Submit = () => {
                   </div>
                   
                   {index < steps.length - 1 && (
-                    <div className={`w-8 sm:w-16 h-0.5 mx-2 sm:mx-4 transition-all duration-500 ${
+                    <div className={`w-4 sm:w-8 h-0.5 mx-1 sm:mx-2 transition-all duration-500 flex-shrink-0 ${
                       currentStep > step.number 
                         ? 'bg-gradient-to-r from-green-400 to-emerald-400'
                         : 'bg-white/20'
@@ -292,12 +391,12 @@ const Submit = () => {
                     <div className="space-y-2">
                       <Label htmlFor="title" className="text-white font-mono flex items-center space-x-2">
                         <FileText className="w-4 h-4" />
-                        <span>Report Title</span>
+                        <span>Project Title</span>
                       </Label>
                       <Input
                         id="title"
                         type="text"
-                        placeholder="Enter a descriptive title for your report"
+                        placeholder="Enter a descriptive title for your project"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
@@ -338,27 +437,177 @@ const Submit = () => {
                         </Select>
                       </div>
                     </div>
+
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="workPeriod" className="text-white font-mono">Work Period</Label>
+                        <Select value={workPeriod} onValueChange={setWorkPeriod} required>
+                          <SelectTrigger className="bg-black/20 border-white/20 text-white focus:border-red-400 focus:ring-red-400">
+                            <SelectValue placeholder="Select work period" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black/90 border-white/20 backdrop-blur-xl">
+                            {workPeriods.map((period) => (
+                              <SelectItem key={period.value} value={period.value} className="text-white hover:bg-white/10">
+                                {period.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="timeSpent" className="text-white font-mono">Time Spent</Label>
+                        <Input
+                          id="timeSpent"
+                          type="text"
+                          placeholder="e.g., 8 hours, 2 days, 1 week"
+                          value={timeSpent}
+                          onChange={(e) => setTimeSpent(e.target.value)}
+                          required
+                          className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
 
-                {/* Step 2: Description */}
+                {/* Step 2: Technical Implementation */}
                 {currentStep === 2 && (
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-white font-mono flex items-center space-x-2">
-                      <Brain className="w-4 h-4" />
-                      <span>Detailed Description</span>
-                    </Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Provide a detailed description of your progress, achievements, and any challenges encountered..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required
-                      rows={8}
-                      className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
-                    />
-                    <div className="text-sm text-gray-400 mt-2">
-                      {description.length} characters • Minimum 50 characters recommended
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="technicalImplementation" className="text-white font-mono flex items-center space-x-2">
+                        <Code className="w-4 h-4" />
+                        <span>Technical Implementation Details</span>
+                      </Label>
+                      <Textarea
+                        id="technicalImplementation"
+                        placeholder="Describe the technical approach, algorithms, code structure, implementation methodology..."
+                        value={technicalImplementation}
+                        onChange={(e) => setTechnicalImplementation(e.target.value)}
+                        required
+                        rows={6}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="technologyStack" className="text-white font-mono">Technology Stack</Label>
+                      <Textarea
+                        id="technologyStack"
+                        placeholder="List programming languages, frameworks, databases, tools, libraries used..."
+                        value={technologyStack}
+                        onChange={(e) => setTechnologyStack(e.target.value)}
+                        required
+                        rows={4}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="challengesSolved" className="text-white font-mono">Challenges Solved</Label>
+                      <Textarea
+                        id="challengesSolved"
+                        placeholder="Describe technical challenges encountered and how they were resolved..."
+                        value={challengesSolved}
+                        onChange={(e) => setChallengesSolved(e.target.value)}
+                        required
+                        rows={4}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Deliverables & Progress */}
+                {currentStep === 3 && (
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="completedFeatures" className="text-white font-mono flex items-center space-x-2">
+                        <Wrench className="w-4 h-4" />
+                        <span>Completed Features & Deliverables</span>
+                      </Label>
+                      <Textarea
+                        id="completedFeatures"
+                        placeholder="List specific features, modules, components completed. Be detailed and specific..."
+                        value={completedFeatures}
+                        onChange={(e) => setCompletedFeatures(e.target.value)}
+                        required
+                        rows={6}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="deploymentDetails" className="text-white font-mono">Deployment & Testing Details</Label>
+                      <Textarea
+                        id="deploymentDetails"
+                        placeholder="Describe deployment process, testing methodology, URLs, screenshots, performance metrics..."
+                        value={deploymentDetails}
+                        onChange={(e) => setDeploymentDetails(e.target.value)}
+                        required
+                        rows={4}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="measureableProgress" className="text-white font-mono">Measurable Progress & Metrics</Label>
+                      <Textarea
+                        id="measureableProgress"
+                        placeholder="Provide quantifiable metrics, performance improvements, user feedback, ROI calculations..."
+                        value={measureableProgress}
+                        onChange={(e) => setMeasureableProgress(e.target.value)}
+                        required
+                        rows={4}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 4: Planning & Next Steps */}
+                {currentStep === 4 && (
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="nextSteps" className="text-white font-mono flex items-center space-x-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>Next Steps & Action Items</span>
+                      </Label>
+                      <Textarea
+                        id="nextSteps"
+                        placeholder="Outline specific next steps, action items, and immediate priorities..."
+                        value={nextSteps}
+                        onChange={(e) => setNextSteps(e.target.value)}
+                        required
+                        rows={5}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="timeline" className="text-white font-mono">Timeline & Milestones</Label>
+                      <Textarea
+                        id="timeline"
+                        placeholder="Provide detailed timeline, milestones, deadlines, and delivery expectations..."
+                        value={timeline}
+                        onChange={(e) => setTimeline(e.target.value)}
+                        required
+                        rows={4}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="goals" className="text-white font-mono">Goals & Objectives</Label>
+                      <Textarea
+                        id="goals"
+                        placeholder="Define clear goals, objectives, success criteria, and expected outcomes..."
+                        value={goals}
+                        onChange={(e) => setGoals(e.target.value)}
+                        required
+                        rows={4}
+                        className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                      />
                     </div>
                   </div>
                 )}
@@ -376,7 +625,7 @@ const Submit = () => {
                     </Button>
                   )}
                   
-                  {currentStep < 2 ? (
+                  {currentStep < 4 ? (
                     <Button
                       type="button"
                       onClick={() => {
@@ -395,13 +644,13 @@ const Submit = () => {
                   ) : (
                     <Button
                       type="submit"
-                      disabled={isSubmitting || !isStepComplete(2)}
+                      disabled={isSubmitting || !isStepComplete(4)}
                       className="ml-auto bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-mono group relative overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                       <Send className="w-4 h-4 mr-2 relative z-10" />
                       <span className="relative z-10">
-                        {isSubmitting ? "Submitting..." : "Submit Report"}
+                        {isSubmitting ? "Analyzing..." : "Submit Report"}
                       </span>
                       <Sparkles className="w-4 h-4 ml-2 relative z-10 group-hover:animate-pulse" />
                     </Button>
@@ -411,32 +660,48 @@ const Submit = () => {
             </CardContent>
           </Card>
 
-          {/* Features Info */}
-          <div className={`mt-12 grid md:grid-cols-3 gap-6 transition-all duration-1000 delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+          {/* Scoring Info */}
+          <div className={`mt-12 grid md:grid-cols-5 gap-4 transition-all duration-1000 delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
             {[
               {
-                icon: Brain,
-                title: "AI Validation",
-                description: "Advanced algorithms validate your report against multiple data sources"
+                icon: Code,
+                title: "Technical Content",
+                score: "30 pts",
+                description: "Implementation details, algorithms, code structure"
               },
               {
-                icon: Clock,
-                title: "Real-time Processing",
-                description: "Get instant feedback and insights as soon as you submit"
+                icon: Wrench,
+                title: "Deliverables",
+                score: "25 pts",
+                description: "Completed features, measurable outcomes"
+              },
+              {
+                icon: Brain,
+                title: "Clarity",
+                score: "20 pts",
+                description: "Communication quality, structure, detail"
+              },
+              {
+                icon: Calendar,
+                title: "Planning",
+                score: "15 pts",
+                description: "Next steps, timeline, goal setting"
               },
               {
                 icon: Shield,
-                title: "Secure Storage",
-                description: "Your reports are encrypted and stored with enterprise-grade security"
+                title: "Professionalism",
+                score: "10 pts",
+                description: "Format, tone, time specificity"
               }
-            ].map((feature, index) => (
+            ].map((category, index) => (
               <Card key={index} className="bg-black/20 border-white/10 hover:border-white/30 transition-all duration-300 group backdrop-blur-xl">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-red-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="w-6 h-6 text-white" />
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-red-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <category.icon className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-lg font-mono text-white mb-2">{feature.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{feature.description}</p>
+                  <div className="text-lg font-bold text-red-400 font-mono mb-1">{category.score}</div>
+                  <h3 className="text-sm font-mono text-white mb-2">{category.title}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">{category.description}</p>
                 </CardContent>
               </Card>
             ))}

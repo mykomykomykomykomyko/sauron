@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Send, Sparkles, MessageSquare, Calendar } from "lucide-react";
+import { Send, Sparkles, MessageSquare, Calendar, AlertTriangle, Code } from "lucide-react";
 import { toast } from "sonner";
 import { analyzeReport } from "@/services/aiAnalysis";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +26,12 @@ const ChatQuickReport = () => {
 
     if (!user) {
       toast.error("You must be logged in to submit reports");
+      return;
+    }
+
+    // Quality checks for better scoring
+    if (report.trim().length < 80) {
+      toast.error("Report too brief for accurate AI analysis. Please add more detail.");
       return;
     }
 
@@ -74,6 +80,12 @@ const ChatQuickReport = () => {
     { value: "last-year", label: "Last Year" },
   ];
 
+  // Quality indicators
+  const characterCount = report.length;
+  const technicalTerms = ['implemented', 'developed', 'coded', 'built', 'created', 'designed', 'completed', 'deployed', 'tested'];
+  const hasTechnicalContent = technicalTerms.some(term => report.toLowerCase().includes(term));
+  const qualityScore = characterCount >= 80 && hasTechnicalContent ? 'good' : characterCount >= 50 ? 'fair' : 'poor';
+
   return (
     <div className="w-full max-w-4xl mx-auto mb-8 px-4">
       <Card className={`bg-black/80 border-2 transition-all duration-300 backdrop-blur-sm ${
@@ -86,8 +98,20 @@ const ChatQuickReport = () => {
             </div>
             <div>
               <h3 className="text-white font-mono font-semibold text-sm sm:text-base">Quick Report</h3>
-              <p className="text-gray-400 text-xs sm:text-sm">Submit your progress instantly</p>
+              <p className="text-gray-400 text-xs sm:text-sm">Submit progress optimized for AI scoring</p>
             </div>
+            {qualityScore === 'poor' && characterCount > 0 && (
+              <div className="flex items-center space-x-1 text-yellow-400 text-xs">
+                <AlertTriangle className="w-3 h-3" />
+                <span>Add more detail</span>
+              </div>
+            )}
+            {hasTechnicalContent && (
+              <div className="flex items-center space-x-1 text-green-400 text-xs">
+                <Code className="w-3 h-3" />
+                <span>Technical content detected</span>
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -117,13 +141,21 @@ const ChatQuickReport = () => {
                   onChange={(e) => setReport(e.target.value)}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  placeholder="Describe your progress, achievements, challenges, and next steps..."
+                  placeholder="For better AI scoring include: technical implementation details, specific completed features, challenges solved, technology stack, measurable progress, and next steps..."
                   className={`bg-black/20 border-white/20 text-white placeholder:text-gray-500 font-mono resize-none transition-all duration-300 text-xs sm:text-sm ${
                     isFocused ? 'border-red-500/70' : ''
                   }`}
-                  rows={3}
+                  rows={4}
                   disabled={isSubmitting}
                 />
+                <div className="flex justify-between mt-1 text-xs">
+                  <span className={`${characterCount >= 80 ? 'text-green-400' : characterCount >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                    {characterCount} chars (min 80 recommended)
+                  </span>
+                  <span className={`${hasTechnicalContent ? 'text-green-400' : 'text-gray-400'}`}>
+                    {hasTechnicalContent ? '✓ Technical content' : 'Add technical details'}
+                  </span>
+                </div>
               </div>
               <Button
                 type="submit"

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Send, Sparkles, Zap } from "lucide-react";
+import { Send, Sparkles, Zap, Code, Wrench, Calendar, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { analyzeReport } from "@/services/aiAnalysis";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +26,20 @@ const QuickReportForm = () => {
 
     if (!user) {
       toast.error("You must be logged in to submit reports");
+      return;
+    }
+
+    // Check if report meets minimum requirements for good scoring
+    if (report.trim().length < 100) {
+      toast.error("Report too brief. Please include more detail for better AI analysis (minimum 100 characters).");
+      return;
+    }
+
+    const technicalTerms = ['implemented', 'developed', 'coded', 'built', 'created', 'designed', 'optimized', 'refactored', 'debugged', 'tested', 'deployed', 'integrated'];
+    const hasTechnicalContent = technicalTerms.some(term => report.toLowerCase().includes(term));
+    
+    if (!hasTechnicalContent) {
+      toast.error("Please include technical implementation details for better scoring.");
       return;
     }
 
@@ -74,6 +88,12 @@ const QuickReportForm = () => {
     { value: "last-year", label: "Last Year" },
   ];
 
+  // Character count and quality indicators
+  const characterCount = report.length;
+  const wordCount = report.split(/\s+/).filter(word => word.length > 0).length;
+  const technicalTerms = ['implemented', 'developed', 'coded', 'built', 'created', 'designed', 'optimized', 'refactored', 'debugged', 'tested', 'deployed', 'integrated', 'api', 'database', 'frontend', 'backend', 'algorithm', 'function', 'feature'];
+  const technicalScore = technicalTerms.filter(term => report.toLowerCase().includes(term)).length;
+
   return (
     <div className="w-full max-w-4xl mx-auto mb-12 md:mb-20 px-4 sm:px-0">
       <div className="text-center mb-6 md:mb-8">
@@ -81,7 +101,7 @@ const QuickReportForm = () => {
           Quick Report Submission
         </h2>
         <p className="text-gray-300 text-base md:text-lg px-2">
-          Submit your progress report instantly with AI-powered analysis
+          Submit your progress report instantly with AI-powered analysis optimized for comprehensive scoring
         </p>
       </div>
 
@@ -124,7 +144,7 @@ const QuickReportForm = () => {
             {/* Report Text Field */}
             <div className="space-y-2 md:space-y-3">
               <label className="text-red-400 font-mono text-xs sm:text-sm uppercase tracking-wider">
-                Progress Report
+                Comprehensive Progress Report
               </label>
               <div className="relative">
                 <Textarea
@@ -132,8 +152,15 @@ const QuickReportForm = () => {
                   onChange={(e) => setReport(e.target.value)}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  placeholder="Describe your progress, achievements, challenges, and next steps..."
-                  className={`min-h-[100px] sm:min-h-[120px] bg-neutral-900/50 border-red-700/50 text-white placeholder:text-gray-500 font-mono resize-none transition-all duration-300 text-sm sm:text-base ${
+                  placeholder="For optimal AI scoring, include:
+• Technical implementation details (algorithms, code, architecture)
+• Specific completed features and deliverables
+• Challenges solved and problem-solving approach
+• Technology stack used (languages, frameworks, tools)
+• Measurable progress and outcomes
+• Next steps and future planning
+• Time spent and specific achievements"
+                  className={`min-h-[150px] sm:min-h-[180px] bg-neutral-900/50 border-red-700/50 text-white placeholder:text-gray-500 font-mono resize-none transition-all duration-300 text-sm sm:text-base ${
                     isFocused ? 'border-red-500/70 bg-red-900/10' : ''
                   }`}
                   disabled={isSubmitting}
@@ -141,6 +168,23 @@ const QuickReportForm = () => {
                 {isFocused && (
                   <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 via-red-600/40 to-red-500/30 rounded-lg blur-sm pointer-events-none -z-10 animate-pulse" />
                 )}
+              </div>
+              
+              {/* Quality Indicators */}
+              <div className="flex flex-wrap gap-4 text-xs sm:text-sm">
+                <div className={`flex items-center space-x-1 ${characterCount >= 100 ? 'text-green-400' : 'text-yellow-400'}`}>
+                  <span>Characters: {characterCount}</span>
+                  <span className="opacity-60">(min 100)</span>
+                </div>
+                <div className={`flex items-center space-x-1 ${wordCount >= 50 ? 'text-green-400' : 'text-yellow-400'}`}>
+                  <span>Words: {wordCount}</span>
+                  <span className="opacity-60">(min 50)</span>
+                </div>
+                <div className={`flex items-center space-x-1 ${technicalScore >= 3 ? 'text-green-400' : 'text-yellow-400'}`}>
+                  <Code className="w-3 h-3" />
+                  <span>Technical Terms: {technicalScore}</span>
+                  <span className="opacity-60">(min 3)</span>
+                </div>
               </div>
             </div>
 
@@ -174,6 +218,23 @@ const QuickReportForm = () => {
           </form>
         </div>
       </Card>
+
+      {/* Scoring Guidelines */}
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { icon: Code, label: "Technical", points: "30pts", desc: "Implementation details" },
+          { icon: Wrench, label: "Deliverables", points: "25pts", desc: "Completed features" },
+          { icon: Brain, label: "Clarity", points: "20pts", desc: "Communication quality" },
+          { icon: Calendar, label: "Planning", points: "15pts", desc: "Next steps" },
+        ].map((item, index) => (
+          <div key={index} className="bg-black/40 border border-white/10 rounded-lg p-3 text-center">
+            <item.icon className="w-5 h-5 text-red-400 mx-auto mb-2" />
+            <div className="text-xs font-mono text-white">{item.label}</div>
+            <div className="text-xs text-red-400 font-bold">{item.points}</div>
+            <div className="text-xs text-gray-400">{item.desc}</div>
+          </div>
+        ))}
+      </div>
 
       <style>{`
         .border-glow {
