@@ -427,3 +427,66 @@ export const scheduleReportEmail = async (userEmail: string) => {
   
   window.location.href = `mailto:${userEmail}?subject=${subject}&body=${body}`;
 };
+
+// Get all users with their reports and analysis (admin only)
+export const getUsersWithReports = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    console.log('No authenticated user found in getUsersWithReports');
+    return [];
+  }
+  
+  // Check if user is admin
+  const { data: userRole, error: roleError } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+    
+  if (userRole?.role !== 'admin') {
+    console.log('User is not admin - cannot access all users data');
+    return [];
+  }
+  
+  // Get all profiles with their reports
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('full_name', { ascending: true });
+    
+  if (profilesError) {
+    console.error('Error fetching profiles:', profilesError);
+    throw profilesError;
+  }
+  
+  // Get reports for each user
+  const usersWithReports = await Promise.all(
+    profiles.map(async (profile) => {
+      const { data: reports, error: reportsError } = await supabase
+        .from('reports')
+        .select(`
+          *,
+          analysis_results!analysis_results_report_id_fkey (*)
+        `)
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false });
+        
+      if (reportsError) {
+        console.error('Error fetching reports for user:', profile.id, reportsError);
+        return {
+          ...profile,
+          reports: []
+        };
+      }
+      
+      return {
+        ...profile,
+        reports: reports || []
+      };
+    })
+  );
+  
+  console.log('Users with reports:', usersWithReports);
+  return usersWithReports;
+};

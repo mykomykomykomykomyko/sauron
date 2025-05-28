@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,16 +23,19 @@ import {
   RefreshCw,
   Plus,
   Calendar,
-  Star
+  Star,
+  Award,
+  User
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { getReportsWithAnalysis, getDashboardStats, downloadCSV, filterReports, Report, AnalysisResult } from "@/services/supabaseService";
+import { getReportsWithAnalysis, getDashboardStats, downloadCSV, filterReports, getUsersWithReports, Report, AnalysisResult } from "@/services/supabaseService";
 import { format } from "date-fns";
 import { FilterDialog } from "@/components/FilterDialog";
 import { SimpleAccountDialog } from "@/components/SimpleAccountDialog";
 import { ReportDetails } from "@/components/ReportDetails";
+import { UserProfile } from "@/components/UserProfile";
 import { toast } from "sonner";
 
 const Dashboard = () => {
@@ -41,6 +45,7 @@ const Dashboard = () => {
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
   const [selectedReport, setSelectedReport] = useState<(Report & { analysis_results: AnalysisResult[] }) | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [filters, setFilters] = useState<{ name?: string; sortBy?: 'date' | 'alphabetical'; sortOrder?: 'asc' | 'desc' }>({});
 
   const { user, userRole } = useAuth();
@@ -76,6 +81,12 @@ const Dashboard = () => {
       return Object.keys(filters).length > 0 ? filterReports(filters) : getReportsWithAnalysis();
     },
     enabled: !!user,
+  });
+
+  const { data: usersWithReports = [] } = useQuery({
+    queryKey: ['usersWithReports'],
+    queryFn: getUsersWithReports,
+    enabled: !!user && userRole === 'admin',
   });
 
   // Add effect to log reports data
@@ -141,6 +152,13 @@ const Dashboard = () => {
       case 'failed': return 'bg-red-500/20 text-red-400';
       default: return 'bg-gray-500/20 text-gray-400';
     }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-400';
+    if (score >= 60) return 'text-yellow-400';
+    if (score >= 40) return 'text-orange-400';
+    return 'text-red-400';
   };
 
   const formatStatus = (status: string) => {
@@ -347,10 +365,10 @@ const Dashboard = () => {
                     <CardHeader>
                       <CardTitle className="text-white font-mono flex items-center space-x-2">
                         <Activity className="w-5 h-5 text-red-400" />
-                        <span>Recent Activity</span>
+                        <span>{userRole === 'admin' ? 'Contractor Leaderboard' : 'Recent Activity'}</span>
                       </CardTitle>
                       <CardDescription className="text-gray-300">
-                        Latest reports and AI analysis results
+                        {userRole === 'admin' ? 'Top performing contractors by average score' : 'Latest reports and AI analysis results'}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -363,40 +381,101 @@ const Dashboard = () => {
                             </div>
                           ))}
                         </div>
-                      ) : reports && reports.length > 0 ? (
-                        <div className="space-y-4">
-                          {reports.slice(0, 5).map((report) => (
-                            <div key={report.id} className="flex items-center justify-between p-4 bg-black/20 rounded-lg border border-white/10 hover:border-white/20 transition-colors group">
-                              <div className="flex items-center space-x-4">
-                                <div className="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg">
-                                  <FileText className="w-4 h-4 text-blue-400" />
-                                </div>
-                                <div>
-                                  <div className="text-white font-medium text-sm">{report.title || report.name}</div>
-                                  <div className="text-gray-400 text-xs">
-                                    {report.created_at && format(new Date(report.created_at), 'MMM dd, yyyy HH:mm')}
+                      ) : userRole === 'admin' ? (
+                        // Admin view - User leaderboard
+                        usersWithReports && usersWithReports.length > 0 ? (
+                          <div className="space-y-4">
+                            {usersWithReports
+                              .map(user => {
+                                const reportsWithAnalysis = user.reports.filter((r: any) => r.analysis_results.length > 0);
+                                const avgScore = reportsWithAnalysis.length > 0 
+                                  ? reportsWithAnalysis.reduce((sum: number, r: any) => sum + (r.analysis_results[0]?.score || 0), 0) / reportsWithAnalysis.length 
+                                  : 0;
+                                return { ...user, avgScore };
+                              })
+                              .sort((a, b) => b.avgScore - a.avgScore)
+                              .slice(0, 10)
+                              .map((user, index) => (
+                                <div 
+                                  key={user.id} 
+                                  className="flex items-center justify-between p-4 bg-black/20 rounded-lg border border-white/10 hover:border-white/20 transition-colors group cursor-pointer"
+                                  onClick={() => setSelectedUser(user)}
+                                >
+                                  <div className="flex items-center space-x-4">
+                                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full">
+                                      <span className="text-blue-400 font-bold text-sm">#{index + 1}</span>
+                                    </div>
+                                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg">
+                                      <User className="w-4 h-4 text-purple-400" />
+                                    </div>
+                                    <div>
+                                      <div className="text-white font-medium text-sm">{user.full_name}</div>
+                                      <div className="text-gray-400 text-xs">
+                                        {user.reports.length} reports • {user.reports.filter((r: any) => r.analysis_results.length > 0).length} analyzed
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <div className={`text-lg font-bold font-mono ${getScoreColor(user.avgScore)}`}>
+                                      {user.avgScore.toFixed(1)}%
+                                    </div>
+                                    {user.avgScore >= 90 && <Award className="w-4 h-4 text-yellow-400" />}
                                   </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Badge className={`text-xs ${getPriorityColor(report.priority || 'low')}`}>
-                                  {report.priority || 'low'}
-                                </Badge>
-                                <Badge className={`text-xs ${getStatusColor(report.status || 'pending')}`}>
-                                  {formatStatus(report.status || 'pending')}
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                          <p className="text-gray-400">No reports found. Create your first report to get started.</p>
-                          <div className="text-xs text-gray-500 mt-2">
-                            If you've created reports but don't see them here, check the browser console for debugging info.
+                              ))}
                           </div>
-                        </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                            <p className="text-gray-400">No contractors found</p>
+                          </div>
+                        )
+                      ) : (
+                        // Contractor view - Recent activity with scores and clickable reports
+                        reports && reports.length > 0 ? (
+                          <div className="space-y-4">
+                            {reports.slice(0, 5).map((report) => (
+                              <div 
+                                key={report.id} 
+                                className="flex items-center justify-between p-4 bg-black/20 rounded-lg border border-white/10 hover:border-white/20 transition-colors group cursor-pointer"
+                                onClick={() => setSelectedReport(report)}
+                              >
+                                <div className="flex items-center space-x-4">
+                                  <div className="p-2 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg">
+                                    <FileText className="w-4 h-4 text-blue-400" />
+                                  </div>
+                                  <div>
+                                    <div className="text-white font-medium text-sm">{report.title || report.name}</div>
+                                    <div className="text-gray-400 text-xs">
+                                      {report.created_at && format(new Date(report.created_at), 'MMM dd, yyyy HH:mm')}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  {report.analysis_results[0] && (
+                                    <Badge className={`text-xs ${getScoreColor(report.analysis_results[0].score)} bg-white/10`}>
+                                      AI: {report.analysis_results[0].score}%
+                                    </Badge>
+                                  )}
+                                  <Badge className={`text-xs ${getPriorityColor(report.priority || 'low')}`}>
+                                    {report.priority || 'low'}
+                                  </Badge>
+                                  <Badge className={`text-xs ${getStatusColor(report.status || 'pending')}`}>
+                                    {formatStatus(report.status || 'pending')}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                            <p className="text-gray-400">No reports found. Create your first report to get started.</p>
+                            <div className="text-xs text-gray-500 mt-2">
+                              If you've created reports but don't see them here, check the browser console for debugging info.
+                            </div>
+                          </div>
+                        )
                       )}
                     </CardContent>
                   </Card>
@@ -702,6 +781,14 @@ const Dashboard = () => {
           report={selectedReport}
           open={!!selectedReport}
           onOpenChange={() => setSelectedReport(null)}
+        />
+      )}
+
+      {selectedUser && (
+        <UserProfile 
+          user={selectedUser}
+          open={!!selectedUser}
+          onOpenChange={() => setSelectedUser(null)}
         />
       )}
 
