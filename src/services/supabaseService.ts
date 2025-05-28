@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Report {
@@ -103,12 +104,18 @@ export const getReports = async (): Promise<Report[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   console.log('Current user in getReports:', user);
   
+  if (!user) {
+    console.log('No authenticated user found');
+    return [];
+  }
+  
   const { data, error } = await supabase
     .from('reports')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
     
-  console.log('Raw reports data:', data);
+  console.log('Filtered reports data for user:', user.id, data);
   console.log('Reports query error:', error);
     
   if (error) throw error;
@@ -143,13 +150,35 @@ export const getReportsWithAnalysis = async () => {
   console.log('Current user in getReportsWithAnalysis:', user);
   console.log('User ID:', user?.id);
   
-  const { data, error } = await supabase
+  if (!user) {
+    console.log('No authenticated user found in getReportsWithAnalysis');
+    return [];
+  }
+  
+  // Check user role to determine if they should see all reports or just their own
+  const { data: userRole } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+    
+  console.log('User role:', userRole?.role);
+  
+  let query = supabase
     .from('reports')
     .select(`
       *,
       analysis_results (*)
-    `)
-    .order('created_at', { ascending: false });
+    `);
+  
+  // If user is not an admin, filter by user_id
+  if (userRole?.role !== 'admin') {
+    query = query.eq('user_id', user.id);
+  }
+  
+  query = query.order('created_at', { ascending: false });
+  
+  const { data, error } = await query;
     
   console.log('Reports with analysis - raw data:', data);
   console.log('Reports with analysis - error:', error);
@@ -167,14 +196,35 @@ export const getRecentReports = async (limit = 10) => {
   const { data: { user } } = await supabase.auth.getUser();
   console.log('Current user in getRecentReports:', user);
   
-  const { data, error } = await supabase
+  if (!user) {
+    console.log('No authenticated user found in getRecentReports');
+    return [];
+  }
+  
+  // Check user role to determine if they should see all reports or just their own
+  const { data: userRole } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+    
+  console.log('User role in getRecentReports:', userRole?.role);
+  
+  let query = supabase
     .from('reports')
     .select(`
       *,
       analysis_results (*)
-    `)
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    `);
+  
+  // If user is not an admin, filter by user_id
+  if (userRole?.role !== 'admin') {
+    query = query.eq('user_id', user.id);
+  }
+  
+  query = query.order('created_at', { ascending: false }).limit(limit);
+  
+  const { data, error } = await query;
     
   console.log('Recent reports data:', data);
   console.log('Recent reports error:', error);
@@ -279,12 +329,31 @@ export const getAccounts = async (): Promise<Account[]> => {
 
 // Filter reports
 export const filterReports = async (filters: { name?: string; sortBy?: 'date' | 'alphabetical'; sortOrder?: 'asc' | 'desc' }) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    console.log('No authenticated user found in filterReports');
+    return [];
+  }
+  
+  // Check user role to determine if they should see all reports or just their own
+  const { data: userRole } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+  
   let query = supabase
     .from('reports')
     .select(`
       *,
       analysis_results (*)
     `);
+    
+  // If user is not an admin, filter by user_id
+  if (userRole?.role !== 'admin') {
+    query = query.eq('user_id', user.id);
+  }
     
   if (filters.name) {
     query = query.ilike('name', `%${filters.name}%`);
