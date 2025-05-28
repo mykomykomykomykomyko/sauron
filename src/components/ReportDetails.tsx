@@ -4,11 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Brain, Clock, User, Building, Calendar, Target, Zap, CheckCircle, AlertCircle, Flag, AlertTriangle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { FileText, Brain, Clock, User, Building, Calendar, Target, Zap, CheckCircle, AlertCircle, Flag, AlertTriangle, Edit, Save, X } from "lucide-react";
 import { format } from "date-fns";
-import { Report, AnalysisResult, triggerAIAnalysis } from "@/services/supabaseService";
+import { Report, AnalysisResult, triggerAIAnalysis, updateAnalysisStatus } from "@/services/supabaseService";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 
 interface ReportDetailsProps {
   report: Report & { analysis_results?: AnalysisResult[] };
@@ -130,14 +134,43 @@ const getFlagExplanations = (flags: number) => {
 
 export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedScore, setEditedScore] = useState(0);
+  const [editedStatus, setEditedStatus] = useState<'validated' | 'review' | 'flagged' | 'pending'>('pending');
+  const [editedFlags, setEditedFlags] = useState(0);
+  const [editedSummary, setEditedSummary] = useState('');
   const queryClient = useQueryClient();
+
+  // Fetch fresh analysis results for this specific report
+  const { data: freshAnalysis, refetch: refetchAnalysis } = useQuery({
+    queryKey: ['analysis', report.id],
+    queryFn: async () => {
+      if (!report.id) return null;
+      
+      const { data, error } = await supabase
+        .from('analysis_results')
+        .select('*')
+        .eq('report_id', report.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error fetching analysis:', error);
+        return null;
+      }
+      
+      return data as AnalysisResult | null;
+    },
+    enabled: open && !!report.id,
+  });
 
   const analysisMutation = useMutation({
     mutationFn: triggerAIAnalysis,
     onSuccess: () => {
-      // Invalidate and refetch both reports and the specific report data
       queryClient.invalidateQueries({ queryKey: ['reports'] });
-      queryClient.invalidateQueries({ queryKey: ['report', report.id] });
+      queryClient.invalidateQueries({ queryKey: ['analysis', report.id] });
+      refetchAnalysis();
       toast.success("AI analysis completed successfully");
       setIsAnalyzing(false);
     },
@@ -147,10 +180,64 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
     },
   });
 
+  const updateAnalysisMutation = useMutation({
+    mutationFn: async (updates: { score: number; status: string; flags: number; summary: string }) => {
+      if (!freshAnalysis?.id) throw new Error('No analysis found to update');
+      
+      const { data, error } = await supabase
+        .from('analysis_results')
+        .update({
+          score: updates.score,
+          status: updates.status,
+          flags: updates.flags,
+          summary: updates.summary
+        })
+        .eq('id', freshAnalysis.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['analysis', report.id] });
+      refetchAnalysis();
+      toast.success("Analysis updated successfully");
+      setIsEditing(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update analysis");
+    },
+  });
+
   const handleAnalyze = async () => {
     if (!report.id) return;
     setIsAnalyzing(true);
     analysisMutation.mutate(report.id);
+  };
+
+  const handleEditStart = () => {
+    if (freshAnalysis) {
+      setEditedScore(freshAnalysis.score);
+      setEditedStatus(freshAnalysis.status as 'validated' | 'review' | 'flagged' | 'pending');
+      setEditedFlags(freshAnalysis.flags);
+      setEditedSummary(freshAnalysis.summary || '');
+    }
+    setIsEditing(true);
+  };
+
+  const handleEditSave = () => {
+    updateAnalysisMutation.mutate({
+      score: editedScore,
+      status: editedStatus,
+      flags: editedFlags,
+      summary: editedSummary
+    });
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -173,7 +260,8 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
     }
   };
 
-  const analysis = report.analysis_results?.[0];
+  // Use fresh analysis data or fallback to report data
+  const analysis = freshAnalysis || report.analysis_results?.[0];
 
   // Extract the feedback content from the detailed_feedback
   const getFeedbackContent = (detailedFeedback: any) => {
@@ -252,47 +340,136 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                   <Brain className="w-5 h-5 text-purple-400" />
                   <span>AI Analysis</span>
                 </CardTitle>
-                {!analysis && (
-                  <Button
-                    onClick={handleAnalyze}
-                    disabled={isAnalyzing}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-mono"
-                  >
-                    <Zap className="w-4 h-4 mr-2" />
-                    {isAnalyzing ? "Analyzing..." : "Run Analysis"}
-                  </Button>
-                )}
+                <div className="flex items-center space-x-2">
+                  {!analysis && (
+                    <Button
+                      onClick={handleAnalyze}
+                      disabled={isAnalyzing}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-mono"
+                    >
+                      <Zap className="w-4 h-4 mr-2" />
+                      {isAnalyzing ? "Analyzing..." : "Run Analysis"}
+                    </Button>
+                  )}
+                  {analysis && !isEditing && (
+                    <Button
+                      onClick={handleEditStart}
+                      variant="outline"
+                      className="border-white/20 text-white hover:bg-white/10"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Manual Override
+                    </Button>
+                  )}
+                  {isEditing && (
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={handleEditSave}
+                        disabled={updateAnalysisMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        Save
+                      </Button>
+                      <Button
+                        onClick={handleEditCancel}
+                        variant="outline"
+                        className="border-white/20 text-white hover:bg-white/10"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
               {analysis ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-black/20 rounded-lg">
-                      <div className="text-2xl font-bold text-green-400 font-mono">
-                        {analysis.score}/1000
+                  {isEditing ? (
+                    // Manual editing interface
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="score" className="text-white">Quality Score</Label>
+                          <Input
+                            id="score"
+                            type="number"
+                            min="0"
+                            max="1000"
+                            value={editedScore}
+                            onChange={(e) => setEditedScore(Number(e.target.value))}
+                            className="bg-black/20 border-white/20 text-white"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="flags" className="text-white">Flags</Label>
+                          <Input
+                            id="flags"
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={editedFlags}
+                            onChange={(e) => setEditedFlags(Number(e.target.value))}
+                            className="bg-black/20 border-white/20 text-white"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="status" className="text-white">Status</Label>
+                          <Select value={editedStatus} onValueChange={(value: 'validated' | 'review' | 'flagged' | 'pending') => setEditedStatus(value)}>
+                            <SelectTrigger className="bg-black/20 border-white/20 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-black border-white/20">
+                              <SelectItem value="validated">Validated</SelectItem>
+                              <SelectItem value="review">Review</SelectItem>
+                              <SelectItem value="flagged">Flagged</SelectItem>
+                              <SelectItem value="pending">Pending</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-400">Quality Score</div>
-                    </div>
-                    <div className="text-center p-4 bg-black/20 rounded-lg">
-                      <div className="text-2xl font-bold text-red-400 font-mono flex items-center justify-center space-x-2">
-                        <Flag className="w-6 h-6" />
-                        <span>{analysis.flags}</span>
+                      <div>
+                        <Label htmlFor="summary" className="text-white">Summary</Label>
+                        <Textarea
+                          id="summary"
+                          value={editedSummary}
+                          onChange={(e) => setEditedSummary(e.target.value)}
+                          className="bg-black/20 border-white/20 text-white"
+                          rows={3}
+                        />
                       </div>
-                      <div className="text-sm text-gray-400">Flags Raised</div>
                     </div>
-                    <div className="text-center p-4 bg-black/20 rounded-lg">
-                      <div className={`text-2xl font-bold font-mono ${analysis.status === 'validated' ? 'text-green-400' : analysis.status === 'flagged' ? 'text-red-400' : 'text-yellow-400'}`}>
-                        {analysis.status === 'validated' ? <CheckCircle className="w-8 h-8 mx-auto" /> : 
-                         analysis.status === 'flagged' ? <AlertCircle className="w-8 h-8 mx-auto" /> :
-                         <Clock className="w-8 h-8 mx-auto" />}
+                  ) : (
+                    // Display interface
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-black/20 rounded-lg">
+                        <div className="text-2xl font-bold text-green-400 font-mono">
+                          {analysis.score}/1000
+                        </div>
+                        <div className="text-sm text-gray-400">Quality Score</div>
                       </div>
-                      <div className="text-sm text-gray-400 capitalize">{analysis.status}</div>
+                      <div className="text-center p-4 bg-black/20 rounded-lg">
+                        <div className="text-2xl font-bold text-red-400 font-mono flex items-center justify-center space-x-2">
+                          <Flag className="w-6 h-6" />
+                          <span>{analysis.flags}</span>
+                        </div>
+                        <div className="text-sm text-gray-400">Flags Raised</div>
+                      </div>
+                      <div className="text-center p-4 bg-black/20 rounded-lg">
+                        <div className={`text-2xl font-bold font-mono ${analysis.status === 'validated' ? 'text-green-400' : analysis.status === 'flagged' ? 'text-red-400' : 'text-yellow-400'}`}>
+                          {analysis.status === 'validated' ? <CheckCircle className="w-8 h-8 mx-auto" /> : 
+                           analysis.status === 'flagged' ? <AlertCircle className="w-8 h-8 mx-auto" /> :
+                           <Clock className="w-8 h-8 mx-auto" />}
+                        </div>
+                        <div className="text-sm text-gray-400 capitalize">{analysis.status}</div>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Flags Explanation Section */}
-                  {analysis.flags > 0 && (
+                  {analysis.flags > 0 && !isEditing && (
                     <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                       <div className="flex items-center space-x-2 mb-3">
                         <AlertTriangle className="w-5 h-5 text-red-400" />
@@ -309,7 +486,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                     </div>
                   )}
                   
-                  {analysis.summary && (
+                  {analysis.summary && !isEditing && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Summary</h4>
                       <p className="text-gray-300 leading-relaxed bg-black/20 p-4 rounded-lg">
@@ -318,7 +495,7 @@ export const ReportDetails = ({ report, open, onOpenChange }: ReportDetailsProps
                     </div>
                   )}
                   
-                  {analysis.detailed_feedback && (
+                  {analysis.detailed_feedback && !isEditing && (
                     <div>
                       <h4 className="text-white font-mono mb-2">Detailed Feedback</h4>
                       <div className="bg-black/20 p-4 rounded-lg">

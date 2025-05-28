@@ -152,6 +152,23 @@ export const updateAnalysisStatus = async (reportId: string, status: 'validated'
   return data as AnalysisResult;
 };
 
+export const updateAnalysisResult = async (analysisId: string, updates: {
+  score?: number;
+  status?: 'validated' | 'review' | 'flagged' | 'pending';
+  flags?: number;
+  summary?: string;
+}) => {
+  const { data, error } = await supabase
+    .from('analysis_results')
+    .update(updates)
+    .eq('id', analysisId)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data as AnalysisResult;
+};
+
 export const getReportsWithAnalysis = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   console.log('Current user in getReportsWithAnalysis:', user);
