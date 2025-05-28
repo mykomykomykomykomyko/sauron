@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileText, Brain, Clock, User, Building, Calendar, Target, Zap, CheckCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Report, AnalysisResult, triggerAIAnalysis } from "@/services/supabaseService";
@@ -16,150 +17,166 @@ interface ReportDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Improved markdown renderer with better formatting
+// Improved markdown renderer with proper table support
 const renderMarkdownText = (text: string) => {
   if (!text) return null;
 
-  // Split by lines and process each line
   const lines = text.split('\n');
   const elements: JSX.Element[] = [];
-
-  let inTable = false;
+  let currentTableRows: string[][] = [];
   let tableHeaders: string[] = [];
+  let inTable = false;
+  let tableKey = 0;
+
+  const processTextFormatting = (text: string) => {
+    // Clean up excessive asterisks first
+    let processedText = text.replace(/\*{3,}/g, '**');
+    
+    // Process bold text
+    const parts = [];
+    const boldRegex = /\*\*(.*?)\*\*/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = boldRegex.exec(processedText)) !== null) {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push(processedText.substring(lastIndex, match.index));
+      }
+      // Add the bold text
+      parts.push(<strong key={`bold-${match.index}`} className="text-white font-semibold">{match[1]}</strong>);
+      lastIndex = boldRegex.lastIndex;
+    }
+    
+    // Add remaining text
+    if (lastIndex < processedText.length) {
+      parts.push(processedText.substring(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : processedText.replace(/\*+/g, '');
+  };
+
+  const finishTable = () => {
+    if (currentTableRows.length > 0 && tableHeaders.length > 0) {
+      elements.push(
+        <div key={`table-${tableKey++}`} className="my-4 overflow-x-auto">
+          <Table className="w-full border-collapse">
+            <TableHeader>
+              <TableRow className="border-b border-gray-600">
+                {tableHeaders.map((header, index) => (
+                  <TableHead key={index} className="border border-gray-600 px-3 py-2 text-left text-gray-200 font-medium bg-gray-800">
+                    {processTextFormatting(header)}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentTableRows.map((row, rowIndex) => (
+                <TableRow key={rowIndex} className="border-b border-gray-600">
+                  {row.map((cell, cellIndex) => (
+                    <TableCell key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
+                      {processTextFormatting(cell)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      );
+    }
+    currentTableRows = [];
+    tableHeaders = [];
+    inTable = false;
+  };
 
   lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
     const key = `line-${index}`;
     
     // Skip empty lines
-    if (!line.trim()) {
+    if (!trimmedLine) {
+      if (inTable) finishTable();
       elements.push(<div key={key} className="h-2"></div>);
       return;
     }
 
-    // Headers with proper styling
-    if (line.startsWith('# ')) {
+    // Table detection
+    if (trimmedLine.includes('|') && trimmedLine.includes('Metric')) {
+      if (inTable) finishTable();
+      inTable = true;
+      tableHeaders = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
+      return;
+    }
+    
+    // Table separator line (ignore)
+    if (trimmedLine.includes('|') && trimmedLine.includes('---')) {
+      return;
+    }
+    
+    // Table rows
+    if (inTable && trimmedLine.includes('|')) {
+      const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
+      if (cells.length > 0) {
+        currentTableRows.push(cells);
+      }
+      return;
+    }
+
+    // If we reach here and were in a table, finish it
+    if (inTable) {
+      finishTable();
+    }
+
+    // Headers
+    if (trimmedLine.startsWith('# ')) {
       elements.push(
         <h1 key={key} className="text-xl font-bold text-white mt-6 mb-4 border-b border-gray-700 pb-2">
-          {line.substring(2).replace(/\*+/g, '')}
+          {processTextFormatting(trimmedLine.substring(2))}
         </h1>
       );
-    } else if (line.startsWith('## ')) {
+    } else if (trimmedLine.startsWith('## ')) {
       elements.push(
         <h2 key={key} className="text-lg font-semibold text-blue-300 mt-5 mb-3">
-          {line.substring(3).replace(/\*+/g, '')}
+          {processTextFormatting(trimmedLine.substring(3))}
         </h2>
       );
-    } else if (line.startsWith('### ')) {
+    } else if (trimmedLine.startsWith('### ')) {
       elements.push(
         <h3 key={key} className="text-base font-semibold text-purple-300 mt-4 mb-2">
-          {line.substring(4).replace(/\*+/g, '')}
+          {processTextFormatting(trimmedLine.substring(4))}
         </h3>
       );
     }
-    // Table detection and rendering
-    else if (line.includes('|') && line.includes('Metric')) {
-      inTable = true;
-      tableHeaders = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+    // List items
+    else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
       elements.push(
-        <div key={key} className="overflow-x-auto mt-4 mb-4">
-          <table className="w-full border-collapse border border-gray-600 text-sm">
-            <thead>
-              <tr className="bg-gray-800">
-                {tableHeaders.map((header, cellIndex) => (
-                  <th key={cellIndex} className="border border-gray-600 px-3 py-2 text-left text-gray-200 font-medium">
-                    {header.replace(/\*+/g, '')}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody id={`table-body-${index}`}>
-            </tbody>
-          </table>
+        <div key={key} className="flex items-start space-x-2 mb-2 ml-4">
+          <span className="text-blue-400 mt-1 text-xs">•</span>
+          <span className="text-gray-300 text-sm flex-1">
+            {processTextFormatting(trimmedLine.substring(2))}
+          </span>
         </div>
       );
     }
-    // Table separator line (ignore)
-    else if (line.includes('|') && line.includes('---')) {
-      return;
+    // Horizontal rules
+    else if (trimmedLine === '---') {
+      elements.push(<hr key={key} className="border-gray-600 my-4" />);
     }
-    // Table rows
-    else if (inTable && line.includes('|')) {
-      const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
-      if (cells.length > 0) {
-        // Find the previous table and add row
-        const lastTableIndex = elements.length - 1;
-        const tableElement = elements[lastTableIndex];
-        if (tableElement && tableElement.props.children.props.children.length > 1) {
-          const tbody = tableElement.props.children.props.children[1];
-          const newRow = (
-            <tr key={`row-${index}`}>
-              {cells.map((cell, cellIndex) => (
-                <td key={cellIndex} className="border border-gray-600 px-3 py-2 text-gray-300">
-                  {cell.replace(/\*+/g, '')}
-                </td>
-              ))}
-            </tr>
-          );
-          // This is a workaround - in practice, we'd need a more sophisticated table builder
-        }
-      }
-    } else {
-      inTable = false;
-    }
-
-    // Process other content if not in table
-    if (!inTable && !line.startsWith('#') && !(line.includes('|') && line.includes('Metric'))) {
-      // Bold text processing
-      let processedLine = line;
-      
-      // Clean up multiple asterisks and formatting
-      processedLine = processedLine.replace(/\*{3,}/g, '**');
-      processedLine = processedLine.replace(/\*{1}\s*/g, '');
-      
-      // Process bold text
-      const boldRegex = /\*\*(.*?)\*\*/g;
-      const parts = [];
-      let lastIndex = 0;
-      let match;
-
-      while ((match = boldRegex.exec(processedLine)) !== null) {
-        // Add text before the match
-        if (match.index > lastIndex) {
-          parts.push(processedLine.substring(lastIndex, match.index));
-        }
-        // Add the bold text
-        parts.push(<strong key={`bold-${match.index}`} className="text-white font-semibold">{match[1]}</strong>);
-        lastIndex = boldRegex.lastIndex;
-      }
-      
-      // Add remaining text
-      if (lastIndex < processedLine.length) {
-        parts.push(processedLine.substring(lastIndex));
-      }
-
-      // List items
-      if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
-        elements.push(
-          <div key={key} className="flex items-start space-x-2 mb-2 ml-4">
-            <span className="text-blue-400 mt-1 text-xs">•</span>
-            <span className="text-gray-300 text-sm flex-1">{parts.length > 0 ? parts : line.substring(2).replace(/\*+/g, '')}</span>
-          </div>
-        );
-      }
-      // Horizontal rules
-      else if (line.trim() === '---') {
-        elements.push(<hr key={key} className="border-gray-600 my-4" />);
-      }
-      // Regular paragraphs
-      else if (line.trim()) {
-        elements.push(
-          <p key={key} className="text-gray-300 text-sm mb-3 leading-relaxed">
-            {parts.length > 0 ? parts : line.replace(/\*+/g, '')}
-          </p>
-        );
-      }
+    // Regular paragraphs
+    else if (trimmedLine) {
+      elements.push(
+        <p key={key} className="text-gray-300 text-sm mb-3 leading-relaxed">
+          {processTextFormatting(trimmedLine)}
+        </p>
+      );
     }
   });
+
+  // Finish any remaining table
+  if (inTable) {
+    finishTable();
+  }
 
   return <div className="space-y-1">{elements}</div>;
 };
