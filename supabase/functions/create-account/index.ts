@@ -36,18 +36,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { email, full_name, company_name, role }: CreateAccountRequest = await req.json();
 
-    // Get the redirect URL from the origin header or use a default
-    const origin = req.headers.get("origin") || "https://eyeofsauron.ca";
-    const redirectTo = `${origin}/auth`;
-
     // Create the user in Supabase Auth with email invitation
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       data: {
         full_name: full_name,
         company_name: company_name,
         role: role
-      },
-      redirectTo: redirectTo
+      }
     });
 
     if (authError) {

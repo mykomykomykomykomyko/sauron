@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface MagicLinkRequest {
@@ -10,7 +11,7 @@ export const sendMagicLink = async ({ email, redirectTo }: MagicLinkRequest) => 
     email,
     options: {
       shouldCreateUser: false, // Only allow existing users to sign in
-      emailRedirectTo: redirectTo || `${window.location.origin}/auth`,
+      emailRedirectTo: redirectTo || `${window.location.origin}/dashboard`,
     },
   });
 
@@ -23,7 +24,7 @@ export const createUserWithMagicLink = async ({ email, redirectTo }: MagicLinkRe
     email,
     options: {
       shouldCreateUser: true, // Allow creating new users
-      emailRedirectTo: redirectTo || `${window.location.origin}/auth`,
+      emailRedirectTo: redirectTo || `${window.location.origin}/dashboard`,
     },
   });
 
