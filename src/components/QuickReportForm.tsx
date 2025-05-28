@@ -74,12 +74,12 @@ const QuickReportForm = () => {
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto mb-20">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-mono">
+    <div className="w-full max-w-4xl mx-auto mb-12 md:mb-20 px-4 sm:px-0">
+      <div className="text-center mb-6 md:mb-8">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 md:mb-4 font-mono">
           Quick Report Submission
         </h2>
-        <p className="text-gray-300 text-lg">
+        <p className="text-gray-300 text-base md:text-lg px-2">
           Submit your progress report instantly with AI-powered analysis
         </p>
       </div>
@@ -97,15 +97,15 @@ const QuickReportForm = () => {
           <div className="absolute inset-0 border-2 border-red-400/50 animate-pulse rounded-lg pointer-events-none border-glow" />
         )}
 
-        <div className="p-8 relative z-10">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="p-4 sm:p-6 md:p-8 relative z-10">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {/* Period Selector */}
-            <div className="space-y-3">
-              <label className="text-red-400 font-mono text-sm uppercase tracking-wider">
+            <div className="space-y-2 md:space-y-3">
+              <label className="text-red-400 font-mono text-xs sm:text-sm uppercase tracking-wider">
                 Report Period
               </label>
               <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className={`h-12 bg-neutral-900/50 border-red-700/50 text-white font-mono transition-all duration-300 ${
+                <SelectTrigger className={`h-10 sm:h-12 bg-neutral-900/50 border-red-700/50 text-white font-mono transition-all duration-300 text-sm sm:text-base ${
                   period ? 'border-red-500/70 bg-red-900/20' : ''
                 }`}>
                   <SelectValue placeholder="Select reporting period..." />
@@ -121,8 +121,8 @@ const QuickReportForm = () => {
             </div>
 
             {/* Report Text Field */}
-            <div className="space-y-3">
-              <label className="text-red-400 font-mono text-sm uppercase tracking-wider">
+            <div className="space-y-2 md:space-y-3">
+              <label className="text-red-400 font-mono text-xs sm:text-sm uppercase tracking-wider">
                 Progress Report
               </label>
               <div className="relative">
@@ -132,7 +132,7 @@ const QuickReportForm = () => {
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   placeholder="Describe your progress, achievements, challenges, and next steps..."
-                  className={`min-h-[120px] bg-neutral-900/50 border-red-700/50 text-white placeholder:text-gray-500 font-mono resize-none transition-all duration-300 ${
+                  className={`min-h-[100px] sm:min-h-[120px] bg-neutral-900/50 border-red-700/50 text-white placeholder:text-gray-500 font-mono resize-none transition-all duration-300 text-sm sm:text-base ${
                     isFocused ? 'border-red-500/70 bg-red-900/10' : ''
                   }`}
                   disabled={isSubmitting}
@@ -144,11 +144,11 @@ const QuickReportForm = () => {
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-center pt-4">
+            <div className="flex justify-center pt-2 md:pt-4">
               <Button
                 type="submit"
                 disabled={isSubmitting || !report.trim() || !period}
-                className={`px-8 py-4 text-lg font-mono group relative overflow-hidden transition-all duration-300 ${
+                className={`px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-mono group relative overflow-hidden transition-all duration-300 w-full sm:w-auto ${
                   isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
                 } ${
                   report.trim() && period ? 'bg-red-600 hover:bg-red-700 border-red-500/50' : 'bg-gray-600 hover:bg-gray-700 border-gray-500/50'
@@ -158,14 +158,14 @@ const QuickReportForm = () => {
                 
                 {isSubmitting ? (
                   <>
-                    <Zap className="w-5 h-5 mr-2 relative z-10 animate-spin" />
+                    <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2 relative z-10 animate-spin" />
                     <span className="relative z-10">Analyzing...</span>
                   </>
                 ) : (
                   <>
-                    <Send className="w-5 h-5 mr-2 relative z-10 group-hover:animate-pulse" />
+                    <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-2 relative z-10 group-hover:animate-pulse" />
                     <span className="relative z-10">Submit Report</span>
-                    <Sparkles className="w-4 h-4 ml-2 relative z-10 group-hover:animate-spin" />
+                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 ml-2 relative z-10 group-hover:animate-spin" />
                   </>
                 )}
               </Button>
