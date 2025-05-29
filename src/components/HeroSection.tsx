@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,11 +21,11 @@ const HeroSection = ({
   } = useAuth();
   return <div className={`text-center mb-16 pt-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
       <div className="mb-8">
-        <Badge className="bg-red-500/20 text-red-400 border-red-500/30 mb-4 font-mono">
+        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 mb-4 font-mono">
           AI-POWERED PROGRESS TRACKING
         </Badge>
         <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
-          <span className="bg-gradient-to-r from-red-400 via-purple-400 to-red-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 bg-clip-text text-transparent">
             THE EYE
           </span>
           <br />
@@ -42,7 +43,7 @@ const HeroSection = ({
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
         {user ? <>
             <Link to="/submit">
-              <Button size="lg" className="bg-red-600 hover:bg-red-700 px-8 py-3 text-lg font-mono">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg font-mono">
                 <Send className="w-5 h-5 mr-2" />
                 Submit Report
               </Button>
@@ -55,7 +56,7 @@ const HeroSection = ({
             </Link>
           </> : <>
             <Link to="/auth">
-              <Button size="lg" className="bg-red-600 hover:bg-red-700 px-8 py-3 text-lg font-mono">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg font-mono">
                 <ArrowRight className="w-5 h-5 mr-2" />
                 Get Started
               </Button>

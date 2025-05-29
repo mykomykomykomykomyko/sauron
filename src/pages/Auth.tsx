@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +44,7 @@ const Auth = () => {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      toast.success("Welcome back to The Eye of Sauron!");
+      toast.success("Welcome to The Eye of Jasper!");
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Sign in error:", error);
@@ -93,36 +94,36 @@ const Auth = () => {
     title: "Real-time Insights",
     description: "Get instant feedback and performance metrics"
   }];
-  return <div className="min-h-screen bg-black text-white overflow-hidden relative flex items-center justify-center">
-      {/* Background Effects */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-black to-red-900/30"></div>
-      <div className="fixed inset-0 bg-gradient-to-tr from-blue-900/10 via-transparent to-orange-900/10"></div>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-black to-transparent"></div>
+  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white overflow-hidden relative flex items-center justify-center">
+      {/* Background Effects - Updated for Alberta/Jasper theme */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-900/30 via-slate-900 to-indigo-900/40"></div>
+      <div className="fixed inset-0 bg-gradient-to-tr from-cyan-900/15 via-transparent to-blue-900/20"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-800/20 via-slate-900 to-transparent"></div>
 
-      {/* Animated mesh gradient */}
+      {/* Animated mesh gradient - Updated colors */}
       <div className="fixed inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{
         animationDelay: '2s'
       }}></div>
-        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{
         animationDelay: '4s'
       }}></div>
       </div>
 
-      {/* Dynamic cursor glow */}
-      <div className="fixed w-96 h-96 bg-gradient-radial from-red-500/15 via-purple-500/8 to-transparent rounded-full blur-3xl pointer-events-none z-0 transition-all duration-500 hidden md:block" style={{
+      {/* Dynamic cursor glow - Updated colors */}
+      <div className="fixed w-96 h-96 bg-gradient-radial from-blue-500/15 via-cyan-500/8 to-transparent rounded-full blur-3xl pointer-events-none z-0 transition-all duration-500 hidden md:block" style={{
       left: mousePosition.x - 192,
       top: mousePosition.y - 192
     }} />
 
-      {/* Floating particles */}
+      {/* Floating particles - Updated colors */}
       {particles.map(particle => <div key={particle.id} className="absolute rounded-full pointer-events-none animate-pulse" style={{
       left: `${particle.x}%`,
       top: `${particle.y}%`,
       width: `${particle.size}px`,
       height: `${particle.size}px`,
-      background: `linear-gradient(45deg, #ef4444, #8b5cf6, #06b6d4)`,
+      background: `linear-gradient(45deg, #3b82f6, #06b6d4, #1e40af)`,
       animationDelay: `${particle.delay}s`,
       animationDuration: `${particle.duration}s`,
       opacity: 0.4
@@ -130,7 +131,7 @@ const Auth = () => {
 
       {/* Back to Home */}
       <Link to="/" className="fixed top-6 left-6 z-50 flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 group">
-        <div className="w-10 h-10 bg-gradient-to-br from-red-500/20 to-purple-500/20 rounded-xl border border-white/20 flex items-center justify-center backdrop-blur-xl group-hover:scale-110 transition-all duration-300">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl border border-white/20 flex items-center justify-center backdrop-blur-xl group-hover:scale-110 transition-all duration-300">
           <Eye className="w-5 h-5" />
         </div>
         <span className="font-mono text-sm hidden sm:inline">Back to Home</span>
@@ -143,20 +144,20 @@ const Auth = () => {
           {/* Left Side - Branding */}
           <div className={`text-center lg:text-left transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'}`}>
             <div className="flex items-center justify-center lg:justify-start space-x-3 mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-red-500 via-purple-600 to-red-700 rounded-2xl flex items-center justify-center border border-white/20 relative overflow-hidden group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-cyan-600 to-blue-700 rounded-2xl flex items-center justify-center border border-white/20 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
                 <Eye className="w-8 h-8 text-white relative z-10" />
               </div>
               <div className="flex flex-col">
                 <h1 className="text-3xl font-bold text-white tracking-tight font-mono">THE EYE OF JASPER</h1>
                 <div className="flex items-center space-x-2 mt-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-400 font-mono">AI-POWERED OVERSIGHT</span>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-300 font-mono">AI-POWERED OVERSIGHT</span>
                 </div>
               </div>
             </div>
 
-            <h2 className="text-4xl sm:text-5xl font-bold font-mono mb-6 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl font-bold font-mono mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
               SECURE ACCESS
             </h2>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
@@ -171,23 +172,23 @@ const Auth = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-white font-mono text-sm">{feature.title}</h4>
-                    <p className="text-gray-400 text-sm">{feature.description}</p>
+                    <p className="text-gray-300 text-sm">{feature.description}</p>
                   </div>
                 </div>)}
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-400">
+            <div className="flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-300">
               <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
+                <CheckCircle className="w-4 h-4 text-cyan-400" />
                 <span>Enterprise Grade</span>
               </div>
               <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
+                <CheckCircle className="w-4 h-4 text-cyan-400" />
                 <span>SOC 2 Compliant</span>
               </div>
               <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
+                <CheckCircle className="w-4 h-4 text-cyan-400" />
                 <span>99.9% Uptime</span>
               </div>
             </div>
@@ -195,12 +196,12 @@ const Auth = () => {
 
           {/* Right Side - Auth Forms */}
           <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'}`}>
-            <Card className="bg-black/40 border-white/20 backdrop-blur-xl shadow-2xl">
+            <Card className="bg-slate-900/40 border-white/20 backdrop-blur-xl shadow-2xl">
               <CardHeader className="text-center pb-6">
-                <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-500/20 to-purple-500/20 border border-white/20 rounded-full px-4 py-2 backdrop-blur-xl mb-4">
-                  <Sparkles className="w-4 h-4 text-red-400" />
+                <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-white/20 rounded-full px-4 py-2 backdrop-blur-xl mb-4">
+                  <Sparkles className="w-4 h-4 text-blue-400" />
                   <span className="text-sm font-mono text-white/90">SECURE LOGIN</span>
-                  <Lock className="w-4 h-4 text-purple-400" />
+                  <Lock className="w-4 h-4 text-cyan-400" />
                 </div>
                 <CardTitle className="text-2xl font-mono text-white">
                   Access Your Dashboard
@@ -211,11 +212,11 @@ const Auth = () => {
               </CardHeader>
               <CardContent>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-black/20 border border-white/20">
-                    <TabsTrigger value="signin" className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-purple-600 data-[state=active]:text-white">
+                  <TabsList className="grid w-full grid-cols-2 bg-slate-800/20 border border-white/20">
+                    <TabsTrigger value="signin" className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white">
                       Sign In
                     </TabsTrigger>
-                    <TabsTrigger value="signup" className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-purple-600 data-[state=active]:text-white">
+                    <TabsTrigger value="signup" className="font-mono data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white">
                       Sign Up
                     </TabsTrigger>
                   </TabsList>
@@ -227,16 +228,16 @@ const Auth = () => {
                           <Mail className="w-4 h-4" />
                           <span>Email</span>
                         </Label>
-                        <Input id="signin-email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400" />
+                        <Input id="signin-email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="bg-slate-800/20 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="signin-password" className="text-white font-mono flex items-center space-x-2">
                           <Lock className="w-4 h-4" />
                           <span>Password</span>
                         </Label>
-                        <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400" />
+                        <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="bg-slate-800/20 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400" />
                       </div>
-                      <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden">
+                      <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                         <Shield className="w-4 h-4 mr-2 relative z-10" />
                         <span className="relative z-10">{isLoading ? "Authenticating..." : "Sign In"}</span>
@@ -252,30 +253,30 @@ const Auth = () => {
                           <User className="w-4 h-4" />
                           <span>Full Name</span>
                         </Label>
-                        <Input id="signup-name" type="text" placeholder="John Doe" value={fullName} onChange={e => setFullName(e.target.value)} required className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400" />
+                        <Input id="signup-name" type="text" placeholder="John Doe" value={fullName} onChange={e => setFullName(e.target.value)} required className="bg-slate-800/20 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="signup-email" className="text-white font-mono flex items-center space-x-2">
                           <Mail className="w-4 h-4" />
                           <span>Email</span>
                         </Label>
-                        <Input id="signup-email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400" />
+                        <Input id="signup-email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="bg-slate-800/20 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="signup-password" className="text-white font-mono flex items-center space-x-2">
                           <Lock className="w-4 h-4" />
                           <span>Password</span>
                         </Label>
-                        <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400" />
+                        <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="bg-slate-800/20 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="confirm-password" className="text-white font-mono flex items-center space-x-2">
                           <Lock className="w-4 h-4" />
                           <span>Confirm Password</span>
                         </Label>
-                        <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400" />
+                        <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="bg-slate-800/20 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400" />
                       </div>
-                      <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden">
+                      <Button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white border border-white/20 hover:border-white/40 transition-all duration-300 font-mono group relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                         <User className="w-4 h-4 mr-2 relative z-10" />
                         <span className="relative z-10">{isLoading ? "Creating Account..." : "Create Account"}</span>

@@ -9,8 +9,8 @@ interface EyeOfSauronProps {
 }
 
 /**
- * Main Eye of Sauron component
- * Enterprise-ready modular eye tracking system with cartoon-friendly styling
+ * Main Eye component (now themed for Jasper)
+ * Enterprise-ready modular eye tracking system with blue Alberta-friendly styling
  * Composed of multiple sub-components for maintainability and extensibility
  */
 const EyeOfSauron: React.FC<EyeOfSauronProps> = ({ mousePosition }) => {

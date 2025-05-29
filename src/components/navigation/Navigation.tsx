@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Eye, BarChart3, LogOut } from "lucide-react";
@@ -26,12 +27,12 @@ const Navigation: React.FC<NavigationProps> = ({
   return <nav className="relative z-50 flex items-center justify-between p-4 sm:p-6">
       {/* Brand Logo and Title */}
       <div className="flex items-center space-x-2 sm:space-x-3">
-        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center">
           <Eye className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-red-400 to-purple-400 bg-clip-text text-transparent">The Eye of Jasper</h1>
-          <p className="text-xs text-gray-400 font-mono hidden sm:block">Judgment & Assessment System for Performance, Evidence & Results</p>
+          <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">The Eye of Jasper</h1>
+          <p className="text-xs text-gray-300 font-mono hidden sm:block">Judgment & Assessment System for Performance, Evidence & Results</p>
         </div>
       </div>
 
@@ -42,7 +43,7 @@ const Navigation: React.FC<NavigationProps> = ({
               {user.user_metadata?.full_name || user.email}
             </span>
             <Link to="/dashboard">
-              <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10 text-xs sm:text-sm px-2 sm:px-3">
+              <Button variant="outline" size="sm" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 text-xs sm:text-sm px-2 sm:px-3">
                 <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Dashboard</span>
                 <span className="sm:hidden">Dash</span>
@@ -54,7 +55,7 @@ const Navigation: React.FC<NavigationProps> = ({
               <span className="sm:hidden">Out</span>
             </Button>
           </> : <Link to="/auth">
-            <Button className="bg-red-600 hover:bg-red-700 text-xs sm:text-sm px-3 sm:px-4">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-3 sm:px-4">
               Sign In
             </Button>
           </Link>}

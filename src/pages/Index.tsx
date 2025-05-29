@@ -21,7 +21,7 @@ const Index: React.FC = () => {
   const { activeStep } = useWorkflowAnimation(4, 3000);
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white overflow-hidden relative">
       {/* Background Visual Effects */}
       <BackgroundEffects />
 
