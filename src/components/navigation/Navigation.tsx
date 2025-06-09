@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Eye, BarChart3, LogOut } from "lucide-react";
@@ -31,7 +30,7 @@ const Navigation: React.FC<NavigationProps> = ({
           <Eye className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">The Eye of Jasper</h1>
+          <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">JASPER</h1>
           <p className="text-xs text-gray-300 font-mono hidden sm:block">Judgment & Assessment System for Performance, Evidence & Results</p>
         </div>
       </div>

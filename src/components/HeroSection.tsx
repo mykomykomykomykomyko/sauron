@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,11 +24,9 @@ const HeroSection = ({
           AI-POWERED PROGRESS TRACKING
         </Badge>
         <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
-          <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 bg-clip-text text-transparent">
-            THE EYE
-          </span>
+          <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 bg-clip-text text-transparent">JASPER</span>
           <br />
-          <span className="text-white/80">OF JASPER</span>
+          <span className="text-white/80"></span>
         </h1>
         <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-mono">
           The all-seeing AI-powered progress report management system. 
