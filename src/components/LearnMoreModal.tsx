@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Send, Brain, CheckCircle, BarChart3, User, Users, ArrowRight } from 'lucide-react';
+import { Send, Brain, Users, BarChart3, User, MapPin, Route, Compass } from 'lucide-react';
 
 interface LearnMoreModalProps {
   isOpen: boolean;
@@ -15,32 +15,36 @@ const LearnMoreModal: React.FC<LearnMoreModalProps> = ({ isOpen, onClose }) => {
 
   const steps = [
     {
-      title: "Contractor Submits Report",
+      title: "Contractor Submits",
       icon: Send,
       perspective: "contractor",
-      description: "Contractors easily submit progress reports through our intuitive interface",
-      detail: "Simple form-based reporting with guided prompts and validation"
+      description: "Field teams submit progress reports from project sites",
+      detail: "Simple, guided reporting from anywhere in the field",
+      position: { x: 15, y: 75 }
     },
     {
-      title: "AI Analysis Begins", 
+      title: "AI Processing", 
       icon: Brain,
       perspective: "system",
-      description: "Advanced AI algorithms analyze the submission for quality and compliance",
-      detail: "Intelligent processing identifies key metrics and potential concerns"
+      description: "Intelligent analysis extracts insights and validates data",
+      detail: "Advanced algorithms ensure quality and consistency",
+      position: { x: 40, y: 45 }
     },
     {
-      title: "Staff Review & Validation",
+      title: "Staff Review",
       icon: Users,
       perspective: "staff", 
-      description: "Government staff receive analyzed reports with highlighted insights",
-      detail: "Pre-processed data enables faster, more informed decision-making"
+      description: "Government teams receive analyzed reports with insights",
+      detail: "Streamlined review process with AI-powered recommendations",
+      position: { x: 70, y: 30 }
     },
     {
-      title: "Insights & Analytics",
+      title: "Dashboard Analytics",
       icon: BarChart3,
       perspective: "system",
-      description: "Comprehensive dashboards provide actionable insights for all stakeholders",
-      detail: "Real-time tracking and performance analytics drive better outcomes"
+      description: "Real-time insights and performance tracking for all stakeholders",
+      detail: "Comprehensive visibility into project progress and trends",
+      position: { x: 85, y: 65 }
     }
   ];
 
@@ -57,165 +61,206 @@ const LearnMoreModal: React.FC<LearnMoreModalProps> = ({ isOpen, onClose }) => {
         setCurrentStep(prev => (prev + 1) % steps.length);
         setIsAnimating(false);
       }, 300);
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [isOpen, steps.length]);
 
   const getPerspectiveColor = (perspective: string) => {
     switch (perspective) {
-      case 'contractor': return 'text-blue-400 bg-blue-500/10 border-blue-500/30';
-      case 'staff': return 'text-green-400 bg-green-500/10 border-green-500/30';
-      case 'system': return 'text-purple-400 bg-purple-500/10 border-purple-500/30';
-      default: return 'text-gray-400 bg-gray-500/10 border-gray-500/30';
+      case 'contractor': return 'text-emerald-400 bg-emerald-500/20 border-emerald-400/40';
+      case 'staff': return 'text-amber-400 bg-amber-500/20 border-amber-400/40';
+      case 'system': return 'text-violet-400 bg-violet-500/20 border-violet-400/40';
+      default: return 'text-slate-400 bg-slate-500/20 border-slate-400/40';
     }
   };
 
-  const getPerspectiveIcon = (perspective: string) => {
-    switch (perspective) {
-      case 'contractor': return User;
-      case 'staff': return Users;
-      default: return Brain;
-    }
+  const getStepColor = (index: number) => {
+    if (index === currentStep) return 'border-orange-400 bg-orange-500/30 shadow-orange-400/30';
+    return 'border-slate-600 bg-slate-700/50 shadow-slate-700/30';
+  };
+
+  const getPathColor = (index: number) => {
+    if (index <= currentStep) return 'stroke-orange-400';
+    return 'stroke-slate-600';
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl bg-slate-900 border-white/10 text-white">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold font-mono text-center mb-2">
-            HOW <span className="text-red-400">JASPER</span> WORKS
-          </DialogTitle>
-          <p className="text-gray-400 font-mono text-center">
-            End-to-end progress report management and analysis
+      <DialogContent className="max-w-6xl h-[80vh] bg-slate-800 border-slate-600 text-white overflow-hidden">
+        <DialogHeader className="border-b border-slate-600 pb-4">
+          <div className="flex items-center justify-center space-x-3">
+            <Compass className="w-8 h-8 text-orange-400" />
+            <DialogTitle className="text-3xl font-bold text-center">
+              JASPER WORKFLOW MAP
+            </DialogTitle>
+          </div>
+          <p className="text-slate-400 text-center font-mono">
+            Navigate the complete progress reporting journey
           </p>
         </DialogHeader>
 
-        <div className="py-8">
+        <div className="flex-1 relative overflow-hidden">
+          {/* Map Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 opacity-20">
+              <svg width="100%" height="100%" className="text-slate-600">
+                <defs>
+                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+              </svg>
+            </div>
+            
+            {/* Topographic Lines */}
+            <div className="absolute inset-0 opacity-10">
+              <svg width="100%" height="100%" className="text-slate-500">
+                <path d="M0,100 Q200,80 400,120 T800,100" fill="none" stroke="currentColor" strokeWidth="2"/>
+                <path d="M0,200 Q300,180 600,220 T1200,200" fill="none" stroke="currentColor" strokeWidth="2"/>
+                <path d="M0,300 Q250,280 500,320 T1000,300" fill="none" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </div>
+          </div>
+
+          {/* Journey Path */}
+          <svg className="absolute inset-0 w-full h-full z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                      refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" className="fill-orange-400" />
+              </marker>
+            </defs>
+            
+            {/* Connecting paths between steps */}
+            {steps.slice(0, -1).map((step, index) => {
+              const nextStep = steps[index + 1];
+              return (
+                <path
+                  key={index}
+                  d={`M ${step.position.x} ${step.position.y} Q ${(step.position.x + nextStep.position.x) / 2} ${Math.min(step.position.y, nextStep.position.y) - 10} ${nextStep.position.x} ${nextStep.position.y}`}
+                  fill="none"
+                  strokeWidth="0.8"
+                  strokeDasharray="2,2"
+                  markerEnd="url(#arrowhead)"
+                  className={`transition-all duration-1000 ${getPathColor(index)}`}
+                />
+              );
+            })}
+          </svg>
+
+          {/* Step Markers */}
+          {steps.map((step, index) => {
+            const StepIcon = step.icon;
+            const isActive = index === currentStep;
+            
+            return (
+              <div
+                key={step.title}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
+                style={{ 
+                  left: `${step.position.x}%`, 
+                  top: `${step.position.y}%` 
+                }}
+              >
+                {/* Location Pin */}
+                <div className="relative">
+                  <MapPin className={`w-12 h-12 transition-all duration-500 ${
+                    isActive ? 'text-orange-400 scale-125' : 'text-slate-500 scale-100'
+                  }`} />
+                  
+                  {/* Step Icon in Pin */}
+                  <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+                    getStepColor(index)
+                  } shadow-lg`}>
+                    <StepIcon className="w-3 h-3" />
+                  </div>
+                  
+                  {/* Pulse Animation for Active Step */}
+                  {isActive && (
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full border-2 border-orange-400 animate-ping" />
+                  )}
+                </div>
+
+                {/* Step Info Card */}
+                <div className={`mt-2 transition-all duration-500 ${
+                  isActive ? 'opacity-100 scale-100' : 'opacity-70 scale-95'
+                }`}>
+                  <div className={`bg-slate-700/90 backdrop-blur-sm border rounded-lg p-3 min-w-48 shadow-xl ${
+                    getPerspectiveColor(step.perspective)
+                  }`}>
+                    <div className="text-center">
+                      <h4 className="font-bold text-sm mb-1">{step.title}</h4>
+                      <p className="text-xs text-slate-300 mb-2">{step.description}</p>
+                      <div className="text-xs opacity-75">{step.detail}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Current Step Spotlight */}
+          <div 
+            className="absolute w-32 h-32 rounded-full bg-orange-400/10 border-2 border-orange-400/30 transform -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-1000"
+            style={{ 
+              left: `${steps[currentStep].position.x}%`, 
+              top: `${steps[currentStep].position.y}%` 
+            }}
+          />
+
+          {/* Legend */}
+          <div className="absolute bottom-4 left-4 bg-slate-800/90 backdrop-blur-sm border border-slate-600 rounded-lg p-4 z-20">
+            <h4 className="text-sm font-bold mb-3 flex items-center">
+              <Route className="w-4 h-4 mr-2 text-orange-400" />
+              Journey Map
+            </h4>
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-emerald-500/40 border border-emerald-400"></div>
+                <span className="text-emerald-400">Contractor Actions</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-violet-500/40 border border-violet-400"></div>
+                <span className="text-violet-400">System Processing</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-amber-500/40 border border-amber-400"></div>
+                <span className="text-amber-400">Staff Review</span>
+              </div>
+            </div>
+          </div>
+
           {/* Progress Indicator */}
-          <div className="flex justify-center mb-8">
-            <div className="flex space-x-2">
+          <div className="absolute bottom-4 right-4 bg-slate-800/90 backdrop-blur-sm border border-slate-600 rounded-lg p-4 z-20">
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="text-slate-400">Step</span>
+              <span className="text-orange-400 font-bold">{currentStep + 1}</span>
+              <span className="text-slate-400">of</span>
+              <span className="text-slate-300">{steps.length}</span>
+            </div>
+            <div className="mt-2 flex space-x-1">
               {steps.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                    index === currentStep ? 'bg-red-400 scale-125' : 'bg-white/20'
+                  className={`w-6 h-1 rounded-full transition-all duration-500 ${
+                    index <= currentStep ? 'bg-orange-400' : 'bg-slate-600'
                   }`}
                 />
               ))}
             </div>
           </div>
-
-          {/* Main Animation Area */}
-          <div className="relative h-80 bg-black/40 rounded-lg border border-white/10 overflow-hidden">
-            {/* Background Grid */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="grid grid-cols-12 grid-rows-8 h-full">
-                {Array.from({ length: 96 }, (_, i) => (
-                  <div key={i} className="border border-white/20" />
-                ))}
-              </div>
-            </div>
-
-            {/* Step Content */}
-            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${
-              isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-            }`}>
-              <div className="text-center space-y-6">
-                {/* Perspective Indicator */}
-                <div className="flex justify-center mb-4">
-                  {(() => {
-                    const PerspectiveIcon = getPerspectiveIcon(steps[currentStep].perspective);
-                    return (
-                      <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${
-                        getPerspectiveColor(steps[currentStep].perspective)
-                      }`}>
-                        <PerspectiveIcon className="w-6 h-6" />
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Main Icon */}
-                <div className="relative">
-                  {(() => {
-                    const StepIcon = steps[currentStep].icon;
-                    return (
-                      <div className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mx-auto border-2 border-red-500/30">
-                        <StepIcon className="w-12 h-12 text-red-400" />
-                      </div>
-                    );
-                  })()}
-                  
-                  {/* Animated Pulse Ring */}
-                  <div className="absolute inset-0 w-24 h-24 rounded-full border-2 border-red-400/30 animate-ping mx-auto" />
-                </div>
-
-                {/* Step Info */}
-                <div className="space-y-3">
-                  <h3 className="text-2xl font-bold font-mono text-white">
-                    {steps[currentStep].title}
-                  </h3>
-                  <p className="text-lg text-gray-300 font-mono max-w-md mx-auto">
-                    {steps[currentStep].description}
-                  </p>
-                  <p className="text-sm text-gray-400 font-mono max-w-lg mx-auto">
-                    {steps[currentStep].detail}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Flow Arrows */}
-            <div className="absolute bottom-4 right-4">
-              <div className="flex items-center space-x-2 text-gray-400">
-                <span className="text-xs font-mono">STEP {currentStep + 1} OF {steps.length}</span>
-                <ArrowRight className="w-4 h-4 animate-pulse" />
-              </div>
-            </div>
-          </div>
-
-          {/* Step Indicators */}
-          <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {steps.map((step, index) => {
-              const StepIcon = step.icon;
-              return (
-                <div
-                  key={step.title}
-                  className={`p-4 rounded-lg border transition-all duration-300 ${
-                    index === currentStep 
-                      ? 'border-red-500/50 bg-red-500/10' 
-                      : 'border-white/10 bg-black/20'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      getPerspectiveColor(step.perspective)
-                    }`}>
-                      <StepIcon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold font-mono text-white">
-                        {step.title}
-                      </h4>
-                      <p className="text-xs text-gray-400 font-mono capitalize">
-                        {step.perspective}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
-        <div className="flex justify-center pt-4 border-t border-white/10">
+        <div className="border-t border-slate-600 pt-4 flex justify-center">
           <Button
             onClick={onClose}
             variant="outline"
-            className="border-white/20 text-white hover:bg-white/10 font-mono"
+            className="border-slate-600 text-slate-300 hover:bg-slate-700 font-mono"
           >
-            Got It
+            Close Map
           </Button>
         </div>
       </DialogContent>
