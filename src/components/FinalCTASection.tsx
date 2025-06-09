@@ -11,7 +11,7 @@ const FinalCTASection = () => {
         <h2 className="text-4xl font-bold font-mono mb-4">
           READY TO EXPERIENCE <span className="text-red-400">THE POWER</span>?
         </h2>
-        <p className="text-xl text-gray-300 font-mono">Join thousands of teams already using The Eye of Jasper</p>
+        <p className="text-xl text-gray-300 font-mono">Fill out your reports with JASPER</p>
       </div>
       
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -37,9 +37,7 @@ const FinalCTASection = () => {
       </div>
 
       <p className="text-gray-400 font-mono">JASPER - Advanced Reporting Intelligence System</p>
-      <p className="text-gray-600 text-sm font-mono mt-2">
-        Powered by AI • Built for Excellence • Designed for Control
-      </p>
+      <p className="text-gray-600 text-sm font-mono mt-2">Powered by AI • Built for Excellence • Designed for Control • Built by Technology and Innovation</p>
     </div>;
 };
 export default FinalCTASection;
