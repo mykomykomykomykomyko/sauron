@@ -4,8 +4,10 @@ import { User } from '@supabase/supabase-js';
 import ChatQuickReport from '@/components/ChatQuickReport';
 import HeroSection from '@/components/HeroSection';
 import WorkflowSection from '@/components/WorkflowSection';
+import FeaturesSection from '@/components/FeaturesSection';
 import DemoSection from '@/components/DemoSection';
 import FinalCTASection from '@/components/FinalCTASection';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface MainContentProps {
   user: User | null;
@@ -24,6 +26,8 @@ const MainContent: React.FC<MainContentProps> = ({
   mousePosition, 
   activeStep 
 }) => {
+  const { isVisible: isScrollVisible } = useScrollAnimation();
+
   return (
     <>
       {/* Chat Quick Report for authenticated users */}
@@ -36,9 +40,35 @@ const MainContent: React.FC<MainContentProps> = ({
       {/* Main Page Content Sections */}
       <div className="relative z-40 px-4 sm:px-6">
         <HeroSection isVisible={isVisible} mousePosition={mousePosition} />
-        <WorkflowSection activeStep={activeStep} />
-        <DemoSection />
-        <FinalCTASection />
+        
+        <div 
+          data-scroll-id="workflow"
+          className={`transition-all duration-1000 ${
+            isScrollVisible('workflow') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
+          <WorkflowSection activeStep={activeStep} />
+        </div>
+        
+        <FeaturesSection />
+        
+        <div 
+          data-scroll-id="demo"
+          className={`transition-all duration-1000 ${
+            isScrollVisible('demo') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
+          <DemoSection />
+        </div>
+        
+        <div 
+          data-scroll-id="final-cta"
+          className={`transition-all duration-1000 ${
+            isScrollVisible('final-cta') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+        >
+          <FinalCTASection />
+        </div>
       </div>
     </>
   );
