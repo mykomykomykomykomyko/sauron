@@ -96,7 +96,7 @@ const Dashboard = () => {
 
   const { data: dashboardStats } = useQuery({
     queryKey: ['dashboardStats'],
-    queryFn: getDashboardStats,
+    queryFn: () => getDashboardStats(),
     enabled: !!user,
   });
 
