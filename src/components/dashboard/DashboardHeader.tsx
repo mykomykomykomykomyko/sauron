@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Eye, RefreshCw, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -14,7 +13,7 @@ export const DashboardHeader = ({
           <Eye className="w-5 h-5 sm:w-7 sm:h-7 text-white relative z-10" />
         </div>
         <div className="flex flex-col">
-          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight font-mono">THE EYE OF JASPER</span>
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight font-mono">JASPER</span>
           <span className="text-xs text-gray-400 font-mono hidden sm:block">OVERSIGHT DASHBOARD</span>
         </div>
       </Link>
