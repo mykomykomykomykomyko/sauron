@@ -14,6 +14,8 @@ export interface Report {
   category?: string;
   priority?: string;
   status?: string;
+  github_repo?: string;
+  project_links?: string;
 }
 
 export interface AnalysisResult {
@@ -68,7 +70,14 @@ export const submitReport = async (reportData: Omit<Report, 'id' | 'created_at'>
   return data as Report;
 };
 
-export const createReport = async (reportData: { title: string; description: string; category: string; priority: string }) => {
+export const createReport = async (reportData: { 
+  title: string; 
+  description: string; 
+  category: string; 
+  priority: string;
+  github_repo?: string;
+  project_links?: string;
+}) => {
   const { data: { user } } = await supabase.auth.getUser();
   console.log('Current user in createReport:', user);
   
@@ -87,7 +96,9 @@ export const createReport = async (reportData: { title: string; description: str
     description: reportData.description,
     category: reportData.category,
     priority: reportData.priority,
-    status: 'pending'
+    status: 'pending',
+    github_repo: reportData.github_repo || null,
+    project_links: reportData.project_links || null
   };
 
   console.log('Creating report with data:', reportToInsert);

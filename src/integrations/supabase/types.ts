@@ -156,10 +156,12 @@ export type Database = {
           created_at: string
           description: string | null
           email: string
+          github_repo: string | null
           id: string
           name: string
           priority: string | null
           project: string
+          project_links: string | null
           report: string
           status: string | null
           title: string | null
@@ -171,10 +173,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           email: string
+          github_repo?: string | null
           id?: string
           name: string
           priority?: string | null
           project: string
+          project_links?: string | null
           report: string
           status?: string | null
           title?: string | null
@@ -186,10 +190,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string
+          github_repo?: string | null
           id?: string
           name?: string
           priority?: string | null
           project?: string
+          project_links?: string | null
           report?: string
           status?: string | null
           title?: string | null
