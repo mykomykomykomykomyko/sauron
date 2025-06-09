@@ -12,6 +12,9 @@ export interface Report {
   created_at?: string;
   title?: string;
   status?: string;
+  priority?: string;
+  category?: string;
+  description?: string;
 }
 
 export interface AnalysisResult {
@@ -21,6 +24,18 @@ export interface AnalysisResult {
   status: 'validated' | 'review' | 'flagged' | 'pending';
   summary: string;
   created_at?: string;
+  flags?: number;
+  detailed_feedback?: any;
+}
+
+export interface Account {
+  id?: string;
+  email: string;
+  full_name: string;
+  company_name?: string;
+  role: string;
+  created_at?: string;
+  is_active?: boolean;
 }
 
 // Basic report submission
@@ -94,4 +109,80 @@ export const getDashboardStats = async () => {
     avgProcessingTime: "2.3s",
     successRate: "95.2"
   };
+};
+
+// Account management functions
+export const createAccount = async (accountData: Omit<Account, 'id' | 'created_at'>) => {
+  const { data, error } = await supabase
+    .from('accounts')
+    .insert([accountData])
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data as Account;
+};
+
+export const getAccounts = async (): Promise<Account[]> => {
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data as Account[];
+};
+
+// Analysis functions
+export const triggerAIAnalysis = async (reportId: string) => {
+  // Placeholder for AI analysis trigger
+  console.log('Triggering AI analysis for report:', reportId);
+  return { success: true };
+};
+
+export const updateAnalysisStatus = async (analysisId: string, status: string) => {
+  const { data, error } = await supabase
+    .from('analysis_results')
+    .update({ status })
+    .eq('id', analysisId)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+};
+
+export const saveAnalysisResult = async (analysisData: Omit<AnalysisResult, 'id' | 'created_at'>) => {
+  const { data, error } = await supabase
+    .from('analysis_results')
+    .insert([analysisData])
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data as AnalysisResult;
+};
+
+// User management functions
+export const getUsersWithReports = async () => {
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data as Account[];
+};
+
+// Data export functions
+export const downloadCSV = async (reports: Report[]) => {
+  // Placeholder for CSV download
+  console.log('Downloading CSV for reports:', reports.length);
+  return { success: true };
+};
+
+export const filterReports = async (filters: any) => {
+  // Placeholder for report filtering
+  console.log('Filtering reports with:', filters);
+  return [];
 };
