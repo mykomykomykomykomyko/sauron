@@ -81,7 +81,7 @@ const Dashboard = () => {
 
   const { data: usersWithReports = [] } = useQuery({
     queryKey: ['usersWithReports'],
-    queryFn: () => getUsersWithReports(),
+    queryFn: getUsersWithReports,
     enabled: !!user && userRole === 'admin',
   });
 
@@ -96,7 +96,7 @@ const Dashboard = () => {
 
   const { data: dashboardStats } = useQuery({
     queryKey: ['dashboardStats'],
-    queryFn: () => getDashboardStats(),
+    queryFn: getDashboardStats,
     enabled: !!user,
   });
 
