@@ -36,7 +36,7 @@ const FinalCTASection = () => {
           </Link>}
       </div>
 
-      <p className="text-gray-400 font-mono">The Eye of Jasper - Advanced Contractor Intelligence System</p>
+      <p className="text-gray-400 font-mono">JASPER - Advanced Reporting Intelligence System</p>
       <p className="text-gray-600 text-sm font-mono mt-2">
         Powered by AI • Built for Excellence • Designed for Control
       </p>
