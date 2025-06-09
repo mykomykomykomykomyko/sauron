@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -149,7 +148,7 @@ const Auth = () => {
                 <Eye className="w-8 h-8 text-white relative z-10" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-3xl font-bold text-white tracking-tight font-mono">THE EYE OF JASPER</h1>
+                <h1 className="text-3xl font-bold text-white tracking-tight font-mono">JASPER</h1>
                 <div className="flex items-center space-x-2 mt-1">
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
                   <span className="text-xs text-gray-300 font-mono">AI-POWERED OVERSIGHT</span>
