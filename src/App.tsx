@@ -1,63 +1,40 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { useWelcomeScreen } from "@/hooks/useWelcomeScreen";
-import WelcomeScreen from "@/components/auth/WelcomeScreen";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
-import Submit from "./pages/Submit";
 import Dashboard from "./pages/Dashboard";
+import Submit from "./pages/Submit";
 import Auth from "./pages/Auth";
+import Registration from "./pages/Registration";
+import RegistrationConfirmation from "./pages/RegistrationConfirmation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-/**
- * Inner App component that has access to auth context
- * Handles global welcome screen logic across all routes
- */
-const AppContent = () => {
-  const { user } = useAuth();
-  const { showWelcome, handleWelcomeComplete } = useWelcomeScreen(user);
-
+function App() {
   return (
-    <>
-      {/* Global Welcome Screen Overlay */}
-      {showWelcome && user && (
-        <WelcomeScreen 
-          user={user} 
-          onComplete={handleWelcomeComplete}
-        />
-      )}
-
-      {/* Main Application Routes */}
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/submit" element={<Submit />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <Toaster />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/submit" element={<Submit />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/registration" element={<Registration />} />
+              <Route path="/registration-confirmation" element={<RegistrationConfirmation />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
-};
-
-/**
- * Main App component with providers
- * Provides query client and authentication context to the entire app
- */
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <Toaster />
-    <Sonner />
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  </QueryClientProvider>
-);
+}
 
 export default App;
