@@ -57,13 +57,14 @@ const StepNavigation = ({ currentStep, onStepChange, isStepComplete }: StepNavig
             const IconComponent = step.icon;
             const isCompleted = isStepComplete(step.number);
             const isActive = currentStep === step.number;
-            const isAccessible = step.number <= currentStep || isCompleted;
+            // Allow clicking on any step
+            const isAccessible = true;
 
             return (
               <div 
                 key={step.number}
                 className="flex flex-col items-center cursor-pointer group"
-                onClick={() => isAccessible && onStepChange(step.number)}
+                onClick={() => onStepChange(step.number)}
               >
                 {/* Step Circle */}
                 <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all duration-500 relative z-10 ${
@@ -71,15 +72,13 @@ const StepNavigation = ({ currentStep, onStepChange, isStepComplete }: StepNavig
                     ? 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-400 shadow-lg shadow-green-500/30'
                     : isActive
                     ? 'bg-gradient-to-br from-red-500 to-purple-600 border-red-400 shadow-lg shadow-red-500/30'
-                    : isAccessible
-                    ? 'bg-black/40 border-white/40 hover:border-white/60 hover:bg-white/10'
-                    : 'bg-black/20 border-white/20'
-                } ${isAccessible ? 'hover:scale-110' : ''}`}>
+                    : 'bg-black/40 border-white/40 hover:border-white/60 hover:bg-white/10'
+                } hover:scale-110`}>
                   {isCompleted ? (
                     <CheckCircle className="w-6 h-6 text-white" />
                   ) : (
                     <IconComponent className={`w-6 h-6 ${
-                      isActive ? 'text-white' : isAccessible ? 'text-white/80' : 'text-white/40'
+                      isActive ? 'text-white' : 'text-white/80'
                     }`} />
                   )}
                 </div>
@@ -87,7 +86,7 @@ const StepNavigation = ({ currentStep, onStepChange, isStepComplete }: StepNavig
                 {/* Step Info */}
                 <div className="mt-3 text-center max-w-32">
                   <div className={`text-sm font-mono transition-colors duration-300 ${
-                    isActive ? 'text-white font-semibold' : isAccessible ? 'text-white/80' : 'text-white/40'
+                    isActive ? 'text-white font-semibold' : 'text-white/80'
                   }`}>
                     {step.title}
                   </div>
