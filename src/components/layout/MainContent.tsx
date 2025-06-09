@@ -1,46 +1,26 @@
 
 import React from 'react';
 import { User } from '@supabase/supabase-js';
-import ChatQuickReport from '@/components/ChatQuickReport';
 import HeroSection from '@/components/HeroSection';
-import WorkflowSection from '@/components/WorkflowSection';
-import DemoSection from '@/components/DemoSection';
-import FinalCTASection from '@/components/FinalCTASection';
 
 interface MainContentProps {
   user: User | null;
-  isVisible: boolean;
-  mousePosition: { x: number; y: number };
-  activeStep: number;
 }
 
-/**
- * Main content layout component
- * Organizes and renders all primary page sections with proper spacing and user context
- */
-const MainContent: React.FC<MainContentProps> = ({ 
-  user, 
-  isVisible, 
-  mousePosition, 
-  activeStep 
-}) => {
+const MainContent: React.FC<MainContentProps> = ({ user }) => {
   return (
-    <>
-      {/* Chat Quick Report for authenticated users */}
-      {user && (
-        <div className="relative z-40 mt-4 sm:mt-8">
-          <ChatQuickReport />
-        </div>
-      )}
-
-      {/* Main Page Content Sections */}
-      <div className="relative z-40 px-4 sm:px-6">
-        <HeroSection isVisible={isVisible} mousePosition={mousePosition} />
-        <WorkflowSection activeStep={activeStep} />
-        <DemoSection />
-        <FinalCTASection />
+    <div className="relative z-40 px-6">
+      <HeroSection />
+      
+      {/* Additional content sections can be added here */}
+      <div className="text-center py-16">
+        <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
+        <p className="text-gray-300 max-w-2xl mx-auto">
+          This is your enterprise template foundation. Build upon this structure to create 
+          your full-featured progress tracking system.
+        </p>
       </div>
-    </>
+    </div>
   );
 };
 

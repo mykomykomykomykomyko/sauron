@@ -1,40 +1,26 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMouseTracking } from "@/hooks/useMouseTracking";
-import { useWorkflowAnimation } from "@/hooks/useWorkflowAnimation";
-import BackgroundEffects from "@/components/background/BackgroundEffects";
 import Navigation from "@/components/navigation/Navigation";
 import MainContent from "@/components/layout/MainContent";
 
-/**
- * Main Index Page Component
- * Enterprise-ready modular landing page with authentication integration
- * Composed of reusable hooks and components for maintainability
- */
 const Index: React.FC = () => {
-  // Authentication context
   const { user, signOut } = useAuth();
-  
-  // Custom hooks for state management
-  const { mousePosition, isVisible } = useMouseTracking();
-  const { activeStep } = useWorkflowAnimation(4, 3000);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white overflow-hidden relative">
-      {/* Background Visual Effects */}
-      <BackgroundEffects />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white">
+      {/* Simple background gradient */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-900/30 via-slate-900 to-indigo-900/40"></div>
+      
+      {/* Navigation */}
+      <div className="relative z-50">
+        <Navigation user={user} onSignOut={signOut} />
+      </div>
 
-      {/* Main Navigation */}
-      <Navigation user={user} onSignOut={signOut} />
-
-      {/* Main Page Content */}
-      <MainContent 
-        user={user} 
-        isVisible={isVisible} 
-        mousePosition={mousePosition} 
-        activeStep={activeStep} 
-      />
+      {/* Main Content */}
+      <div className="relative z-40">
+        <MainContent user={user} />
+      </div>
     </div>
   );
 };
