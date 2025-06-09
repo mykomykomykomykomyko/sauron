@@ -31,6 +31,7 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { UserLeaderboard } from "@/components/dashboard/UserLeaderboard";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
+import { ContractorDashboard } from "@/components/ContractorDashboard";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -56,6 +57,7 @@ const Dashboard = () => {
     console.log('Dashboard - Current user:', user);
     console.log('Dashboard - User ID:', user.id);
     console.log('Dashboard - User email:', user.email);
+    console.log('Dashboard - User role:', userRole);
     
     setIsVisible(true);
     
@@ -68,7 +70,7 @@ const Dashboard = () => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [user, navigate]);
+  }, [user, userRole, navigate]);
 
   const { data: reports = [], isLoading, refetch } = useQuery({
     queryKey: ['reportsWithAnalysis', filters],
@@ -85,7 +87,6 @@ const Dashboard = () => {
     enabled: !!user && userRole === 'admin',
   });
 
-  // Add effect to log reports data
   useEffect(() => {
     console.log('Dashboard - Reports data updated:', reports);
     console.log('Dashboard - Number of reports:', reports.length);
@@ -97,9 +98,72 @@ const Dashboard = () => {
   const { data: dashboardStats } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: () => getDashboardStats(),
-    enabled: !!user,
+    enabled: !!user && userRole === 'admin',
   });
 
+  // If user is a contractor, show simplified dashboard
+  if (userRole === 'contractor') {
+    return (
+      <div className="min-h-screen bg-black text-white overflow-hidden relative">
+        {/* Background Effects */}
+        <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-black to-red-900/30"></div>
+        <div className="fixed inset-0 bg-gradient-to-tr from-blue-900/10 via-transparent to-orange-900/10"></div>
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-black to-transparent"></div>
+
+        {/* Dynamic cursor glow */}
+        <div 
+          className="fixed w-96 h-96 bg-gradient-radial from-red-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl pointer-events-none z-0 transition-all duration-500 hidden md:block"
+          style={{
+            left: mousePosition.x - 192,
+            top: mousePosition.y - 192,
+          }}
+        />
+
+        {/* Header */}
+        <DashboardHeader onRefresh={() => refetch()} />
+
+        {/* Main Content */}
+        <div className="px-4 sm:px-6 md:px-8 py-8 sm:py-12 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            
+            {/* Welcome Section for Contractors */}
+            <div className={`text-center mb-8 transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0'}`}>
+              <h1 className="text-3xl sm:text-4xl font-bold font-mono mb-4 bg-gradient-to-r from-white to-red-200 bg-clip-text text-transparent">
+                Welcome Back, {user.user_metadata?.full_name || user.email}
+              </h1>
+              <p className="text-gray-300 text-lg mb-6">
+                Track your submitted reports and their status
+              </p>
+              <Link to="/submit">
+                <Button className="bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 text-white font-mono">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Submit New Report
+                </Button>
+              </Link>
+            </div>
+
+            {/* Contractor Dashboard */}
+            <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+              <ContractorDashboard 
+                reports={reports}
+                isLoading={isLoading}
+                onRefresh={() => refetch()}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Custom styles */}
+        <style>{`
+          .bg-gradient-radial {
+            background: radial-gradient(var(--tw-gradient-stops));
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Admin dashboard (existing functionality)
   const handleExport = async () => {
     try {
       await downloadCSV();
@@ -160,7 +224,6 @@ const Dashboard = () => {
     return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  // Helper function to get the actual status from analysis results
   const getReportStatus = (report: Report & { analysis_results: AnalysisResult[] }) => {
     if (report.analysis_results && report.analysis_results.length > 0) {
       return report.analysis_results[0].status || 'pending';
@@ -168,7 +231,6 @@ const Dashboard = () => {
     return report.status || 'pending';
   };
 
-  // Calculate success rate as percentage based on 1000-point scale
   const calculateSuccessRate = (stats: any) => {
     if (!stats || !reports.length) return 0;
     
@@ -180,7 +242,6 @@ const Dashboard = () => {
     }, 0);
     
     const averageScore = totalScore / reportsWithAnalysis.length;
-    // Convert score out of 1000 to percentage
     return (averageScore / 1000) * 100;
   };
 

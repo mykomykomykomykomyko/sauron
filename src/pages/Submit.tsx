@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Shield, Send, Sparkles, ArrowRight, Brain, Target, FileText, Code, Wrench, Calendar } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Eye, Shield, Send, Sparkles, ArrowRight, Brain, Target, FileText, Code, Wrench, Calendar, Link, Github } from "lucide-react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { analyzeReport } from "@/services/aiAnalysis";
@@ -36,6 +36,10 @@ const Submit = () => {
   // Additional context
   const [workPeriod, setWorkPeriod] = useState("");
   const [timeSpent, setTimeSpent] = useState("");
+
+  // New optional fields for links
+  const [githubRepo, setGithubRepo] = useState("");
+  const [projectLinks, setProjectLinks] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -75,8 +79,8 @@ const Submit = () => {
     setIsSubmitting(true);
 
     try {
-      // Construct comprehensive report description
-      const reportDescription = `
+      // Construct comprehensive report description with optional links
+      let reportDescription = `
 PROJECT: ${title}
 
 TECHNICAL IMPLEMENTATION:
@@ -107,8 +111,24 @@ GOALS & OBJECTIVES:
 ${goals}
 
 TIME SPENT: ${timeSpent}
-WORK PERIOD: ${workPeriod}
-      `.trim();
+WORK PERIOD: ${workPeriod}`;
+
+      // Add optional links if provided
+      if (githubRepo || projectLinks) {
+        reportDescription += `
+
+PROJECT LINKS:`;
+        if (githubRepo) {
+          reportDescription += `
+GitHub Repository: ${githubRepo}`;
+        }
+        if (projectLinks) {
+          reportDescription += `
+Additional Links: ${projectLinks}`;
+        }
+      }
+
+      reportDescription = reportDescription.trim();
 
       const periodMap: { [key: string]: string } = {
         today: new Date().toISOString().split('T')[0],
@@ -131,11 +151,13 @@ WORK PERIOD: ${workPeriod}
         description: reportDescription,
         category: category,
         priority: priority,
+        github_repo: githubRepo || null,
+        project_links: projectLinks || null,
       };
 
       await analyzeReport(reportData);
       
-      toast.success("Report submitted successfully! AI analysis complete.");
+      toast.success("Report submitted successfully! You can view the status in your dashboard.");
       
       // Reset all form fields
       setTitle("");
@@ -152,6 +174,8 @@ WORK PERIOD: ${workPeriod}
       setGoals("");
       setWorkPeriod("");
       setTimeSpent("");
+      setGithubRepo("");
+      setProjectLinks("");
       setCurrentStep(1);
       
       // Navigate to dashboard after a short delay
@@ -199,8 +223,8 @@ WORK PERIOD: ${workPeriod}
     },
     {
       number: 4,
-      title: "Planning & Next Steps",
-      description: "Future plans, timeline, and objectives",
+      title: "Planning & Links",
+      description: "Future plans, timeline, and project resources",
       icon: Calendar,
       fields: ["nextSteps", "timeline", "goals"]
     }
@@ -292,7 +316,7 @@ WORK PERIOD: ${workPeriod}
 
       {/* Header */}
       <nav className="flex items-center justify-between p-4 sm:p-6 md:p-8 border-b border-white/10 backdrop-blur-xl bg-black/30 relative z-10">
-        <Link to="/" className="flex items-center space-x-3 group">
+        <RouterLink to="/" className="flex items-center space-x-3 group">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 via-purple-600 to-red-700 rounded-2xl flex items-center justify-center border border-white/20 group-hover:scale-110 transition-all duration-500 relative overflow-hidden">
             <Eye className="w-5 h-5 sm:w-7 sm:h-7 text-white relative z-10" />
           </div>
@@ -302,15 +326,15 @@ WORK PERIOD: ${workPeriod}
             </span>
             <span className="text-xs text-gray-400 font-mono hidden sm:block">COMPREHENSIVE REPORT SUBMISSION</span>
           </div>
-        </Link>
+        </RouterLink>
 
         <div className="flex items-center space-x-4">
-          <Link to="/dashboard">
+          <RouterLink to="/dashboard">
             <Button variant="outline" size="sm" className="border-white/20 text-white/90 hover:bg-white/10 font-mono">
               <Shield className="w-4 h-4 mr-2" />
               Dashboard
             </Button>
-          </Link>
+          </RouterLink>
         </div>
       </nav>
 
@@ -538,7 +562,7 @@ WORK PERIOD: ${workPeriod}
                   </div>
                 )}
 
-                {/* Step 4: Planning & Next Steps */}
+                {/* Step 4: Planning & Links */}
                 {currentStep === 4 && (
                   <div className="space-y-6">
                     <div className="space-y-2">
@@ -581,6 +605,49 @@ WORK PERIOD: ${workPeriod}
                         rows={4}
                         className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
                       />
+                    </div>
+
+                    {/* Optional Project Links Section */}
+                    <div className="border-t border-white/10 pt-6">
+                      <h3 className="text-lg font-mono text-white mb-4 flex items-center space-x-2">
+                        <Link className="w-5 h-5 text-blue-400" />
+                        <span>Project Links (Optional)</span>
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="githubRepo" className="text-white font-mono flex items-center space-x-2">
+                            <Github className="w-4 h-4" />
+                            <span>GitHub Repository</span>
+                          </Label>
+                          <Input
+                            id="githubRepo"
+                            type="url"
+                            placeholder="https://github.com/username/repository"
+                            value={githubRepo}
+                            onChange={(e) => setGithubRepo(e.target.value)}
+                            className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="projectLinks" className="text-white font-mono flex items-center space-x-2">
+                            <Link className="w-4 h-4" />
+                            <span>Additional Project Links</span>
+                          </Label>
+                          <Textarea
+                            id="projectLinks"
+                            placeholder="Live demo: https://example.com&#10;Documentation: https://docs.example.com&#10;Design files: https://figma.com/..."
+                            value={projectLinks}
+                            onChange={(e) => setProjectLinks(e.target.value)}
+                            rows={3}
+                            className="bg-black/20 border-white/20 text-white placeholder:text-gray-400 focus:border-red-400 focus:ring-red-400 resize-none"
+                          />
+                          <p className="text-xs text-gray-400">
+                            Include demo URLs, documentation links, design files, or any other relevant project resources
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
